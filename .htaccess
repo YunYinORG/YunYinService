@@ -1,0 +1,20 @@
+<IfModule mod_rewrite.c>
+  Options +FollowSymlinks
+  RewriteEngine On
+  RewriteBase /
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^(.*)$ index.php/$1 [QSA,PT,L]
+</IfModule>
+<Files *.html>
+Order Allow,Deny 
+Deny from all
+</Files>
+<Files config.yaml>
+Order Allow,Deny 
+Deny from all
+</Files>
+<Files .git*>
+Order Allow,Deny 
+Deny from all
+</Files>
