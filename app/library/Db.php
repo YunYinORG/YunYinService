@@ -51,7 +51,6 @@ class Db
 	private function init($query, $parameters = '')
 	{
 		// var_dump($query);
-		// var_dump($parameters);
 		try
 		{
 			# Prepare query
@@ -60,6 +59,7 @@ class Db
 				# Add parameters to the parameter array
 				$parameters = is_array($parameters) ? $this->bind($parameters) : array();
 				#excute
+				// var_dump($parameters);
 				return $this->sQuery->execute($parameters);
 			}
 		}
@@ -179,7 +179,7 @@ class Db
 		$this->pdo = null;
 	}
 
-	function __destruct()
+	public function __destruct()
 	{
 		$this->close();
 	}

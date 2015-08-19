@@ -24,10 +24,10 @@
  */
 abstract class FacadeModel
 {
-	protected $table  = null; //数据库表
-	protected $pk     = 'id'; //主键
-	static $_model    = null; //底层model实体
-	static $_instance = null; //接口实体
+	protected $table            = null; //数据库表
+	protected $pk               = 'id'; //主键
+	protected $_model           = null; //底层model实体
+	protected static $_instance = null; //接口实体
 
 	/**
 	 * 构造函数
@@ -38,17 +38,17 @@ abstract class FacadeModel
 	 */
 	public function __construct($data = array())
 	{
-		if (null == $this->table)
+		if (null === $this->table)
 		{
 			$this->table = strtolower(strstr(get_called_class(), 'Model', true));
 		}
-		if (null === static::$_model)
+		if (null === $this->_model)
 		{
-			static::$_model = new Model($this->table, $this->pk);
+			$this->_model = new Model($this->table, $this->pk);
 		}
 		if (!empty($data))
 		{
-			static::$_model->set($data);
+			$this->_model->set($data);
 		}
 	}
 
@@ -58,9 +58,13 @@ abstract class FacadeModel
 	 * @return [type]   [description]
 	 * @author NewFuture
 	 */
-	public function getModel()
+	protected function getModel()
 	{
-		return static::$_model;
+		if (null === $this->_model)
+		{
+			$this->_model = new Model($this->table, $this->pk);
+		}
+		return $this->_model;
 	}
 
 	/**
@@ -69,7 +73,7 @@ abstract class FacadeModel
 	 * @return [type]      [description]
 	 * @author NewFuture
 	 */
-	static public function getInstance()
+	public static function getInstance()
 	{
 		if (null === static::$_instance)
 		{
@@ -88,7 +92,7 @@ abstract class FacadeModel
 	 */
 	public function __set($name, $value)
 	{
-		return static::$_model->set($name, $value);
+		return $this->_model->set($name, $value);
 	}
 
 	/**
@@ -100,7 +104,7 @@ abstract class FacadeModel
 	 */
 	public function __get($name)
 	{
-		return static::$_model->get($name, false);
+		return $this->_model->get($name, false);
 	}
 
 	/**
@@ -109,16 +113,16 @@ abstract class FacadeModel
 	 */
 	public function __call($method, $params)
 	{
-		return call_user_func_array(array(static::$_model, $method), $params);
+		return call_user_func_array(array($this->_model, $method), $params);
 	}
 
 	/**
 	 * 静态调用model的操作
 	 * @author NewFuture
 	 */
-	static public function __callStatic($method, $params)
+	public static function __callStatic($method, $params)
 	{
-		static::getInstance();
-		return call_user_func_array(array(static::$_model, $method), $params);
+		$instance = new static; //::getInstance();
+		return call_user_func_array(array($instance->getModel(), $method), $params);
 	}
 }

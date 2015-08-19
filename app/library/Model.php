@@ -46,13 +46,14 @@ class Model
 	 */
 	protected $pk = 'id';
 
-	protected $fields   = array(); //查询字段
-	protected $data     = array(); //数据
-	protected $where    = '';      //查询条件
-	protected $param    = array(); //查询参数
-	protected $distinct = false;   //是否去重
-	protected $order    = '';      //排序字段
-	protected $limit    = null;
+	protected $has_one_tables = array();
+	protected $fields         = array(); //查询字段
+	protected $data           = array(); //数据
+	protected $where          = '';      //查询条件
+	protected $param          = array(); //查询参数
+	protected $distinct       = false;   //是否去重
+	protected $order          = '';      //排序字段
+	protected $limit          = null;
 
 	private static $_db = null; //数据库连接
 
@@ -62,10 +63,21 @@ class Model
 		$this->pk    = $pk;
 		if (self::$_db == null)
 		{
-			$config    = Yaf_registry::get('config')['database'];
+			$config    = Config::get('database');
 			$dsn       = $config['driver'] . ':host=' . $config['host'] . ';dbname=' . $config['database'];
 			self::$_db = new Db($dsn, $config['username'], $config['password']);
 		}
+	}
+
+	public function one($table, $fk = null)
+	{
+		if ($fk == null)
+		{
+			$fk = substr($table, 0, 3) . '_id';
+		}
+		$this->has_one_tables[$fk] = $table;
+		// $this->fields[$table . '.name'] = $table;
+		return $this;
 	}
 
 	/**
@@ -110,7 +122,6 @@ class Model
 	 */
 	public function select($data = array())
 	{
-		$field_string = null;
 		if (is_array($data))
 		{
 			//数组条件
@@ -119,14 +130,13 @@ class Model
 		elseif (is_string($data))
 		{
 			//select筛选字段
-			$field_string = $data;
+			$this->field($data);
 		}
 
-		$sql = $this->buildSelectSql($field_string);
+		$sql = $this->buildSelectSql();
 		$sql .= $this->buidlFromSql();
 		$sql .= $this->buildWhereSql();
 		$sql .= $this->buildTailSql();
-
 		return $this->query($sql, $this->param);
 	}
 
@@ -171,9 +181,9 @@ class Model
 			$update_string = '';
 			foreach (array_keys($data) as $key)
 			{
-				$update_string .= '`' . $key . '` = :' . $key . ',';
+				$update_string .= self::backQoute($key) . '=:' . $key . ',';
 			}
-			$sql = 'UPDATE `' . $this->table . '`';
+			$sql = 'UPDATE' . self::backQoute($this->table);
 			$sql .= ' SET ' . trim($update_string, ',');
 			$sql .= $this->buildWhereSql();
 
@@ -214,13 +224,19 @@ class Model
 			$fields = array_flip($fields);
 			$data   = array_intersect_key($data, $field);
 		}
-
+		//插入数据
 		if (!empty($data))
 		{
-
-			$fields = array_keys($data);
-			$sql    = 'INSERT INTO `' . $this->table . '` ';
-			$sql .= ' (' . implode(',', $fields) . ') VALUES ( :' . implode(',:', $fields) . ')';
+			// $this->fields = $data;
+			$fields       = array_keys($data);
+			$quote_fields = $fields;
+			//对字段进行转义
+			array_walk($quote_fields, function (&$k)
+			{
+				$k = self::backQoute($k);
+			});
+			$sql = 'INSERT INTO' . self::backQoute($this->table);
+			$sql .= '(' . implode(',', $quote_fields) . ')VALUES(:' . implode(',:', $fields) . ')';
 			$this->query($sql, $data);
 			return self::$_db->lastInsertId();
 		}
@@ -278,6 +294,9 @@ class Model
 	/**
 	 * 字段过滤
 	 * @method field
+	 * field('name','username')
+	 * field('name AS username')
+	 * field('id,name,pwd')
 	 * @param  [type] $key   [description]
 	 * @param  [type] $alias [description]
 	 * @return [type]        [description]
@@ -287,11 +306,27 @@ class Model
 	{
 		if ($alias && $field)
 		{
-			$this->fields[$field] = $alias;
+			$this->fields[trim($field)] = trim($alias);
 		}
 		else
 		{
-			$this->fields[$field] = $field;
+			/*多字段解析*/
+			$fields = explode(',', $field);
+			foreach ($fields as $field)
+			{
+				$field = strtolower(trim($field));
+				/*解析是否为name AS alias的形式*/
+				if (strpos($field, ' as '))
+				{
+					list($name, $alias)        = explode(' as ', $field);
+					$this->fields[trim($name)] = trim($alias);
+					// $this->fields[trim(stristr($field, ' AS ', true))] = trim(stristr($field, ' AS '));
+				}
+				else
+				{
+					$this->fields[$field] = $field;
+				}
+			}
 		}
 		return $this;
 	}
@@ -307,7 +342,7 @@ class Model
 		{
 			//表达式如x>1
 			$name = $key . '_' . bin2hex($exp);
-			$this->where .= ' AND (`' . $key . '` ' . $exp . ' :' . $name . ')';
+			$this->where .= 'AND(' . self::backQoute($key) . $exp . ':' . $name . ')';
 			$this->param[$name] = $value;
 		}
 		elseif (is_array($key))
@@ -317,14 +352,15 @@ class Model
 			foreach ($key as $k => $v)
 			{
 				$name = $k . '_w_eq';
-				$str .= '（`' . $k . '` = :' . $name . ') AND';
+				$str .= '（' . self::backQoute($k) . '=:' . $name . ')AND';
 				$this->param[$name] = $v;
 			}
-			$this->where = substr($str, 0, -4);
+			$this->where = substr($str, 0, -3);
 		}
 		else
 		{
 			//直接sql条件
+			//TO 安全过滤
 			$this->where .= '(' . $key . ')';
 		}
 		return $this;
@@ -356,11 +392,11 @@ class Model
 	{
 		if ($desc === true || strtoupper($desc) == 'DESC')
 		{
-			$order = ' `' . $fields . '` DESC ';
+			$order = self::backQoute($fields) . 'DESC ';
 		}
 		else
 		{
-			$order = ' ` ' . $fields . '`';
+			$order = self::backQoute($fields);
 		}
 		$this->order .= $this->order ? (',' . $order) : ($order);
 		return $this;
@@ -396,7 +432,7 @@ class Model
 	 */
 	public function count($field = null)
 	{
-		$exp = $field ? 'count(`' . $field . '`)' : 'count(*)';
+		$exp = $field ? 'count(' . self::backQoute($field) . ')' : 'count(*)';
 		$sql = $this->buildSelectSql($exp);
 		$sql .= $this->buidlFromSql();
 		$this->clear();
@@ -409,7 +445,7 @@ class Model
 		if (in_array($op, ['MAX', 'MIN', 'AVG', 'SUM']) && isset($args[0]))
 		{
 			//数学计算
-			$sql = $this->buildSelectSql($op . '(`' . $args[0] . '`)');
+			$sql = $this->buildSelectSql($op . '(' . self::backQoute($args[0]) . ')');
 			$sql .= $this->buidlFromSql();
 			$this->clear();
 			return self::$_db->single($sql);
@@ -487,7 +523,7 @@ class Model
 			elseif ($auto_db)
 			{
 				//数据库读取
-				$sql = $this->buildSelectSql(' `' . $name . '`');
+				$sql = $this->buildSelectSql(self::backQoute($name));
 				$sql .= $this->buidlFromSql();
 				$sql .= $this->buildWhereSql();
 				$sql .= 'LIMIT 1';
@@ -547,16 +583,19 @@ class Model
 		}
 		else
 		{
-			$str = '';
+			$fieldsvals = array();
 			// 完善数组方式传字段名的支持
 			// 支持 'fieldname'=>'alias' 这样的字段别名定义
-			foreach ($fields as $key => $field)
+			foreach ($fields as $field => $alias)
 			{
-				$str .= is_numeric($key) ? ('`' . $field . '`,') : ('`' . $key . '` AS `' . $field . '`,');
+				$fieldsvals[] = ($field == $alias || is_int($field)) ?
+				self::backQoute($field)
+				: (self::backQoute($field) . 'AS' . self::backQoute($alias));
 			}
+			$str = implode(',', $fieldsvals);
 		}
 		//TODO 如果是查询全部字段，并且是join的方式，那么就把要查的表加个别名，以免字段被覆盖
-		return trim($str, ',');
+		return $str;
 	}
 
 	/**
@@ -571,7 +610,7 @@ class Model
 		$fieldsvals = array();
 		foreach (array_keys($this->data) as $column)
 		{
-			$fieldsvals[] = '`' . $column . '` = :' . $column;
+			$fieldsvals[] = self::backQoute($column) . '=:' . $column;
 		}
 		$this->param = array_merge($this->param, $this->data);
 		return implode($pos, $fieldsvals);
@@ -598,7 +637,7 @@ class Model
 	 */
 	private function buidlFromSql()
 	{
-		return ' FROM (`' . $this->table . '`)';
+		return ' FROM(' . self::backQoute($this->table) . ')';
 	}
 
 	/**
@@ -620,7 +659,7 @@ class Model
 			//去掉第一个AND或者OR
 			$where = strstr($this->where, '(');
 		}
-		return $where ? ' WHERE(' . $where . ')' : '';
+		return $where ? ' WHERE ' . $where : '';
 	}
 
 	/**
@@ -642,6 +681,29 @@ class Model
 			$tail .= ' LIMIT ' . $this->limit;
 		}
 		return $tail;
+	}
+
+	/**
+	 * 对字段和表名进行反引字符串
+	 * 并字符进行安全检查
+	 * 合法字符为[a-zA-Z_]
+	 * @method backQoute
+	 * @param  [type]    $str [description]
+	 * @return [type]         [description]
+	 * @author NewFuture
+	 */
+	public static function backQoute($str)
+	{
+		if (!ctype_alnum(str_replace('_', '', $str)))
+		{
+			//合法字符为字母[a-zA-Z]或者下划线_
+			throw new Exception('非法字符' . $str);
+			die('数据库操作中断');
+		}
+		else
+		{
+			return '`' . $str . '`';
+		}
 	}
 }
 ?>

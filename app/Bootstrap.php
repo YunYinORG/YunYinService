@@ -10,11 +10,10 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
 	 * @method _initConfig
 	 * @author NewFuture
 	 */
-	public function _initConfig()
-	{
-		$config = Yaf_Application::app()->getConfig()->toArray();
-		Yaf_Registry::set('config', $config);
-	}
+	// public function _initConfig()
+	// {
+	// 	$config = Yaf_Application::app()->getConfig()->toArray();
+	// }
 
 	/**
 	 * 关闭视图输出
@@ -23,6 +22,9 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
 	 */
 	public function _initView(Yaf_Dispatcher $dispatcher)
 	{
+		//关闭视图
 		$dispatcher->disableView();
+		//路由
+		$dispatcher->getRouter()->addConfig(Config::get('routes'));
 	}
 }
