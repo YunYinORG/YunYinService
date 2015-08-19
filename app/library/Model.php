@@ -46,14 +46,15 @@ class Model
 	 */
 	protected $pk = 'id';
 
-	protected $has_one_tables = array();
-	protected $fields         = array(); //查询字段
-	protected $data           = array(); //数据
-	protected $where          = '';      //查询条件
-	protected $param          = array(); //查询参数
-	protected $distinct       = false;   //是否去重
-	protected $order          = '';      //排序字段
-	protected $limit          = null;
+	protected $has_tables        = array();
+	protected $belongs_to_tables = array();
+	protected $fields            = array(); //查询字段
+	protected $data              = array(); //数据
+	protected $where             = '';      //查询条件
+	protected $param             = array(); //查询参数
+	protected $distinct          = false;   //是否去重
+	protected $order             = array(); //排序字段
+	protected $limit             = null;
 
 	private static $_db = null; //数据库连接
 
@@ -69,14 +70,41 @@ class Model
 		}
 	}
 
-	public function one($table, $fk = null)
+	/**
+	 * has
+	 * 一对多
+	 * @method one
+	 * @param  [type] $table [description]
+	 * @param  [type] $fk    [description]
+	 * @return [type]        [description]
+	 * @author NewFuture
+	 */
+	// public function has($table, $fk = null)
+	// {
+	// 	if ($fk == null)
+	// 	{
+	// 		$fk = substr($this->table, 0, 3) . '_id';
+	// 	}
+	// 	$this->has_one_tables[$fk] = $table;
+	// 	return $this;
+	// }
+
+	/**
+	 * 从属关系
+	 * 对于inner join
+	 * @method belongs
+	 * @param  [type]  $table [表名]
+	 * @param  [type]  $pk    [外键]
+	 * @return [type]         [description]
+	 * @author NewFuture
+	 */
+	public function belongs($table, $fk = null)
 	{
 		if ($fk == null)
 		{
 			$fk = substr($table, 0, 3) . '_id';
 		}
-		$this->has_one_tables[$fk] = $table;
-		// $this->fields[$table . '.name'] = $table;
+		$this->belongs_to_tables[$fk] = $table;
 		return $this;
 	}
 
@@ -390,15 +418,7 @@ class Model
 	 */
 	public function order($fields, $desc = false)
 	{
-		if ($desc === true || strtoupper($desc) == 'DESC')
-		{
-			$order = self::backQoute($fields) . 'DESC ';
-		}
-		else
-		{
-			$order = self::backQoute($fields);
-		}
-		$this->order .= $this->order ? (',' . $order) : ($order);
+		$this->order[trim($fields)] = ($desc === true || $desc === 1 || strtoupper($desc) == 'DESC') ? 'DESC' : '';
 		return $this;
 	}
 
@@ -556,8 +576,8 @@ class Model
 		$this->data     = array(); //数据
 		$this->where    = '';      //查询条件
 		$this->param    = array(); //查询参数
-		$this->distinct = false;   //排序方式
-		$this->order    = '';      //排序字段
+		$this->distinct = false;   //是否去重
+		$this->order    = array(); //排序字段
 		$this->limit    = null;
 		return $this;
 	}
@@ -572,29 +592,39 @@ class Model
 	private function parseField()
 	{
 		$fields = $this->fields;
-		if (is_string($fields) && '' !== $fields)
-		{
-			$fields = explode(',', $fields);
-		}
 
+		/*多表链接时加入表名*/
+		$pre = $this->belongs_to_tables ? self::backQoute($this->table) . '.' : '';
+		$str = '';
 		if (empty($fields))
 		{
-			$str = '*';
+			$str = $pre . '*';
+		}
+		elseif ($pre)
+		{
+			//多表加入表名
+			$pre = ',' . $pre;
+			foreach ($fields as $field => $alias)
+			{
+				$str .= $pre . self::backQoute($field) . 'AS' . self::backQoute($alias);
+			}
 		}
 		else
 		{
-			$fieldsvals = array();
-			// 完善数组方式传字段名的支持
 			// 支持 'fieldname'=>'alias' 这样的字段别名定义
 			foreach ($fields as $field => $alias)
 			{
-				$fieldsvals[] = ($field == $alias || is_int($field)) ?
-				self::backQoute($field)
-				: (self::backQoute($field) . 'AS' . self::backQoute($alias));
+				$str .= ($field == $alias || is_int($field)) ? ',' . self::backQoute($field)
+				: ',' . (self::backQoute($field) . 'AS' . self::backQoute($alias));
 			}
-			$str = implode(',', $fieldsvals);
 		}
-		//TODO 如果是查询全部字段，并且是join的方式，那么就把要查的表加个别名，以免字段被覆盖
+		$str = ltrim($str, ',');
+		/*belong关系，从属与*/
+		foreach ($this->belongs_to_tables as $fk => $table)
+		{
+			$str .= ',' . self::backQoute($table) . '.' . self::backQoute('name') . 'AS' . self::backQoute($table);
+		}
+		//TODO其他接表方式
 		return $str;
 	}
 
@@ -637,7 +667,15 @@ class Model
 	 */
 	private function buidlFromSql()
 	{
-		return ' FROM(' . self::backQoute($this->table) . ')';
+		$from = 'FROM' . self::backQoute($this->table) . '';
+		//belong关系（属于）1对多，innerjoin
+		foreach ($this->belongs_to_tables as $fk => $table)
+		{
+			$from .= 'INNER JOIN' . self::backQoute($table) .
+			'ON' . self::backQoute($this->table) . '.' . self::backQoute($fk) .
+			'=' . self::backQoute($table) . '.' . self::backQoute('id');
+		}
+		return $from;
 	}
 
 	/**
@@ -648,11 +686,12 @@ class Model
 	 */
 	private function buildWhereSql()
 	{
-		$datastr = $where = $this->parseData(')AND(');
+		$pre     = $this->belongs_to_tables ? self::backQoute($this->table) . '.' : '';
+		$datastr = $where = $this->parseData(')AND(' . $pre);
 		$where   = null;
 		if ($datastr)
 		{
-			$where = '(' . $datastr . ')' . $this->where;
+			$where = '(' . $pre . $datastr . ')' . $this->where;
 		}
 		elseif ($this->where)
 		{
@@ -674,7 +713,15 @@ class Model
 		$tail = '';
 		if ($this->order)
 		{
-			$tail .= ' ORDER BY ' . $this->order;
+			/*多表链接时加入表名*/
+			$pre   = $this->belongs_to_tables ? ',' . self::backQoute($this->table) . '.' : ',';
+			$order = '';
+			/*拼接排序字段*/
+			foreach ($this->order as $field => $value)
+			{
+				$order .= $pre . self::backQoute($field) . $value;
+			}
+			$tail = ' ORDER BY' . ltrim($order, ',');
 		}
 		if ($this->limit)
 		{

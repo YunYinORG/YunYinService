@@ -4,7 +4,6 @@ class UserModel extends FacadeModel
 {
 	protected $pk    = 'id';
 	protected $table = 'user';
-	private $error   = '';
 
 	/**
 	 * 创建用户
@@ -62,12 +61,13 @@ class UserModel extends FacadeModel
 			$this->error = '保存失败';
 			return false;
 		}
-
 	}
 
-	public function getError()
+	/*关联用户学校*/
+	public function school()
 	{
-		return $this->error;
+		/*用户属于一所学校*/
+		parent::getModel()->belongs('school');
+		return $this;
 	}
-
 }

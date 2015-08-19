@@ -5,7 +5,7 @@ class UserController extends Rest
 
 	public function indexAction()
 	{
-		$this->response = (UserModel::order('id', true)->select('name AS user,number,last_login'));
+		$this->response = (UserModel::belongs('school')->order('name')->order('id', 1)->select('id,name AS user,number,last_login'));
 	}
 
 	/**
@@ -46,12 +46,7 @@ class UserController extends Rest
 	 */
 	public function GET_infoAction($id = 0)
 	{
-		$user = UserModel::field('name,number,sch_id,phone,email')->find($id);
-		if ($user)
-		{
-			$user['school'] = SchoolModel::getName($user['sch_id']);
-
-		}
+		$user           = UserModel::belongs('school')->field('name,number,phone,email')->find($id);
 		$this->response = $user;
 	}
 

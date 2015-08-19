@@ -26,6 +26,7 @@ abstract class FacadeModel
 {
 	protected $table            = null; //数据库表
 	protected $pk               = 'id'; //主键
+	protected $error            = '';   //错误信息
 	protected $_model           = null; //底层model实体
 	protected static $_instance = null; //接口实体
 
@@ -42,14 +43,17 @@ abstract class FacadeModel
 		{
 			$this->table = strtolower(strstr(get_called_class(), 'Model', true));
 		}
-		if (null === $this->_model)
-		{
-			$this->_model = new Model($this->table, $this->pk);
-		}
+		$this->_model = new Model($this->table, $this->pk);
 		if (!empty($data))
 		{
 			$this->_model->set($data);
 		}
+	}
+
+	/*获取错误信息33*/
+	public function getError()
+	{
+		return $this->error;
 	}
 
 	/**
@@ -113,7 +117,7 @@ abstract class FacadeModel
 	 */
 	public function __call($method, $params)
 	{
-		return call_user_func_array(array($this->_model, $method), $params);
+		return call_user_func_array(array($this->getModel(), $method), $params);
 	}
 
 	/**
