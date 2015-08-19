@@ -50,23 +50,29 @@ class Db
 	 */
 	private function init($query, $parameters = '')
 	{
-		// var_dump($query);
-		try
+		// try
+		// {
+		# Prepare query
+		if (Config::get('isdebug'))
 		{
-			# Prepare query
-			if ($this->sQuery = $this->pdo->prepare($query))
+			PC::DB($query, 'prepare');
+		}
+		if ($this->sQuery = $this->pdo->prepare($query))
+		{
+			# Add parameters to the parameter array
+			$parameters = is_array($parameters) ? $this->bind($parameters) : array();
+			#excute
+			if (Config::get('isdebug'))
 			{
-				# Add parameters to the parameter array
-				$parameters = is_array($parameters) ? $this->bind($parameters) : array();
-				#excute
-				// var_dump($parameters);
-				return $this->sQuery->execute($parameters);
+				PC::DB($parameters, 'parameters');
 			}
+			return $this->sQuery->execute($parameters);
 		}
-		catch (PDOException $e)
-		{
-			$this->ExceptionLog($e->getMessage(), $query);
-		}
+		// }
+		// catch (PDOException $e)
+		// {
+		// 	$this->ExceptionLog($e->getMessage(), $query);
+		// }
 	}
 
 	/**
@@ -182,30 +188,6 @@ class Db
 	public function __destruct()
 	{
 		$this->close();
-	}
-
-	/**
-	 * Writes the log and returns the exception
-	 *
-	 * @param  string $message
-	 * @param  string $sql
-	 * @return string
-	 */
-	private function ExceptionLog($message, $sql = '')
-	{
-		$exception = 'Unhandled Exception. <br />';
-		$exception .= $message;
-		$exception .= '<br /> You can find the error back in the log.';
-
-		if (!empty($sql))
-		{
-			# Add the Raw SQL to the Log
-			$message .= "\r\nRaw SQL : " . $sql;
-		}
-		# Write into log
-		// $this->log->write($message);
-		die($exceptions);
-		return $exception;
 	}
 }
 ?>

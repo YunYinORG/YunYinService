@@ -27,4 +27,33 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
 		//路由
 		$dispatcher->getRouter()->addConfig(Config::get('routes'));
 	}
+
+	/**
+	 * 开启调试输出
+	 * @method _initDebug
+	 * @author NewFuture
+	 */
+	public function _initDebug()
+	{
+		if (Config::get('isdebug'))
+		{
+			/*加载 PHP Console Debug模块*/
+			Yaf_Loader::import('PhpConsole/__autoload.php');
+			$handler = PhpConsole\Handler::getInstance();
+			$handler->start();
+			PhpConsole\Helper::register();
+
+			$connector  = PhpConsole\Connector::getInstance();
+			$dispatcher = $connector->getDebugDispatcher();
+			$connector->setSourcesBasePath(APP_PATH);
+			$connector->setServerEncoding('utf8');
+			$dispatcher->detectTraceAndSource = true;
+
+			if ($pwd = Config::get('debug.auth'))
+			{
+				$connector->setPassword($pwd);
+				$connector->startEvalRequestsListener();
+			}
+		}
+	}
 }
