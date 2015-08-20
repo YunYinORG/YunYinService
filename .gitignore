@@ -1,3 +1,11 @@
+#tempFile
+#临时文件
+temp/
+
+#localfile
+#本地文件
+*.local
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
