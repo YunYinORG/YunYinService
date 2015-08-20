@@ -20,21 +20,39 @@ class UserController extends Rest
 	 */
 	public function POST_indexAction()
 	{
-		$post = $this->_request->getPost();
-
-		$user = new UserModel;
-		if ($user->create($post))
+		$post     = $this->_request->getPost();
+		$number   = $this->_request->getPost('number');
+		$password = $this->_request->getPost('password');
+		$sch_id   = $this->_request->getPost('sch_id');
+		$name     = '';
+		if ($sch_id == 1)
 		{
-			$response['status'] = 1;
-			$response['msg']    = '注册成功';
+			$name = Verify\Nku::getName($number, $password);
+		}
+		if (!$name)
+		{
+			$this->response['msg'] = '验证无效';
 		}
 		else
 		{
-			$response['status'] = 0;
-			$response['msg']    = $user->getError();
+			$user             = new UserModel;
+			$post             = $this->_request->getPost();
+			$post['name']     = $name;
+			$post['password'] = md5($password);
+			if ($user->create($post))
+			{
+				$response['status'] = 1;
+				$response['msg']    = '注册成功';
+			}
+			else
+			{
+				$response['status'] = 0;
+				$response['msg']    = $user->getError();
+			}
+
+			$this->response = $response;
 		}
 
-		$this->response = $response;
 	}
 
 	/**

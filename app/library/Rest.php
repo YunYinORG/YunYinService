@@ -7,8 +7,8 @@ abstract class Rest extends Yaf_Controller_Abstract
 	/*允许的请求*/
 	// protected $request = array('GET', 'POST', 'PUT', 'DELETE');
 
-	protected $response_type = 'json'; //返回数据格式
-	protected $response      = null;   //返回数据
+	private $response_type = 'json'; //返回数据格式
+	protected $response    = false;  //返回数据
 
 	/**
 	 * 初始化 REST 路由
@@ -30,7 +30,6 @@ abstract class Rest extends Yaf_Controller_Abstract
 		}
 		elseif (method_exists($this, $rest_action . 'Action'))
 		{
-			//
 			$this->_request->setActionName($rest_action);
 		}
 	}
@@ -43,10 +42,22 @@ abstract class Rest extends Yaf_Controller_Abstract
 	 */
 	public function __destruct()
 	{
-		if ($this->response)
+		if ($this->response !== false)
 		{
-			header('Content-type: application/json');
-			echo json_encode($this->response);
+			switch ($this->response_type)
+			{
+				case 'xml':
+					header('Content-type: application/xml');
+					echo Parse\Xml::encode($this->response);
+					break;
+
+				case 'json':
+				default:
+					header('Content-type: application/json');
+					echo json_encode($this->response);
+					break;
+			}
 		}
 	}
+
 }
