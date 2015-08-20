@@ -50,29 +50,31 @@ class Db
 	 */
 	private function init($query, $parameters = '')
 	{
-		// try
-		// {
-		# Prepare query
-		if (Config::get('isdebug'))
+		try
 		{
-			PC::DB($query, 'prepare');
-		}
-		if ($this->sQuery = $this->pdo->prepare($query))
-		{
-			# Add parameters to the parameter array
-			$parameters = is_array($parameters) ? $this->bind($parameters) : array();
-			#excute
+			// Prepare query
 			if (Config::get('isdebug'))
 			{
-				PC::DB($parameters, 'parameters');
+				PC::DB($query, 'prepare');
+				Log::write($query, 'SQL');
 			}
-			return $this->sQuery->execute($parameters);
+			if ($this->sQuery = $this->pdo->prepare($query))
+			{
+				# Add parameters to the parameter array
+				$parameters = is_array($parameters) ? $this->bind($parameters) : array();
+				#excute
+				if (Config::get('isdebug'))
+				{
+					PC::DB($parameters, 'parameters');
+					Log::write('query param:', implode(',', $parameters), 'SQL');
+				}
+				return $this->sQuery->execute($parameters);
+			}
 		}
-		// }
-		// catch (PDOException $e)
-		// {
-		// 	$this->ExceptionLog($e->getMessage(), $query);
-		// }
+		catch (PDOException $e)
+		{
+			Log::write('数据库链接错误:' . $e->getMessage() . '执行：' . $query, 'ERROR');
+		}
 	}
 
 	/**
