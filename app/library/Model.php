@@ -27,7 +27,7 @@
  * - parseField()
  * - parseData()
  * - buildSelectSql()
- * - buidlFromSql()
+ * - buildFromSql()
  * - buildWhereSql()
  * - buildTailSql()
  * Classes list:
@@ -162,7 +162,7 @@ class Model
 		}
 
 		$sql = $this->buildSelectSql();
-		$sql .= $this->buidlFromSql();
+		$sql .= $this->buildFromSql();
 		$sql .= $this->buildWhereSql();
 		$sql .= $this->buildTailSql();
 		return $this->query($sql, $this->param);
@@ -291,7 +291,7 @@ class Model
 			}
 		}
 		$sql = 'DELETE';
-		$sql .= $this->buidlFromSql();
+		$sql .= $this->buildFromSql();
 		$where = $this->buildWhereSql();
 		if (!$where)
 		{
@@ -369,8 +369,8 @@ class Model
 		if ($exp && is_string($key))
 		{
 			//表达式如x>1
-			$name = $key . '_' . bin2hex($exp);
-			$this->where .= 'AND(' . self::backQoute($key) . $exp . ':' . $name . ')';
+			$name               = $key . '_' . bin2hex($exp);
+			$str                = 'AND(' . self::backQoute($key) . $exp . ':' . $name . ')';
 			$this->param[$name] = $value;
 		}
 		elseif (is_array($key))
@@ -380,17 +380,18 @@ class Model
 			foreach ($key as $k => $v)
 			{
 				$name = $k . '_w_eq';
-				$str .= '（' . self::backQoute($k) . '=:' . $name . ')AND';
+				$str .= 'AND(' . self::backQoute($k) . '=:' . $name . ')';
 				$this->param[$name] = $v;
 			}
-			$this->where = substr($str, 0, -3);
+
 		}
 		else
 		{
 			//直接sql条件
 			//TO 安全过滤
-			$this->where .= '(' . $key . ')';
+			$str .= '(' . $key . ')';
 		}
+		$this->where = $str;
 		return $this;
 	}
 
@@ -452,11 +453,13 @@ class Model
 	 */
 	public function count($field = null)
 	{
-		$exp = $field ? 'count(' . self::backQoute($field) . ')' : 'count(*)';
+		$exp = $field ? 'COUNT(' . self::backQoute($field) . ')' : 'COUNT(*)';
 		$sql = $this->buildSelectSql($exp);
-		$sql .= $this->buidlFromSql();
+		$sql .= $this->buildFromSql();
+		$sql .= $this->buildWhereSql();
+		$result = self::$_db->single($sql, $this->param);
 		$this->clear();
-		return self::$_db->single($sql);
+		return $result;
 	}
 
 	public function __call($op, $args)
@@ -466,9 +469,15 @@ class Model
 		{
 			//数学计算
 			$sql = $this->buildSelectSql($op . '(' . self::backQoute($args[0]) . ')');
-			$sql .= $this->buidlFromSql();
+			$sql .= $this->buildFromSql();
+			$sql .= $this->buildWhereSql();
+			$result = self::$_db->single($sql, $this->param);
 			$this->clear();
-			return self::$_db->single($sql);
+			return $result;
+		}
+		else
+		{
+			throw new Exception('不支持操作' . $op, 1);
 		}
 	}
 
@@ -544,7 +553,7 @@ class Model
 			{
 				//数据库读取
 				$sql = $this->buildSelectSql(self::backQoute($name));
-				$sql .= $this->buidlFromSql();
+				$sql .= $this->buildFromSql();
 				$sql .= $this->buildWhereSql();
 				$sql .= 'LIMIT 1';
 				$data  = $this->data;
@@ -661,14 +670,14 @@ class Model
 
 	/**
 	 * 构建From子句
-	 * @method buidlFromSql
+	 * @method buildFromSql
 	 * @return [type]       [description]
 	 * @author NewFuture
 	 */
-	private function buidlFromSql()
+	private function buildFromSql()
 	{
 		$from = 'FROM' . self::backQoute($this->table) . '';
-		//belong关系（属于）1对多，innerjoin
+		//belong关系(属于)1对多，innerjoin
 		foreach ($this->belongs_to_tables as $fk => $table)
 		{
 			$from .= 'INNER JOIN' . self::backQoute($table) .
@@ -681,13 +690,13 @@ class Model
 	/**
 	 * 构建where子句
 	 * @method buildWhereSql
-	 * @return [string]        [''或者WHERE（xxx）]
+	 * @return [string]        [''或者WHERE(xxx)]
 	 * @author NewFuture
 	 */
 	private function buildWhereSql()
 	{
 		$pre     = $this->belongs_to_tables ? self::backQoute($this->table) . '.' : '';
-		$datastr = $where = $this->parseData(')AND(' . $pre);
+		$datastr = $this->parseData(')AND(' . $pre);
 		$where   = null;
 		if ($datastr)
 		{
@@ -698,6 +707,7 @@ class Model
 			//去掉第一个AND或者OR
 			$where = strstr($this->where, '(');
 		}
+
 		return $where ? ' WHERE ' . $where : '';
 	}
 

@@ -55,8 +55,8 @@ class Db
 			// Prepare query
 			if (Config::get('isdebug'))
 			{
-				PC::DB($query, 'prepare');
 				Log::write($query, 'SQL');
+				PC::DB($query, 'prepare');
 			}
 			if ($this->sQuery = $this->pdo->prepare($query))
 			{
@@ -65,8 +65,8 @@ class Db
 				#excute
 				if (Config::get('isdebug'))
 				{
+					Log::write('SQL param:' . json_encode($parameters), 'SQL');
 					PC::DB($parameters, 'parameters');
-					Log::write('query param:', implode(',', $parameters), 'SQL');
 				}
 				return $this->sQuery->execute($parameters);
 			}

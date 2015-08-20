@@ -10,7 +10,7 @@ class NKU extends Connect
 	const LOGIN_URL = '';
 	const INFO_URL  = '';
 
-	public static function getName($number, $pwd)
+	public static function getName($number, $pwd, $code = null)
 	{
 		// $data['username'] = $number;
 		// 	$result = self::post(self::LOGIN_URL, $data);

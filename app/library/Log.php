@@ -19,7 +19,7 @@ class Log
 	{
 		if ($stream = self::getStream($tag))
 		{
-			$msg = '[' . date('l jS F Y : h:i:s a') . '] ' . $msg . PHP_EOL;
+			$msg = '[' . date('Y-m-j H:i:s') . '] ' . $msg . PHP_EOL;
 
 			return fwrite($stream, $msg);
 		}
