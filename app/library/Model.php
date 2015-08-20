@@ -741,7 +741,7 @@ class Model
 	 */
 	public static function backQoute($str)
 	{
-		if (!ctype_alnum(str_replace('_', '', $str)))
+		if (!ctype_alnum(strtr($str, '_', 'A')))
 		{
 			//合法字符为字母[a-zA-Z]或者下划线_
 			throw new Exception('非法字符' . $str);

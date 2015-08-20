@@ -1,7 +1,8 @@
 <?php
 
 /**
- * 数据格式验证* - card()
+ * 数据格式验证
+ *  - card()
  * - email()
  * - phone()
  * Classes list:
@@ -31,7 +32,7 @@ class Validate
 	}
 
 	/*验证邮箱格式*/
-	public static function email(&$email)
+	public static function email(&$email, $check = true)
 	{
 		return preg_match(Config::get('regex.email'), $email);
 	}
@@ -53,5 +54,4 @@ class Validate
 	{
 		return preg_match(Config::get('regex.name'), $name);
 	}
-
 }
