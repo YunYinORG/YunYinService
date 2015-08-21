@@ -1,13 +1,13 @@
 <?php
 /**
- * 缓存类
+ * 键值对存储
  * Function list:
  * - set()
  * - get()
  * - del()
  * - flush()
  */
-class Cache
+class Kv
 {
 
 	private static $_handler = null; //处理方式
@@ -20,9 +20,9 @@ class Cache
 	 * @param  mixed $expire [有效时间]
 	 * @author NewFuture
 	 */
-	public static function set($name, $value, $expire = false)
+	public static function set($name, $value)
 	{
-		return self::Handler()->set($name, $value, 0, $expire);
+		return self::Handler()->set($name, $value);
 	}
 
 	/**
@@ -50,14 +50,29 @@ class Cache
 	}
 
 	/**
-	 * 清空缓存
+	 * 清空存储
 	 * @method fush
-	 * @return [type] [description]
 	 * @author NewFuture
 	 */
 	public static function flush()
 	{
-		return self::Handler()->flush();
+		if (Config::get('kv.type') == 'sae')
+		{
+			/*sae kvdb 逐个删除*/
+			$kv = self::Handler();
+			while ($ret = $kv->pkrget('', 100))
+			{
+				foreach ($ret as $k => $v)
+				{
+					$kv->delete(key($k));
+				}
+			}
+		}
+		else
+		{
+			return self::Handler()->flush();
+		}
+
 	}
 
 	/**
@@ -70,7 +85,7 @@ class Cache
 	{
 		if (null === self::$_handler)
 		{
-			$config = Config::get('cache');
+			$config = Config::get('kv');
 			switch ($config['type'])
 			{
 				case 'sae':	//sae_memcache
@@ -78,11 +93,11 @@ class Cache
 					break;
 
 				case 'file':	//文件缓存
-					self::$_handler = new Storage\File($config['dir'], true);
+					self::$_handler = new Storage\File($config['dir'], false);
 					break;
 
 				default:
-					throw new Exception('未知缓存方式' . $config['type']);
+					throw new Exception('未定义方式' . $config['type']);
 			}
 		}
 		return self::$_handler;

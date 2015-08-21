@@ -107,9 +107,10 @@ class File
 	 */
 	public function __construct($dir, $serialized = false)
 	{
+		$dir .= DIRECTORY_SEPARATOR;
 		if (self::mkdir($dir))
 		{
-			$this->_dir = $dir . DIRECTORY_SEPARATOR;
+			$this->_dir = $dir;
 		}
 		else
 		{
