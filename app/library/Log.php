@@ -4,7 +4,7 @@
  */
 class Log
 {
-	private static $_path   = null;
+	private static $_dir    = null;
 	private static $_tags   = null; //运行写入的日志级别
 	private static $_stream = null; //
 	/**
@@ -34,10 +34,15 @@ class Log
 	 */
 	private static function getStream($tag)
 	{
-		if (null === self::$_path)
+		if (null === self::$_dir)
 		{
-			//日志路径
-			self::$_path = Config::get('log.path');
+			//日志目录
+			$logdir = Config::get('log.dir');
+			if (!Storage\File::mkdir($logdir))
+			{
+				throw new Exception('目录文件无法创建' . $logdir, 1);
+			}
+			self::$_dir = $logdir;
 			//日志级别
 			self::$_tags = explode(',', Config::get('log.allow'));
 			date_default_timezone_set('PRC');
@@ -52,7 +57,7 @@ class Log
 		if (!isset(self::$_stream[$tag]))
 		{
 			//打开日志文件
-			$file = self::$_path . DIRECTORY_SEPARATOR . $tag . '.log';
+			$file = self::$_dir . DIRECTORY_SEPARATOR . $tag . '.log';
 			if (!self::$_stream[$tag] = fopen($file, 'a'))
 			{
 				throw new Exception('Cannot log to file: ' . $file);
