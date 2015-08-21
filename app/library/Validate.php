@@ -1,5 +1,4 @@
 <?php
-
 /**
  * 数据格式验证
  *  - card()
@@ -31,10 +30,18 @@ class Validate
 		}
 	}
 
-	/*验证邮箱格式*/
-	public static function email(&$email, $check = true)
+	/**
+	 * 验证邮箱格式
+	 * @method email
+	 * @param  [type]  &$email       [description]
+	 * @param  boolean $ignore_mx [是否忽略对mx记录的检查]
+	 * @return [type]                [description]
+	 * @author NewFuture
+	 */
+	public static function email(&$email, $ignore_mx = false)
 	{
-		return preg_match(Config::get('regex.email'), $email);
+		return preg_match(Config::get('regex.email'), $email)
+		&& ($ignore_mx || checkdnsrr(substr(strrchr($email, '@'), 1)));
 	}
 
 	/*验证手机格式*/
