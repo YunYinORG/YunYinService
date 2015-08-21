@@ -34,23 +34,23 @@ class Input
 			$input = &$_REQUEST;
 			$name  = $param;
 		}
-		return self::filter($input, $name, $export, $filter) || ($export = $default && false);
+		return self::filter($input, $name, $export, $filter) || ($export = $default);
 	}
 
 	/*put,get，post等输入过滤*/
 	public static function put($name, &$export, $filter = null, $default = null)
 	{
-		return self::filter($GLOBALS['_PUT'], $name, $export, $filter) || ($export = $default && false);
+		return self::filter($GLOBALS['_PUT'], $name, $export, $filter) || ($export = $default);
 	}
 
 	public static function get($name, &$export, $filter = null, $default = null)
 	{
-		return self::filter($_GET, $name, $export, $filter) || ($export = $default && false);
+		return self::filter($_GET, $name, $export, $filter) || ($export = $default);
 	}
 
 	public static function post($name, &$export, $filter = null, $default = null)
 	{
-		return self::filter($_POST, $name, $export, $filter) || ($export = $default && false);
+		return self::filter($_POST, $name, $export, $filter) || ($export = $default);
 	}
 
 	/**
@@ -86,7 +86,7 @@ class Input
 			elseif (function_exists($filter))
 			{
 				/*函数*/
-				return (bool) $export = $filter($export);
+				return $filter($export);
 			}
 			elseif (method_exists('Validate', $filter))
 			{
@@ -108,6 +108,5 @@ class Input
 			/*不存在*/
 			return false;
 		}
-
 	}
 }

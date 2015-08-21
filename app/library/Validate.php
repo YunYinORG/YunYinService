@@ -25,8 +25,7 @@ class Validate
 		}
 		else
 		{
-			throw new Exception('位置学校', 1);
-
+			throw new Exception('未知学校', 1);
 		}
 	}
 
