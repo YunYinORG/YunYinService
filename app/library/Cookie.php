@@ -18,10 +18,13 @@ class Cookie
 	 */
 	public static function set($name, $value, $path = '', $expire = null)
 	{
-		$value  = Encrypt::aesEncode(serialize($value), self::config('key'));
-		$path   = $path ?: self::config($path);
-		$expire = $expire ? ($_SERVER['REQUEST_TIME'] + $expire) : null;
-		return setcookie($name, $value, $expire, $path, self::config('domain'), self::config('secure'), self::config('httponly'));
+		if ($value = Encrypt::aesEncode(serialize($value), self::config('key')))
+		{
+			$value  = strtr(base64_encode($value), ['+' => '-', '=' => '_', '/' => '.']);
+			$path   = $path ?: self::config('path');
+			$expire = $expire ? ($_SERVER['REQUEST_TIME'] + $expire) : null;
+			return setcookie($name, $value, $expire, $path, self::config('domain'), self::config('secure'), self::config('httponly'));
+		}
 	}
 
 	/**
@@ -34,10 +37,11 @@ class Cookie
 	{
 		if (isset($_COOKIE[$name]))
 		{
-			$value = $_COOKIE[$name];
-			if ($value = Encrypt::aesDecode($value, self::config('key')))
+			$data = strtr($_COOKIE[$name], ['-' => '+', '_' => '=', '.' => '/']);
+			$data = base64_decode($data);
+			if ($data = Encrypt::aesDecode($data, self::config('key')))
 			{
-				return @unserialize($value);
+				return @unserialize($data);
 			}
 		}
 	}
@@ -48,11 +52,11 @@ class Cookie
 	 * @param  [type] $name [description]
 	 * @author NewFuture
 	 */
-	public static function del($name, $path = '/')
+	public static function del($name, $path = null)
 	{
 		if (isset($_COOKIE[$name]))
 		{
-			$path = $path ?: self::config($path);
+			$path = $path ?: self::config('path');
 			return setcookie($name, '', 100, $path, self::config('domain'), self::config('secure'), self::config('httponly'));
 			unset($_COOKIE[$name]);
 		}
