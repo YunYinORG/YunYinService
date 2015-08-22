@@ -41,6 +41,19 @@ abstract class Rest extends Yaf_Controller_Abstract
 	}
 
 	/**
+	 * 设置返回信息
+	 * @method response
+	 * @param  [type]   $status [请求结果]
+	 * @param  string   $info   [请求信息]
+	 * @return [type]           [description]
+	 * @author NewFuture
+	 */
+	protected function response($status, $info = '')
+	{
+		$this->response = ['status' => $status, 'info' => $info];
+	}
+
+	/**
 	 * 结束时自动输出信息
 	 * @method __destruct
 	 * @access private

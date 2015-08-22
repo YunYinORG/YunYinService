@@ -70,4 +70,14 @@ class UserModel extends FacadeModel
 		parent::getModel()->belongs('school');
 		return $this;
 	}
+
+	public static function savePhone($id, $phone)
+	{
+
+	}
+
+	public static function getByPhone($phone)
+	{
+
+	}
 }
