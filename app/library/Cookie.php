@@ -18,9 +18,8 @@ class Cookie
 	 */
 	public static function set($name, $value, $path = '', $expire = null)
 	{
-		if ($value = Encrypt::aesEncode(serialize($value), self::config('key')))
+		if ($value = Encrypt::aesEncode(json_encode($value), self::config('key'), true))
 		{
-			$value  = strtr(base64_encode($value), ['+' => '-', '=' => '_', '/' => '.']);
 			$path   = $path ?: self::config('path');
 			$expire = $expire ? ($_SERVER['REQUEST_TIME'] + $expire) : null;
 			return setcookie($name, $value, $expire, $path, self::config('domain'), self::config('secure'), self::config('httponly'));
@@ -37,11 +36,9 @@ class Cookie
 	{
 		if (isset($_COOKIE[$name]))
 		{
-			$data = strtr($_COOKIE[$name], ['-' => '+', '_' => '=', '.' => '/']);
-			$data = base64_decode($data);
-			if ($data = Encrypt::aesDecode($data, self::config('key')))
+			if ($data = Encrypt::aesDecode($_COOKIE[$name], self::config('key'), true))
 			{
-				return @unserialize($data);
+				return @json_decode($data);
 			}
 		}
 	}

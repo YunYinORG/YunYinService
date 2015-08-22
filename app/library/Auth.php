@@ -53,7 +53,7 @@ class Auth
 				return $user;
 			}
 		}
-		elseif (I('SERVER.HTTP_TOKEN', $token, 'token'))
+		elseif (Input::I('SERVER.HTTP_TOKEN', $token, 'token'))
 		{
 			/*http头中的请求*/
 
@@ -132,6 +132,6 @@ class Auth
 	private static function createBaseToken(&$user)
 	{
 		$token = hash_hmac('md5', implode('|', $user), $user['password'], true);
-		return strtr(base64_encode($token), ['+' => '-', '=' => '', '/' => '_']);
+		return Encrypt::base64Encode($token);
 	}
 }

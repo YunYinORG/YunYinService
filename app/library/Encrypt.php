@@ -43,6 +43,30 @@ class Encrypt
 	}
 
 	/**
+	 * 路径安全base64编码
+	 * @method base64Encode
+	 * @param  string       $str [编码前字符串]
+	 * @return string                  [编码后字符串]
+	 * @author NewFuture
+	 */
+	public static function base64Encode($str)
+	{
+		return strtr(base64_encode($str), array('+' => '_', '=' => '.', '/' => '-'));
+	}
+
+	/**
+	 * 路径安全形base64解码
+	 * @method base64Decode
+	 * @param  string      $tr [description]
+	 * @return string           [解码后字符串]
+	 * @author NewFuture
+	 */
+	public static function base64Decode($str)
+	{
+		return base64_decode(strtr($str, array('_' => '+', '.' => '=', '-' => '/')));
+	}
+
+	/**
 	 * aes_encode(&$data, $key)
 	 *  aes加密函数,$data引用传真，直接变成密码
 	 *  采用mcrypt扩展,为保证一致性,初始向量设为0
@@ -50,13 +74,13 @@ class Encrypt
 	 * @param $key 密钥
 	 * @return string(16) 加密后的密文
 	 */
-	public static function aesEncode($data, $key)
+	public static function aesEncode($data, $key, $safe_view = false)
 	{
 		$td = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_ECB, '');
 		mcrypt_generic_init($td, $key, '0000000000000000');
 		$data = mcrypt_generic($td, $data);
 		mcrypt_generic_deinit($td);
-		return $data;
+		return $safe_view ? self::base64Encode($data) : $data;
 	}
 
 	/**
@@ -66,9 +90,10 @@ class Encrypt
 	 * @param $key 密钥
 	 * @return string 解密后的明文
 	 */
-	public static function aesDecode($cipher, $key)
+	public static function aesDecode($cipher, $key, $safe_view = false)
 	{
-		$td = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_ECB, '');
+		$cipher = $safe_view ? self::base64Decode($cipher) : trim($cipher);
+		$td     = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_ECB, '');
 		mcrypt_generic_init($td, $key, '0000000000000000');
 		$cipher = mdecrypt_generic($td, $cipher);
 		mcrypt_generic_deinit($td);
@@ -93,10 +118,8 @@ class Encrypt
 		$name2 = substr($name, 1);
 		if ($name2)
 		{
-			self::aesEncode($name2, self::config('key_email'));
-			$name2     = base64_encode($name2); //base64转码
-			$encodeMap = array('+' => '-', '=' => '_', '/' => '.');
-			$name2     = strtr($name2, $encodeMap); //特殊字符编码
+			/*aes 安全加密*/
+			$name2 = self::aesEncode($name2, self::config('key_email'), true);
 		}
 		else
 		{
@@ -126,11 +149,8 @@ class Encrypt
 		}
 		else
 		{
-			//解密 并base64还原
-			$encodeMap = array('+' => '-', '=' => '_', '/' => '.');
-			$name2     = strtr($name2, $decodeMap);
-			$name2     = base64_decode($name2);
-			self::aesDecode($name2, self::config('key_email')); //aes解解码
+			/*aes安全解码*/
+			$name2 = self::aesDecode($name2, self::config('key_email'), true);
 		}
 		$email = $name[0] . trim($name2) . '@' . $domain;
 		return $email;
