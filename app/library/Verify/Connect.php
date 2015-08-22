@@ -27,7 +27,7 @@ abstract class Connect
 	 * @method getCode
 	 * @return [type]  [description]
 	 */
-	public static function getCode($data = null)
+	public static function getCode($url, $data = null)
 	{
 		return null;
 	}
@@ -39,7 +39,7 @@ abstract class Connect
 	 * @param  [数组] $data [description]
 	 * @author NewFuture
 	 */
-	public static function post($url, $data)
+	public static function post($url, $data = null)
 	{
 
 	}

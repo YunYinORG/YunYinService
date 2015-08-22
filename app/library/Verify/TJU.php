@@ -14,7 +14,7 @@ class TJU extends Connect
 	{
 		$data['uid'] = $number;
 		$data['password'] = $pwd;
-		$data['captchas'] = self::getCode();
+		$data['captchas'] = self::getCode(self::LOGIN_URL);
 		$result = self::post(self::LOGIN_URL, $data);
 		$start = '当前用户';
 		$end = ')';
@@ -22,19 +22,19 @@ class TJU extends Connect
 		return substr(trim($middlename), 0, (strpos(trim($middlename), $end)));
 	}
 
-	public static function getCode($data = null)
+	public static function getCode($url,$data = null)
 	{
 		/* 第一次请求获取cookie */
 		$cookie_jar = dirname(__FILE__) . "/tmp.cookie";
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, self::LOGIN_URL);
+		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch,CURLOPT_COOKIEJAR,$cookie_jar);
 		curl_exec($ch);
 		curl_close($ch);
 
 		/* 第二次请求获取验证码 */
-		$ch = curl_init();
+		/*$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, self::INFO_URL);
 		curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie_jar);
 		curl_setopt($ch, CURLOPT_HEADER, 0);
@@ -45,15 +45,15 @@ class TJU extends Connect
 		fwrite($fp,$img);
 		fclose($fp);
 		sleep(20);
-		$code = file_get_contents(dirname(__FILE__)."/code.txt");
+		$code = file_get_contents(dirname(__FILE__)."/code.txt");*/
 		return $code;
 	}
 
-	public static function post($url, $data)
+	public static function post($url, $data = null)
 	{
 		$cookie_jar = dirname(__FILE__) . "/tmp.cookie";
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, self::LOGIN_URL);
+		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_HEADER, 1);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie_jar);
