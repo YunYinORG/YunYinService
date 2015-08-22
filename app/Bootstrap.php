@@ -23,7 +23,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
 	public function _initView(Yaf_Dispatcher $dispatcher)
 	{
 		//关闭视图
-		$dispatcher->disableView();
+		// $dispatcher->disableView();
 		//路由
 		// $dispatcher->getRouter()->addConfig(Config::get('routes'));
 	}

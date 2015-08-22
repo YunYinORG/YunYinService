@@ -27,7 +27,7 @@ abstract class Connect
 	 * @method getCode
 	 * @return [type]  [description]
 	 */
-	public static function getCode()
+	public static function getCode($data = null)
 	{
 		return null;
 	}
