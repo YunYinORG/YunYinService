@@ -359,39 +359,67 @@ class Model
 		return $this;
 	}
 
-	public function where($key, $exp = '', $value = '', $conidition = 'AND')
+	/**
+	 * where 查询
+	 * @method where
+	 * @param  [type] $key        [description]
+	 * @param  string $exp        [description]
+	 * @param  [type] $value      [description]
+	 * @param  string $conidition [description]
+	 * @return [type]             [description]
+	 * @example
+	 * where($data)
+	 * where('id',1) 查询id=1
+	 * where('id','>',1)
+	 * @author NewFuture
+	 */
+	public function where($key, $exp = null, $value = null, $conidition = 'AND')
 	{
 		if ($conidition !== 'OR')
 		{
 			$conidition = 'AND';
 		}
 
-		if ($exp && is_string($key))
+		if (null === $exp) //单个参数，where($array)或者where($sql)
 		{
-			//表达式如x>1
-			$name               = $key . '_' . bin2hex($exp);
-			$str                = 'AND(' . self::backQoute($key) . $exp . ':' . $name . ')';
-			$this->param[$name] = $value;
-		}
-		elseif (is_array($key))
-		{
-			//数组形式
-			$str = '';
-			foreach ($key as $k => $v)
+			if (is_string($key))
 			{
-				$name = $k . '_w_eq';
-				$str .= 'AND(' . self::backQoute($k) . '=:' . $name . ')';
-				$this->param[$name] = $v;
+				//直接sql条件
+				//TO 安全过滤
+				$where = 'AND(' . $key . ')';
 			}
+			elseif (is_array($key))
+			{
+				/*数组形式*/
+				$where = [];
+				foreach ($key as $k => $v)
+				{
+					$name               = $k . '_w_eq';
+					$where[]            = self::backQoute($k) . '=:' . $name;
+					$this->param[$name] = $v;
+				}
+				$where = $conidition . '((' . implode(')AND(', $where) . '))';
+			}
+			else
+			{
+				throw new Exception('非法where查询:' . json_encode($key));
+			}
+		}
+		elseif (null === $value) //where($key,$v)等价于where($key,'=',$v);
+		{
+			$name  = $key . '_w_eq';
+			$where = $conidition . '(' . self::backQoute($key) . '=:' . $name . ')';
 
+			$this->param[$name] = $exp;
 		}
 		else
 		{
-			//直接sql条件
-			//TO 安全过滤
-			$str .= '(' . $key . ')';
+			$name  = $key . '_w_eq';
+			$where = $conidition . '(' . self::backQoute($key) . $exp . ':' . $name . ')';
+
+			$this->param[$name] = $value;
 		}
-		$this->where = $str;
+		$this->where .= $where;
 		return $this;
 	}
 
@@ -404,7 +432,7 @@ class Model
 	 * @return [type]         [description]
 	 * @author NewFuture
 	 */
-	public function orWhere($key, $exp = '', $value = '')
+	public function orWhere($key, $exp = null, $value = null)
 	{
 		return $this->where($key, $exp, $value, 'OR');
 	}
