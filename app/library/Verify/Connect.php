@@ -39,7 +39,7 @@ abstract class Connect
 		}
 		$result = curl_exec($ch);
 		preg_match('/Set-Cookie:(.*);/iU', $result, $matchs);
-		self::$_cookies = $matchs[1];
+		\Session::set('verify_session', $matchs[1]);
 		curl_close($ch);
 		return $result;
 	}
@@ -57,7 +57,7 @@ abstract class Connect
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_HEADER, false);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_COOKIE, self::$_cookies);
+		curl_setopt($ch, CURLOPT_COOKIE, \Session::get('login_cookie'));
 		if ($data)
 		{
 			curl_setopt($ch,CURLOPT_POSTFIELDS, $data); 

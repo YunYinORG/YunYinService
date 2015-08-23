@@ -15,13 +15,13 @@ class TJU extends Connect
 		$data['USERNAME'] = $number;
 		$data['PASSWORD'] = $pwd;
 		$success_key = '<script language=\'javascript\'>window.location.href=\'http://jw.tifert.edu.cn/2003/framework/main.jsp\';</script>';
-		if (strpos(self::getCode(self::LOGIN_URL, $data), $success_key) === false)
+		if (strpos(parent::getCode(self::LOGIN_URL, $data), $success_key) === false)
 		{
 			return false;
 		}
 		else
 		{
-			$result = self::post('UTF-8', self::INFO_URL);
+			$result = parent::post('UTF-8', self::INFO_URL);
 			$start  = '当前用户：';
 			$end    = '</td>';
 			$s = strpos($results, $start) + strlen($start); //起始位置
@@ -31,13 +31,4 @@ class TJU extends Connect
 		}
 	}
 
-	public static function getCode($url, $data = null)
-	{
-		return parent::getCode($url, $data);
-	}
-
-	public static function post($encode, $url, $data = null)
-	{
-		return parent::post($url);
-	}
 }

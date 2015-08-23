@@ -14,21 +14,11 @@ class NKU extends Connect
 	{
 		$data['IPT_LOGINUSERNAME'] = $number;
 		$data['IPT_LOGINPASSWORD'] = $pwd;
-		self::getCode(self::LOGIN_URL, $data);
-		$result = self::post('GBK', self::INFO_URL);
+		parent::getCode(self::LOGIN_URL, $data);  //获取缓存
+		$result = parent::post('GBK', self::INFO_URL);
 		$name = substr($result, strpos($result, '姓名：') + 9, (strlen($result) - strpos($result, '</li>')) * (-1));
 		return $name;
 
-	}
-
-	public static function getCode($url,$data = null)
-	{
-		return parent::getCode($url, $data);
-	}
-
-	public static function post($encode, $url, $data = null)
-	{
-		return parent::post($encode, $url);
 	}
 }
 
