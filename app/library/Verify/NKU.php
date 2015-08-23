@@ -15,37 +15,20 @@ class NKU extends Connect
 		$data['IPT_LOGINUSERNAME'] = $number;
 		$data['IPT_LOGINPASSWORD'] = $pwd;
 		self::getCode(self::LOGIN_URL, $data);
-		$result = self::post(self::LOGIN_URL);
-		$name = substr($result, (strlen('<li>'.'   ') + strpos($result, '<li>')) + 3, (strlen($result) - strpos($result, '</li>')) * (-1));
-		return iconv('GBK', 'UTF-8//IGNORE', $name);
+		$result = self::post('GBK', self::INFO_URL);
+		$name = substr($result, strpos($result, '姓名：') + 9, (strlen($result) - strpos($result, '</li>')) * (-1));
+		return $name;
+
 	}
 
 	public static function getCode($url,$data = null)
 	{
-		$cookie_jar = dirname(__FILE__) . "/tmp.cookie";
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_POST, 1);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-		curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_jar);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_HEADER, false);
-		curl_setopt($ch, CURLOPT_NOBODY, false);
-		curl_exec($ch);
-		curl_close($ch);
-		return null;
+		return parent::getCode($url, $data);
 	}
 
-	public static function post($url, $data = null)
+	public static function post($encode, $url, $data = null)
 	{
-		$cookie_jar = dirname(__FILE__) . "/tmp.cookie";
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_HEADER, false);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie_jar);
-		$result = curl_exec($ch);
-		return $result;
+		return parent::post($encode, $url);
 	}
 }
 

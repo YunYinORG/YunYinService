@@ -29,7 +29,19 @@ abstract class Connect
 	 */
 	public static function getCode($url, $data = null)
 	{
-		return null;
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch,CURLOPT_HEADER, 1);
+		curl_setopt($ch,CURLOPT_RETURNTRANSFER, 1);
+		if ($data)
+		{
+			curl_setopt($ch,CURLOPT_POSTFIELDS, $data); 
+		}
+		$result = curl_exec($ch);
+		preg_match('/Set-Cookie:(.*);/iU', $result, $matchs);
+		self::$_cookies = $matchs[1];
+		curl_close($ch);
+		return $result;
 	}
 
 	/**
@@ -39,9 +51,20 @@ abstract class Connect
 	 * @param  [数组] $data [description]
 	 * @author NewFuture
 	 */
-	public static function post($url, $data = null)
+	public static function post($encode, $url, $data = null)
 	{
-
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_HEADER, false);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_COOKIE, self::$_cookies);
+		if ($data)
+		{
+			curl_setopt($ch,CURLOPT_POSTFIELDS, $data); 
+		}
+		$result = curl_exec($ch);
+		curl_close($ch);
+		return iconv($encode, 'UTF-8//IGNORE', $result);
 	}
 
 	/**
