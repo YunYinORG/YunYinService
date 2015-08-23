@@ -1,6 +1,19 @@
 <?php
 class UserController extends Rest
 {
+
+	public function indexAction($name = '同学')
+	{
+		if (Auth::getUser())
+		{
+			$this->response(1, '亲爱的' . $name . ',已经成功登陆');
+		}
+		else
+		{
+			$this->response = ['status' => 0, 'info' => '尚未登陆', 'url' => '/Auth/'];
+		}
+	}
+
 	/**
 	 * 获取用户信息
 	 * GET /user/1
