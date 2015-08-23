@@ -10,7 +10,7 @@ class UserController extends Rest
 		}
 		else
 		{
-			$this->response = ['status' => 0, 'info' => '尚未登陆', 'url' => '/Auth/'];
+			$this->response = ['status' => self::AUTH_FAIL, 'info' => '尚未登陆', 'url' => '/Auth/'];
 		}
 	}
 
@@ -23,20 +23,10 @@ class UserController extends Rest
 	 */
 	public function GET_infoAction($id = 0)
 	{
-		if ($id && $id == Auth::id())
-		{
-			$user = UserModel::belongs('school')->field('name,number,phone,email')->find(intval($id));
-			//todo
-			//打码
-			$response['info']   = $user;
-			$response['status'] = 1;
-		}
-		else
-		{
-			$response['info']   = '验证信息已失效';
-			$response['status'] = 0;
-		}
-		$this->response = $response;
+		$id   = $this->auth($id);
+		$user = UserModel::belongs('school')->field('name,number,phone,email')->find($id);
+		$user = UserModel::mask($user);
+		$this->response(1, $user);
 	}
 
 	/**
@@ -48,12 +38,10 @@ class UserController extends Rest
 	 */
 	public function PUT_infoAction($id = 0)
 	{
+		$id = $this->auth($id);
+
 		$response['status'] = 0;
-		if (!$id || $id != Auth::id())
-		{
-			$response['info'] = '验证信息已失效';
-		}
-		elseif (!Input::put('password', $password, 'password'))
+		if (!Input::put('password', $password, 'password'))
 		{
 			$response['info'] = '新的密码格式不对';
 		}
@@ -88,16 +76,10 @@ class UserController extends Rest
 	 */
 	public function GET_phoneAction($id = 0)
 	{
-		if ($id && $id == Auth::id())
-		{
-			$user  = UserModel::field('number,phone')->find(intval($id));
-			$phone = $user ? Encrypt::decryptPhone($user['phone'], $user['number'], $id) : null;
-			$this->response(1, $phone);
-		}
-		else
-		{
-			$this->response(0, '验证信息已失效');
-		}
+		$id    = $this->auth($id);
+		$user  = UserModel::field('number,phone')->find($id);
+		$phone = $user ? Encrypt::decryptPhone($user['phone'], $user['number'], $id) : null;
+		$this->response(1, $phone);
 	}
 
 	/**
@@ -109,12 +91,10 @@ class UserController extends Rest
 	 */
 	public function POST_phoneAction($id = 0)
 	{
+		$id = $this->auth($id);
+
 		$response['status'] = 0;
-		if (!$id && $id != Auth::id())
-		{
-			$response['info'] = '验证信息已失效';
-		}
-		elseif (!Input::post('phone', $phone, 'phone'))
+		if (!Input::post('phone', $phone, 'phone'))
 		{
 			$response['info'] = '手机号码无效';
 		}
@@ -153,12 +133,10 @@ class UserController extends Rest
 	 */
 	public function PUT_phoneAction($id = 0)
 	{
+		$id = $this->auth($id);
+
 		$response['status'] = 0;
-		if (!$id && $id != Auth::id())
-		{
-			$response['info'] = '验证信息已失效';
-		}
-		elseif (!Input::post('code', $code, 'ctype_alnum')) //数字或者字母
+		if (!Input::post('code', $code, 'ctype_alnum')) //数字或者字母
 		{
 			$response['info'] = '验证码格式不对';
 		}
@@ -192,5 +170,4 @@ class UserController extends Rest
 			}
 		}
 	}
-
 }

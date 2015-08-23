@@ -71,6 +71,26 @@ class UserModel extends FacadeModel
 		return $this;
 	}
 
+	/**
+	 * 用户数据打码
+	 * @method mask
+	 * @param  [type] &$user [description]
+	 * @return [type]        [description]
+	 * @author NewFuture
+	 */
+	public static function mask(&$user)
+	{
+		if (is_set($user['phone']) && $phone = $user['phone'])
+		{
+			$user['phone'] = substr_replace($phone, '********', -8);
+		}
+		if (is_set($user['email']) && $email = $user['email'])
+		{
+			$user['email'] = $email[0] . '***' . strrchr($email, '@');
+		}
+		return $user;
+	}
+
 	public static function savePhone($id, $phone)
 	{
 
