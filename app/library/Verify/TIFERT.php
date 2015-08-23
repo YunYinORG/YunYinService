@@ -21,7 +21,7 @@ class TJU extends Connect
 		}
 		else
 		{
-			$result = self::post(self::INFO_URL);
+			$result = self::post('UTF-8', self::INFO_URL);
 			$start  = '当前用户：';
 			$end    = '</td>';
 			$s = strpos($results, $start) + strlen($start); //起始位置
@@ -33,31 +33,11 @@ class TJU extends Connect
 
 	public static function getCode($url, $data = null)
 	{
-		$cookie_jar = dirname(__FILE__) . "/tmp.cookie";
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_POST, 1);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-		curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_jar);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_HEADER, false);
-		curl_setopt($ch, CURLOPT_NOBODY, false);
-		$result = curl_exec($ch);
-		curl_close($ch);
-		return $result;
+		return parent::getCode($url, $data);
 	}
 
-	public static function post($url, $data = null)
+	public static function post($encode, $url, $data = null)
 	{
-		$cookie_jar = dirname(__FILE__) . "/tmp.cookie";
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_HEADER, false);
-		curl_setopt($ch, CURLOPT_REFERER,'http://jw.tifert.edu.cn/2003/');
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie_jar);
-		$result = curl_exec($ch);
-		return $result;
-
+		return parent::post($url);
 	}
 }

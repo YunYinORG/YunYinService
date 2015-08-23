@@ -14,53 +14,29 @@ class TJU extends Connect
 	{
 		$data['uid'] = $number;
 		$data['password'] = $pwd;
-		$data['captchas'] = self::getCode(self::LOGIN_URL);
-		$result = self::post(self::LOGIN_URL, $data);
+		$data['captchas'] = $code;
+		$result = self::post('GBK', self::LOGIN_URL, $data);
 		$start = '当前用户';
 		$end = ')';
 		$middlename = substr($result, strlen($start) + strpos($result, $start) + 14, strlen($start) + strpos($result, $start) + 18);
 		return substr(trim($middlename), 0, (strpos(trim($middlename), $end)));
 	}
 
-	public static function getCode($url,$data = null)
+	public static function getCode($url, $data = null)
 	{
-		/* 第一次请求获取cookie */
-		$cookie_jar = dirname(__FILE__) . "/tmp.cookie";
+		parent::getCode(self::LOGIN_URL); //获取缓存
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch,CURLOPT_COOKIEJAR,$cookie_jar);
-		curl_exec($ch);
-		curl_close($ch);
-
-		/* 第二次请求获取验证码 */
-		/*$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, self::INFO_URL);
-		curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie_jar);
+		curl_setopt($ch, CURLOPT_COOKIE, parent::$_cookies);
 		curl_setopt($ch, CURLOPT_HEADER, 0);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		$img = curl_exec($ch);
 		curl_close($ch);
-		$fp = fopen(dirname(__FILE__)."/code.jpg","w");
-		fwrite($fp,$img);
-		fclose($fp);
-		sleep(20);
-		$code = file_get_contents(dirname(__FILE__)."/code.txt");*/
-		return $code;
+		return base64_encode($img);
 	}
 
-	public static function post($url, $data = null)
+	public static function post($encode, $url, $data = null)
 	{
-		$cookie_jar = dirname(__FILE__) . "/tmp.cookie";
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_HEADER, 1);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie_jar);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-		$result = mb_convert_encoding(curl_exec($ch), 'UTF-8', 'GBK');
-		curl_close($ch);
-		return $result;
+		return parent::post($encode, $url, $data);
 	}
 }
