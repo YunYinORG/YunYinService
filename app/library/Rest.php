@@ -18,6 +18,7 @@ abstract class Rest extends Yaf_Controller_Abstract
 	 */
 	protected function init()
 	{
+		Yaf_Dispatcher::getInstance()->disableView(); //关闭视图模板引擎
 		$action      = $this->_request->getActionName();
 		$method      = strtoupper($this->_request->getMethod());
 		$rest_action = $method . '_' . $action; //REST对应的action如PUT_info
@@ -36,7 +37,19 @@ abstract class Rest extends Yaf_Controller_Abstract
 		}
 		elseif (method_exists($this, $rest_action . 'Action'))
 		{
+			/*存在对应的操作*/
 			$this->_request->setActionName($rest_action);
+		}
+		elseif (!method_exists($this, $action . 'Action'))
+		{
+			/*action和REST_actiodn 都不存在*/
+			$this->response = array(
+				'error' => '未定义操作',
+				'method' => $method,
+				'action' => $action,
+				'controller' => $this->_request->getControllerName(),
+			);
+			exit;
 		}
 	}
 
