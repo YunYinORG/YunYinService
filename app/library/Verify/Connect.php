@@ -57,7 +57,7 @@ abstract class Connect
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_HEADER, false);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_COOKIE, \Session::get('login_cookie'));
+		curl_setopt($ch, CURLOPT_COOKIE, \Session::get('verify_session'));
 		if ($data)
 		{
 			curl_setopt($ch,CURLOPT_POSTFIELDS, $data); 
