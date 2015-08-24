@@ -119,20 +119,26 @@ class AuthController extends Yaf_Controller_Abstract
 	 */
 	private function _verify($number, $password, $sch_id = 0, $except = [])
 	{
-
-		$result = Verify\Connect::getName($number, $password, $sch_id, $except);
-
-		/*验证结果*/
-		foreach ($result as $sch => $name)
+		if ($name = Verify\Connect::getName($number, $password, $sch_id, $except))
 		{
-			if ($name)
-			{
-				$regInfo = ['number' => $number, 'password' => md5($password), 'name' => $name];
-				Session::set('reg', $regInfo);
-				return true;
-			}
+			$regInfo = ['number' => $number, 'password' => md5($password), 'name' => $name];
+			Session::set('reg', $regInfo);
+			return true;
 		}
-		return array_keys($result);
+		// if ($result = Verify\Connect::getName($number, $password, $sch_id, $except))
+		// {
+		// 	/*验证结果*/
+		// 	foreach ($result as $sch => $name)
+		// 	{
+		// 		if ($name)
+		// 		{
+		// 			$regInfo = ['number' => $number, 'password' => md5($password), 'name' => $name];
+		// 			Session::set('reg', $regInfo);
+		// 			return true;
+		// 		}
+		// 	}
+		// 	return array_keys($result);
+		// }
 	}
 
 	protected function error($msg = '')
