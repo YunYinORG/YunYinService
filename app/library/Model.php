@@ -33,7 +33,7 @@
  * Classes list:
  * - Model
  */
-class Model
+class Model implements JsonSerializable, ArrayAccess
 {
 	/**
 	 * 数据库表名
@@ -137,8 +137,8 @@ class Model
 		}
 		$this->limit = 1;
 		$result      = $this->select();
-
-		return $this->data = isset($result[0]) ? $result[0] : $result;
+		$this->data  = isset($result[0]) ? $result[0] : $result;
+		return $this->data ? $this : null;
 	}
 
 	/**
@@ -624,7 +624,6 @@ class Model
 	 * @access private
 	 * @param mixed $fields
 	 * @return string
-	 * @author THINKPHP
 	 */
 	private function parseField()
 	{
@@ -789,6 +788,33 @@ class Model
 		{
 			return '`' . $str . '`';
 		}
+	}
+
+	/**json序列化接口实现**/
+	public function jsonSerialize()
+	{
+		return $this->data;
+	}
+
+	/**数组操作接口实现**/
+	public function offsetExists($offset)
+	{
+		return isset($data[$offset]);
+	}
+
+	public function offsetGet($offset)
+	{
+		return $this->get($offsetSet, false);
+	}
+
+	public function offsetSet($offset, $value)
+	{
+		$this->data[$offsetSet] = $value;
+	}
+
+	public function offsetUnset($offset)
+	{
+		unset($this->data[$offsetSet]);
 	}
 }
 ?>

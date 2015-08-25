@@ -33,13 +33,13 @@ class FileController extends Rest
 		{
 			$response['info'] = '未收到数据';
 		}
-		elseif (!$name = Cookie::get($key))
+		elseif (!$name = Cache::get($key))
 		{
 			$response['info'] = '文件不存在';
 		}
 		else
 		{
-			Cookie::del($key);
+			Cache::del($key);
 			//文件名由 temp_xxxx,重命名为 file_xxxx,
 			$newfile        = strtr($key, 'temp', 'file') . '_' . $_SERVER['REQUEST_TIME'];
 			$file['name']   = $name;
@@ -69,13 +69,13 @@ class FileController extends Rest
 	public function POST_tokenAction()
 	{
 		$userid = $this->auth();
-		if (Input::post('name', $name, 'trim'))
+		if (Input::post('name', $name, FILTER_SANITIZE_EMAIL)) //FILTER_SANITIZE_EMAIL过滤特殊字符
 		{
 			$key   = uniqid('temp_' . $userid . '.');
 			$token = File::getToken('temp_' . $key);
 			if ($token)
 			{
-				Cookie::set($key, $name);
+				Cache::set($key, $name, 600);
 				$response['token'] = $files;
 				$response['key']   = $key;
 				$this->response(1, $response);
@@ -92,7 +92,7 @@ class FileController extends Rest
 	}
 
 	/**
-	 * 文件列表
+	 * 文件详细信息
 	 * GET /file/1
 	 * @method GET_info
 	 * @author NewFuture
@@ -120,9 +120,9 @@ class FileController extends Rest
 	public function PUT_infoAction($id = 0)
 	{
 		$userid = $this->auth();
-		if (Input::put('name', $name, 'tirm'))
+		if (Input::put('name', $name, FILTER_SANITIZE_EMAIL))
 		{
-			if ($file = FileModel::where('id', $id)->where('use_id', $userid)->update(['name' => $name]))
+			if (FileModel::where('id', $id)->where('use_id', $userid)->update(['name' => $name]))
 			{
 				$this->response(1, '成功修改为：' . $name);
 			}
@@ -156,7 +156,7 @@ class FileController extends Rest
 		{
 			$response['info'] = '删除出错';
 		}
-		elseif ($File->set('url', '')->save())
+		elseif ($File->set('url', '')->set('status', 0)->save())
 		{
 			$response['status'] = 1;
 			$response['info']   = '已经删除';

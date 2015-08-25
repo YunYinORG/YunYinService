@@ -115,7 +115,7 @@ abstract class Rest extends Yaf_Controller_Abstract
 				case 'json':
 				default:
 					header('Content-type: application/json');
-					echo json_encode($this->response);
+					echo json_encode($this->response,JSON_UNESCAPED_UNICODE);//unicode不转码
 					break;
 			}
 		}
