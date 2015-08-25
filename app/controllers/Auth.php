@@ -33,6 +33,7 @@ class AuthController extends Yaf_Controller_Abstract
 			elseif ($verify = $this->_verify($number, $password, $sch_id, $login))
 			{
 				/*注册验证通过*/
+				$this->forward('index', 'user', 'index');
 			}
 			else
 			{
@@ -42,6 +43,31 @@ class AuthController extends Yaf_Controller_Abstract
 		else
 		{
 			return $this->error('账号或者密码错误');
+		}
+	}
+
+	/**
+	 * 临时注册
+	 * @method register
+	 * @return [type]   [description]
+	 * @author NewFuture
+	 */
+	public function register()
+	{
+		if ($regInfo = Session::get('reg'))
+		{
+			Session::del('reg');
+			$password            = $regInfo['password'];
+			$regInfo['password'] = Encrypt::encryptPwd($password, $regInfo['number']);
+			if ($id = UserModel::insert($regInfo))
+			{
+				$regInfo['id'] = $id;
+				$token         = Auth::token($regInfo);
+				Cookie::set('token', [$id => $token]);
+				unset($regInfo['password']);
+				Session::set('user', $regInfo);
+				$this->forward('index', 'user', 'index');
+			}
 		}
 	}
 
@@ -91,10 +117,13 @@ class AuthController extends Yaf_Controller_Abstract
 				if ($user['password'] == $password)
 				{
 					$user['number'] = $number;
-					$user['token']  = Auth::token($user);
-					// unset($user['password']);
+					// $user['token']  = Auth::token($user);
+					// 保存cookie
+					Cookie::set('token', [$user['id'] => Auth::token($user)]);
+					unset($user['password']);
 					// $code = Auth::createCode($user);
 					Session::set('user', $user);
+
 					return true; //登录成功
 				}
 				else
