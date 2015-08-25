@@ -69,9 +69,9 @@ class FileController extends Rest
 	public function POST_tokenAction()
 	{
 		$userid = $this->auth();
-		if (Input::put('name', $name, 'tirm'))
+		if (Input::post('name', $name, 'trim'))
 		{
-			$key   = uniqid('temp_' . $use_id . '.');
+			$key   = uniqid('temp_' . $userid . '.');
 			$token = File::getToken('temp_' . $key);
 			if ($token)
 			{

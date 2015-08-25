@@ -9,7 +9,7 @@ class File
 	const QINIU_RS = 'http://rs.qbox.me';
 
 	private static $_config = null;
-	// private static $_type   = null;
+	private static $_type   = null;
 
 	/**
 	 * 获取文件
@@ -69,7 +69,7 @@ class File
 	{
 		$timeout = 600;
 		$setting = array(
-			'scope' => $config['bucket'] . ':' . $name,
+			'scope' => self::config('bucket') . ':' . $name,
 			'deadline' => $timeout + $_SERVER['REQUEST_TIME'],
 		);
 		$setting = self::qiniuEncode(json_encode($setting));
