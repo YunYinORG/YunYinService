@@ -136,4 +136,35 @@ class FileController extends Rest
 			$this->response(0, '文件名无效');
 		}
 	}
+
+	/**
+	 * 文件删除
+	 * DELETE /file/1
+	 * @method DELETE_info
+	 * @author NewFuture
+	 */
+	public function DELETE_infoAction($id = 0)
+	{
+		$userid             = $this->auth();
+		$File               = FileModel::where('id', '=', $id)->where('userid', '=', $userid);
+		$response['status'] = 0;
+		if (!$path = $File->get('url'))
+		{
+			$response['info'] = '没有找这个文件';
+		}
+		elseif (!File::del($path))
+		{
+			$response['info'] = '删除出错';
+		}
+		elseif ($File->set('url', '')->save())
+		{
+			$response['status'] = 1;
+			$response['info']   = '已经删除';
+		}
+		else
+		{
+			$response['info'] = '文件状态更新失败';
+		}
+		$this->response = $response;
+	}
 }
