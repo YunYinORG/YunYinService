@@ -85,13 +85,12 @@ class File
 	 */
 	private static function opration($op)
 	{
-		$token    = self::sign($op . PHP_EOL);
-		$url      = self::QINIU_RS . $op;
-		$header   = array('Expect:', 'Authorization: QBox ' . $token);
-		$response = Api::connect($url, $header, 'POST');
+		$token  = self::sign($op . PHP_EOL);
+		$url    = self::QINIU_RS . $op;
+		$header = array('Authorization: QBox ' . $token);
 
-		$response_header = $response[0]; //响应头判断状态
-		if (substr($response_header, 0, 12) == 'HTTP/1.1 200')
+		if (($response = Api::connect($url, $header, 'POST'))
+			&& ($response['header'][0] == 'HTTP/1.1 200 OK')) //响应头判断状态
 		{
 			return true;
 		}
@@ -100,9 +99,9 @@ class File
 			/*操作出错*/
 			if (\Config::get('isdebug'))
 			{
-				\PC::debug($response);
+				\PC::debug($response,'七牛请求出错');
 			}
-			\Log::write('七牛错误' . $url . PHP_EOL . $response[0] . PHP_EOL . $response[1], 'ERROR');
+			\Log::write('七牛错误' . $url . ':' . json_encode($response, JSON_UNESCAPED_UNICODE), 'ERROR');
 			return false;
 		}
 	}

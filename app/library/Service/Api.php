@@ -19,6 +19,7 @@ class Api
 	 */
 	public static function connect($url, $header = array(), $method = 'POST', $data = '')
 	{
+		$response = null;
 		if (function_exists('curl_init'))
 		{
 			if ($ch = curl_init($url))
@@ -34,35 +35,42 @@ class Api
 				curl_setopt($ch, CURLOPT_HEADER, 1);
 				curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 				curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-				$response = curl_exec($ch);
+				$result = curl_exec($ch);
 				// $status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 				curl_close($ch);
-				if ($response)
+
+				if ($result)
 				{
-					return explode("\r\n\r\n", $response, 2);
+					list($header, $response['body']) = explode("\r\n\r\n", $result, 2);
+					$response['header']              = explode("\r\n", $header);
 				}
 			}
 		}
 		else
 		{
-			$opts              = array();
-			$opts['http']      = array();
-			$headers           = array('method' => strtoupper($method));
-			$headers['header'] = $header ?: array();
-			if (!empty($data))
-			{
-				$headers['header'][] = 'Content-Length:' . strlen($data);
-				$headers['content']  = $data;
-			}
-			$opts['http']  = $headers;
-			$response_body = @file_get_contents($url, false, stream_context_create($opts));
-			if ($response_body)
-			{
-				return array($http_response_header, $response_body);
-			}
+			throw new \Exception('不支持的请求curl');
+
+			// $request['method']           = $method;
+			// $request['protocol_version'] = '1.1';
+			// $data                        = is_array($data) ? http_build_query($data) : $data;
+			// $request['content']          = $data;
+			// $http_header                 = [];
+			// $http_header[]               = 'Content-length: ' . strlen($data);
+			// // $http_header[]     = 'Content-Type:   application/x-www-form-urlencoded';
+			// $http_header       = array_merge($http_header, $header);
+			// $request['header'] = implode("\r\n", $http_header) . "\r\n\r\n";
+			// $opts['http']      = $request;
+			// var_dump($opts);
+			// $response_body = @file_get_contents($url, false, stream_context_create($opts));
+			// //$http_response_header 是系统变量，记录http头
+			// if (isset($http_response_header) || $response_body)
+			// {
+			// 	$response['header'] = $http_response_header;
+			// 	$response['body']   = $response_body;
+			// }
 		}
 
-		return null;
+		return $response;
 	}
 
 }

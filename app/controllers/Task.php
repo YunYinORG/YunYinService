@@ -15,7 +15,7 @@ class TaskController extends Rest
 	{
 		$userid = $this->auth();
 		$tasks  = TaskModel::where('use_id', '=', $userid)->belongs('flie')->belongs('printer')->select();
-		$this->response(1, $task);
+		$this->response(1, $tasks);
 	}
 
 	/**
@@ -106,7 +106,7 @@ class TaskController extends Rest
 
 	/**
 	 * 任务状态修改
-	 * PUT /file/1
+	 * PUT /task/1
 	 * @method PUT_info
 	 * @author NewFuture
 	 */
