@@ -33,7 +33,7 @@ class AuthController extends Yaf_Controller_Abstract
 			elseif ($verify = $this->_verify($number, $password, $sch_id, $login))
 			{
 				/*注册验证通过*/
-				$this->forward('index', 'user', 'index');
+				$this->register();
 			}
 			else
 			{
