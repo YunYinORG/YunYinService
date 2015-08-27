@@ -113,7 +113,7 @@ class TaskController extends Rest
 	public function PUT_infoAction($id = 0)
 	{
 		$userid = $this->auth();
-		if ($Task = TaskModel::where('use_id', $taskid)->where('status', 1)->find($id))
+		if ($Task = TaskModel::where('use_id', $userid)->where('status', 1)->find($id))
 		{
 			if (Input::post('copies', $copies, 'intval'))
 			{
@@ -149,5 +149,35 @@ class TaskController extends Rest
 		{
 			$this->response(0, '该任务不存在');
 		}
+	}
+
+	/**
+	 * 删除
+	 * @method DELETE_indexAction
+	 * @param  [type]             $id [description]
+	 * @author NewFuture
+	 */
+	public function DELETE_infoAction($id = 0)
+	{
+		$userid             = $this->auth();
+		$response['status'] = 0;
+		if (!($Task = TaskModel::where('use_id', $userid)->where('status', '>', 0)->find($id)))
+		{
+			$response['info'] = '该任务不存在';
+		}
+		elseif ($Task->status > 1 && $Task->status < 5)
+		{
+			$response['info'] = '改任务目前状态不允许删除';
+		}
+		elseif ($Task->set('status', 0)->save($id))
+		{
+			$response['status'] = 1;
+			$response['info']   = '删除成功';
+		}
+		else
+		{
+			$response['info'] = '删除成功';
+		}
+		$this->response = $response;
 	}
 }
