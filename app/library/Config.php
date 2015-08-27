@@ -27,7 +27,27 @@ class Config
 		}
 	}
 
-	/*h获取配置*/
+	/**
+	 * 获取私密配置
+	 * @method secret
+	 * @param  [type] $name     [配置名]
+	 * @param  [type] $key 		[键值]
+	 * @return [midex]          [description]
+	 * @author NewFuture
+	 * @example
+	 *  Config::getSecrect('encrypt') 获取取私密配置中的encrypt所有配置
+	 *  Config::getSecrect('encrypt'，'key') 获取取私密配置中的encrypt配置的secret值
+	 */
+	public static function getSecret($name = '', $key = null)
+	{
+		if ($path = self::getConfig()->get('secret_config_path'))
+		{
+			$secretConfig = new Yaf_Config_Ini($path, $name);
+			return $key ? $secretConfig->get($key) : $secretConfig->toArray();
+		}
+	}
+
+	/*获取配置*/
 	private static function getConfig()
 	{
 		if (null === self::$_config)

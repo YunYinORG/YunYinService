@@ -36,6 +36,7 @@ class Validate
 	 * @param  boolean $ignore_mx [是否忽略对mx记录的检查]
 	 * @return [type]                [description]
 	 * @author NewFuture
+	 * @todo 邮箱存在性验证 https://github.com/zytzagoo/smtp-validate-email
 	 */
 	public static function email(&$email, $ignore_mx = false)
 	{
