@@ -27,18 +27,24 @@ class FileController extends Rest
 	 */
 	public function POST_indexAction()
 	{
-		$userid             = $this->auth();
-		$response['status'] = 0;
-		if (!Input::post('key', $key, 'trim'))
+
+		if (!Input::post('key', $key, 'char_num'))
 		{
-			$response['info'] = '未收到数据';
+			$this->response(0, '未收到数据');
+			return;
 		}
-		elseif (!$name = Cache::get($key))
+		$userid = substr(strrchr($key, '_'), 1);
+		$userid = $this->auth($userid);
+
+		$response['status'] = 0;
+
+		if (!$name = Cache::get($key))
 		{
 			$response['info'] = '文件不存在';
 		}
 		else
 		{
+
 			Cache::del($key);
 			//文件名由 temp_xxxx,重命名为 file_xxxx,
 			$newfile        = strtr($key, 'temp', 'file') . '_' . $_SERVER['REQUEST_TIME'];
@@ -71,11 +77,11 @@ class FileController extends Rest
 		$userid = $this->auth();
 		if (Input::post('name', $name, FILTER_SANITIZE_EMAIL)) //FILTER_SANITIZE_EMAIL过滤特殊字符
 		{
-			$key   = uniqid('temp_' . $userid . '.');
-			$token = File::getToken('temp_' . $key);
+			$key   = uniqid('temp_') . '_' . $userid;
+			$token = File::getToken($key);
 			if ($token)
 			{
-				Cache::set($key, $name, 600);
+				Cache::set($key, $name, 1200);
 				$response['token'] = $files;
 				$response['key']   = $key;
 				$this->response(1, $response);
@@ -88,6 +94,28 @@ class FileController extends Rest
 		else
 		{
 			$this->response(0, '文件名无效');
+		}
+	}
+
+	/**
+	 * 删除上传token，放弃上传
+	 * DELETE /file/token/temp_ae1233
+	 * @method POST_token
+	 * @param name 文件名
+	 */
+	public function DELETE_tokenAction($key = null)
+	{
+		if ($key && $name = Cache::get($key))
+		{
+			$userid = substr(strrchr($key, '_'), 1);
+			$userid = $this->auth($userid);
+			Cache::del($key);
+			File::del($key);
+			$this->response(1, '已经成功取消' . $name);
+		}
+		else
+		{
+			$this->response(0, '此任务不存在');
 		}
 	}
 

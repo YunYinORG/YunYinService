@@ -61,4 +61,10 @@ class Validate
 	{
 		return preg_match(Config::get('regex.name'), $name);
 	}
+
+	/*验证字符串是否仅由字母，_，数字线组成*/
+	public static function char_num($str)
+	{
+		return ctype_alnum(strtr($str,'_','A'));
+	}
 }
