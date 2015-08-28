@@ -21,11 +21,11 @@ class PrintersController extends Rest
 
 	/**
 	 * 获取打印店详情
-	 * @method GET_detailAction
+	 * @method GET_infoAction
 	 * @param  integer          $id [description]
 	 * @author NewFuture
 	 */
-	public function GET_detailAction($id = 0)
+	public function GET_infoAction($id = 0)
 	{
 		$this->auth();
 		if ($printer = PrinterModel::field('name,sch_id,address,phone,email,qq,profile,image,open,price,other')->find($id))
