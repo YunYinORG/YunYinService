@@ -1,4 +1,8 @@
 <?php
+namespace Service;
+use \PDO;
+use \Config;
+Use \Log;
 /**
  * Class and Function List:
  * Function list:
@@ -56,7 +60,7 @@ class Db
 			if (Config::get('isdebug'))
 			{
 				Log::write($query, 'SQL');
-				PC::DB($query, 'prepare');
+				\PC::DB($query, 'prepare');
 			}
 			if ($this->sQuery = $this->pdo->prepare($query))
 			{
@@ -66,7 +70,7 @@ class Db
 				if (Config::get('isdebug'))
 				{
 					Log::write('SQL param:' . json_encode($parameters), 'SQL');
-					PC::DB($parameters, 'parameters');
+					\PC::DB($parameters, 'parameters');
 				}
 				return $this->sQuery->execute($parameters);
 			}
