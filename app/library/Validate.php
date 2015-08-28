@@ -65,6 +65,19 @@ class Validate
 	/*验证字符串是否仅由字母，_，数字线组成*/
 	public static function char_num($str)
 	{
-		return ctype_alnum(strtr($str,'_','A'));
+		return ctype_alnum(strtr($str, '_', 'A'));
+	}
+
+	/**
+	 * 验证字符串是否安全含有不安全字符
+	 * @todo 过于简单暴力
+	 * @method safeChar
+	 * @param  [type]   $str [description]
+	 * @return [type]        [description]
+	 * @author NewFuture
+	 */
+	public static function safeChar($str)
+	{
+		return strpbrk($str, '<>&#\\%') === false;
 	}
 }

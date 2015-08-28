@@ -1,4 +1,6 @@
 <?php
+use Parse\Filter;
+
 /**
  * 输入过滤
  * 支持PUT GET POST 和 COOKIE , ENV ,SYSTEM
@@ -82,6 +84,11 @@ class Input
 			{
 				/*正则表达式*/
 				return preg_match($filter, $export);
+			}
+			elseif (method_exists('Filter', $filter))
+			{
+				/*过滤器过滤*/
+				return boolval($export = call_user_func_array(array('Validate', $filter), [$export]));
 			}
 			elseif (function_exists($filter))
 			{
