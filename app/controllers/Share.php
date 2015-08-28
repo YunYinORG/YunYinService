@@ -28,7 +28,8 @@ class ShareController extends Rest
 	 */
 	public function POST_indexAction()
 	{
-		$userid = $this->auth();
+		$userid             = $this->auth();
+		$response['status'] = 0;
 		if (!Input::post('fid', $fid, 'int'))
 		{
 			$this->response['info'] = '未选择文件';
@@ -66,7 +67,7 @@ class ShareController extends Rest
 				$response['info'] = '分享失败';
 			}
 		}
-
+		$this->response = $response;
 	}
 
 	/**
@@ -82,6 +83,10 @@ class ShareController extends Rest
 		{
 			$this->response(1, $share);
 		}
+		else
+		{
+			$this->response(0, '不存在');
+		}
 	}
 
 	/**
@@ -94,6 +99,32 @@ class ShareController extends Rest
 	public function PUT_infoAction($id = 0)
 	{
 		$userid = $this->auth();
+		/*检查输入*/
+		if (Input::post('name', $name, 'title'))
+		{
+			$share['name'] = $name;
+		}
+		if (Input::post('anonymous', $anonymous))
+		{
+			$share['anonymous'] = boolval($anonymous);
+		}
+		if (Input::post('detail', $detail, 'text'))
+		{
+			$share['detail'] = $detail;
+		}
+		/*保存*/
+		if (empty($share))
+		{
+			$this->response(0, '没有提交任何内容');
+		}
+		elseif (ShareModel::where('id', $id)->where('use_id', $use_id)->update($share))
+		{
+			$this->response(1, '保存成功');
+		}
+		else
+		{
+			$this->response(0, '保存失败');
+		}
 	}
 
 	/**
@@ -105,5 +136,13 @@ class ShareController extends Rest
 	public function DELETE_infoAction($id = 0)
 	{
 		$userid = $this->auth();
+		if (ShareModel::where('id', $id)->where('use_id', $userid)->set('status', 0)->save)
+		{
+			$this->response(1, '删除成功');
+		}
+		else
+		{
+			$this->response(0, '删除失败');
+		}
 	}
 }
