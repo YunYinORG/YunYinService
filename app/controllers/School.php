@@ -23,7 +23,7 @@ class SchoolController extends Rest
 
 	/**
 	 * 获取打印店详情
-	 * @method GET_detailAction
+	 * @method GET_infoAction
 	 * @param  integer          $id [description]
 	 * @author NewFuture
 	 */

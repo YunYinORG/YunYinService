@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * Schoolmodel
+ * 此处数据缓存为主
+ * 做了特殊数量
+ */
 class SchoolModel
 {
 	/**
@@ -73,5 +77,14 @@ class SchoolModel
 		{
 			return false;
 		}
+	}
+
+	/**
+	 * 静态调用model的操作
+	 * @author NewFuture
+	 */
+	public static function __callStatic($method, $params)
+	{
+		return call_user_func_array(array(new Model('school'), $method), $params);
 	}
 }
