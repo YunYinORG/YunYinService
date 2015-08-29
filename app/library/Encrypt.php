@@ -322,7 +322,7 @@ class Encrypt
 	 */
 	private static function _cipherTable($key)
 	{
-		$tableName ='et_'. $key; //缓存表名称
+		$tableName = 'et_' . $key;        //缓存表名称
 		$table     = Kv::get($tableName); //读取缓存中的密码表
 		if (!$table)
 		{
@@ -335,8 +335,8 @@ class Encrypt
 				$table[] = mcrypt_generic($td, $i);
 			}
 			mcrypt_generic_deinit($td);
-			sort($table); //根据加密后内容排序得到密码表
-			Kv::set($tableName,$table) //缓存密码表
+			sort($table);                //根据加密后内容排序得到密码表
+			Kv::set($tableName, $table); //缓存密码表
 		}
 		return $table;
 	}

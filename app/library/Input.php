@@ -1,5 +1,4 @@
 <?php
-use Parse\Filter;
 
 /**
  * 输入过滤
@@ -85,10 +84,10 @@ class Input
 				/*正则表达式验证*/
 				return preg_match($filter, $export);
 			}
-			elseif (method_exists('Filter', $filter))
+			elseif (method_exists('Parse\Filter', $filter))
 			{
 				/*过滤器过滤*/
-				return (bool) $export = call_user_func_array(array('Filter', $filter), [$export]);
+				return (bool) $export = call_user_func_array(array('Parse\Filter', $filter), [$export]);
 			}
 			elseif (method_exists('Validate', $filter))
 			{
