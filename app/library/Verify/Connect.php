@@ -36,10 +36,15 @@ abstract class Connect
 	protected static function request($url, $data = null)
 	{
 		$ch = self::_getCURL();
+
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_HEADER, 1); //显示请求头
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1); //跟随重定向
+
+		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)');
+		curl_setopt($ch, CURLOPT_REFERER, $url);
+
 		if (self::$_cookie)
 		{
 			/*加入cookie*/
@@ -48,6 +53,7 @@ abstract class Connect
 		if ($data)
 		{
 			/*附加数据*/
+			curl_setopt($ch, CURLOPT_POST, 1); //post
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 		}
 
