@@ -57,7 +57,7 @@ class Encrypt
 	/**
 	 * 路径安全形base64解码
 	 * @method base64Decode
-	 * @param  string      $tr [description]
+	 * @param  string      $tr [解码前字符串]
 	 * @return string           [解码后字符串]
 	 * @author NewFuture
 	 */
@@ -284,8 +284,7 @@ class Encrypt
 		{
 			throw new Exception('尾号密码查找失败');
 		}
-		//对密码进行解密
-		$endNum = (int) self::aesDecode($cipher, $key);
+		$endNum = (int) self::aesDecode($cipher, $key); //对密码进行解密
 		return sprintf('%04s', $endNum);
 	}
 
@@ -344,8 +343,8 @@ class Encrypt
 	/**
 	 * 读取配置
 	 * @method config
-	 * @param  [type] $key [description]
-	 * @return [type]      [description]
+	 * @param  [string] $key [配置变量名]
+	 * @return [mixed]      [description]
 	 * @author NewFuture
 	 */
 	private static function config($key)

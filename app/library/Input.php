@@ -12,8 +12,8 @@ class Input
 	 * 输入过滤
 	 * @method I
 	 * @param  [string] $param   [输入参数]
-	 * @param  [string] &$export [description]
-	 * @param  [type] $filter  [description]
+	 * @param  [mixed] &$export [description]
+	 * @param  [mixed] $filter  [过滤条件]
 	 * @param  [type] $default [description]
 	 * @author NewFuture
 	 * @example if(I('post.phone',$phone,'phone')){}//phone()方法验证
@@ -58,10 +58,10 @@ class Input
 	/**
 	 * 过滤器
 	 * @method filter
-	 * @param  [type] &$input  [description]
-	 * @param  [type] &$index  [description]
-	 * @param  [type] &$export [description]
-	 * @param  [type] $filter  [description]
+	 * @param  [string] &$input  [输入参数]
+	 * @param  [mixed] &$index  [description]
+	 * @param  [mixed] &$export [description]
+	 * @param  [mixed] $filter  [过滤条件]
 	 * @return [bool]          [description]
 	 * @author NewFuture
 	 */

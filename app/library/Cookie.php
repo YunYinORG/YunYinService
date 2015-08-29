@@ -10,9 +10,9 @@ class Cookie
 	/**
 	 * 设置cookie
 	 * @method set
-	 * @param  [string] $name   [description]
-	 * @param  [mixed] $value  [description]
-	 * @param  string $path   [存取路径]
+	 * @param  [string] $name   [cookie名称]
+	 * @param  [mixed] $value  [cookie值]
+	 * @param  [string] $path   [存取路径]
 	 * @param  [int] $expire 有效时间
 	 * @author NewFuture
 	 */
@@ -29,16 +29,17 @@ class Cookie
 	/**
 	 * 获取cookie
 	 * @method get
-	 * @param  [type] $name [description]
+	 * @param  [string] $name [cookie名称]
+	 * @return [json]	
 	 * @author NewFuture
 	 */
 	public static function get($name)
 	{
 		if (isset($_COOKIE[$name]))
 		{
-			if ($data = Encrypt::aesDecode($_COOKIE[$name], self::config('key'), true))
+			if ($data = Encrypt::aesDecode($_COOKIE[$name], self::config('key'), true)) //AES解密
 			{
-				return @json_decode($data);
+				return @json_decode($data); 
 			}
 		}
 	}
@@ -46,7 +47,7 @@ class Cookie
 	/**
 	 * 删除
 	 * @method del
-	 * @param  [type] $name [description]
+	 * @param  [string] $name [cookie名称]
 	 * @author NewFuture
 	 */
 	public static function del($name, $path = null)
@@ -55,7 +56,7 @@ class Cookie
 		{
 			$path = $path ?: self::config('path');
 			return setcookie($name, '', 100, $path, self::config('domain'), self::config('secure'), self::config('httponly'));
-			unset($_COOKIE[$name]);
+			unset($_COOKIE[$name]);	
 		}
 	}
 
@@ -78,8 +79,8 @@ class Cookie
 	/**
 	 * 获取cookie配置
 	 * @method config
-	 * @param  [type] $name [description]
-	 * @return [type]       [description]
+	 * @param  [string] $name [配置变量名]
+	 * @return [mixed]       [description]
 	 * @author NewFuture
 	 */
 	private static function config($name)

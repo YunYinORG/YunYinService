@@ -10,9 +10,9 @@ class Config
 	/**
 	 * 获取配置
 	 * @method get
-	 * @param  [type] $key     [description]
-	 * @param  [type] $default [默认值]
-	 * @return [type]          [description]
+	 * @param  [string]	$key     [键值]
+	 * @param  [type] 	$default [默认值]
+	 * @return [mixed]         	 [返回结果]
 	 * @author NewFuture
 	 */
 	public static function get($key = null, $default = null)
@@ -30,8 +30,8 @@ class Config
 	/**
 	 * 获取私密配置
 	 * @method secret
-	 * @param  [type] $name     [配置名]
-	 * @param  [type] $key 		[键值]
+	 * @param  [string] $name     [配置名]
+	 * @param  [string] $key 		[键值]
 	 * @return [midex]          [description]
 	 * @author NewFuture
 	 * @example
