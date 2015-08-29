@@ -22,7 +22,6 @@ Use \Log;
 /**
  * 数据库操作，
  * PDO 预处理封装
- * @todo log处理
  * @修改自		https://github.com/indieteq/PHP-MySQL-PDO-Database-Class
  */
 class Db

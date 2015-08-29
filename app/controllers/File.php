@@ -75,7 +75,7 @@ class FileController extends Rest
 	public function POST_tokenAction()
 	{
 		$userid = $this->auth();
-		if (Input::post('name', $name, FILTER_SANITIZE_EMAIL)) //FILTER_SANITIZE_EMAIL过滤特殊字符
+		if (Input::post('name', $name, 'title')) //FILTER_SANITIZE_EMAIL过滤特殊字符
 		{
 			$key   = uniqid('temp_') . '_' . $userid;
 			$token = File::getToken($key);
@@ -148,7 +148,7 @@ class FileController extends Rest
 	public function PUT_infoAction($id = 0)
 	{
 		$userid = $this->auth();
-		if (Input::put('name', $name, FILTER_SANITIZE_EMAIL))
+		if (Input::put('name', $name, 'title'))
 		{
 			if (FileModel::where('id', $id)->where('use_id', $userid)->update(['name' => $name]))
 			{

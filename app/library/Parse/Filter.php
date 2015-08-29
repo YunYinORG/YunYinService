@@ -1,10 +1,12 @@
 <?php
 namespace Parse;
+/**
+ * 字符串过滤
+ */
 class Filter
 {
 	public static function int($int)
 	{
-
 		return intval($int);
 	}
 

@@ -17,7 +17,7 @@ class Input
 	 * @param  [type] $default [description]
 	 * @author NewFuture
 	 * @example if(I('post.phone',$phone,'phone')){}//phone()方法验证
-	 * @example if(I('get.id',$uid,int,1)){}//数字，int函数验证,默认1
+	 * @example if(I('get.id',$uid,'int',1)){}//数字，int函数验证,默认1
 	 * @example if(I('put.text',$uid,'/^\w{5,50}$/'){}//正则验证
 	 * @example if(I('cookie.token',$uid,'token'){}//使用配置中的regex.token的值进行验证
 	 */
@@ -82,27 +82,27 @@ class Input
 			}
 			elseif ($filter[0] == '/')
 			{
-				/*正则表达式*/
+				/*正则表达式验证*/
 				return preg_match($filter, $export);
 			}
 			elseif (method_exists('Filter', $filter))
 			{
 				/*过滤器过滤*/
-				return boolval($export = call_user_func_array(array('Validate', $filter), [$export]));
+				return (bool) $export = call_user_func_array(array('Filter', $filter), [$export]);
+			}
+			elseif (method_exists('Validate', $filter))
+			{
+				/*Validate方法验证*/
+				return call_user_func_array(array('Validate', $filter), [$export]);
 			}
 			elseif (function_exists($filter))
 			{
 				/*函数*/
 				return $filter($export);
 			}
-			elseif (method_exists('Validate', $filter))
-			{
-				/*Validate方法*/
-				return call_user_func_array(array('Validate', $filter), [$export]);
-			}
 			elseif ($filter = (string) Config::get('regex.' . $filter))
 			{
-				/*尝试正则*/
+				/*尝试配置正则*/
 				return preg_match($filter, $export);
 			}
 			else

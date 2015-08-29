@@ -31,11 +31,12 @@ class TaskController extends Rest
 	{
 		$userid             = $this->auth();
 		$response['status'] = 0;
-		if (!Input::post('fid', $fid, 'is_numeric'))
+
+		if (!Input::post('fid', $fid, 'int'))
 		{
 			$response['info'] = '未选择文件';
 		}
-		elseif (!Input::post('pid', $pid, 'is_numeric'))
+		elseif (!Input::post('pid', $pid, 'int'))
 		{
 			$response['info'] = '未选择打印店';
 		}
@@ -47,24 +48,23 @@ class TaskController extends Rest
 		{
 			$task = ['fil_id' => $fid, 'use_id' => $userid, 'pri_id' => $pid];
 
-			if (Input::post('copies', $copies, 'intval'))
+			if (Input::post('copies', $copies, 'int'))
 			{
 				$task['copies'] = $copies;
 			}
-			if (Input::post('color', $color, 'intval'))
+			if (Input::post('color', $color, FILTER_VALIDATE_BOOLEAN))
 			{
 				$task['color'] = $color;
 			}
-			if (Input::post('isdouble', $is_double, 'intval'))
+			if (Input::post('isdouble', $is_double, FILTER_VALIDATE_BOOLEAN))
 			{
 				$task['isdouble'] = $is_double;
 			}
-
-			if (Input::post('ppt', $ppt, 'intval'))
+			if (Input::post('ppt', $ppt, 'int'))
 			{
 				$task['ppt'] = $ppt;
 			}
-			if (Input::post('requirements', $requirements, FILTER_SANITIZE_SPECIAL_CHARS)) //特殊字符转义
+			if (Input::post('requirements', $requirements, 'text')) //特殊字符转义
 			{
 				//todo 更严格xss防范
 				$task['requirements'] = $requirements;
@@ -115,23 +115,25 @@ class TaskController extends Rest
 		$userid = $this->auth();
 		if ($Task = TaskModel::where('use_id', $userid)->where('status', 1)->find($id))
 		{
-			if (Input::post('copies', $copies, 'intval'))
+
+			if (Input::post('copies', $copies, 'int'))
 			{
 				$task['copies'] = $copies;
 			}
-			if (Input::post('color', $color, 'intval'))
+			if (Input::post('color', $color, FILTER_VALIDATE_BOOLEAN))
 			{
 				$task['color'] = $color;
 			}
-			if (Input::post('isdouble', $is_double, 'intval'))
+			if (Input::post('isdouble', $is_double, FILTER_VALIDATE_BOOLEAN))
 			{
 				$task['isdouble'] = $is_double;
 			}
-			if (Input::post('ppt', $ppt, 'intval'))
+
+			if (Input::post('ppt', $ppt, 'int'))
 			{
 				$task['ppt'] = $ppt;
 			}
-			if (Input::post('requirements', $requirements, FILTER_SANITIZE_SPECIAL_CHARS))
+			if (Input::post('requirements', $requirements, 'text'))
 			{
 				$task['requirements'] = $requirements;
 			}
