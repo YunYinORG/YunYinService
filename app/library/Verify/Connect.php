@@ -5,44 +5,8 @@ namespace Verify;
  */
 abstract class Connect
 {
-	// protected const $login_url = '';
-	// protected const $info_url  = '';
-	protected static $_cookies = null;
-
-	/**
-	 * 获取用户姓名
-	 * @method getName
-	 * @param  [type]  $number [学号]
-	 * @param  [type]  $pwd    [密码]
-	 * @param  [type]  $code   [验证码，可选]
-	 * @return [type]          [姓名]
-	 */
-	public static function getName($number, $pwd, $code = null)
-	{
-		return '姓名';
-	}
-
-	/**
-	 * 获取验证码
-	 * @method getCode
-	 * @return [type]  [description]
-	 */
-	public static function getCode($url, $data = null)
-	{
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch,CURLOPT_HEADER, 1);
-		curl_setopt($ch,CURLOPT_RETURNTRANSFER, 1);
-		if ($data)
-		{
-			curl_setopt($ch,CURLOPT_POSTFIELDS, $data); 
-		}
-		$result = curl_exec($ch);
-		preg_match('/Set-Cookie:(.*);/iU', $result, $matchs);
-		\Session::set('verify_session', $matchs[1]);
-		curl_close($ch);
-		return $result;
-	}
+	private static $_curl     = null; //curl链接状态,每次请求使用同一个，
+	protected static $_cookie = null; //cookie保存位置
 
 	/**
 	 * post数据
@@ -51,23 +15,98 @@ abstract class Connect
 	 * @param  [数组] $data [description]
 	 * @author NewFuture
 	 */
-	public static function post($encode, $url, $data = null)
+	protected static function getHtml($url, $data = null, $from_encode = '')
 	{
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_HEADER, false);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_COOKIE, \Session::get('verify_session'));
-		if ($data)
+		$result = self::request($url, $data);
+		if ($from_encode)
 		{
-			curl_setopt($ch,CURLOPT_POSTFIELDS, $data); 
+			$result = iconv($from_encode, 'UTF-8//IGNORE', $result);
 		}
-		$result = curl_exec($ch);
-		curl_close($ch);
-		return iconv($encode, 'UTF-8//IGNORE', $result);
+		return $result;
 	}
 
 	/**
-	 * ...其他函数
+	 * 请求数据
+	 * @method request
+	 * @param  [type]  $url  [description]
+	 * @param  [type]  $data [description]
+	 * @return string        [请求结果body]
+	 * @author NewFuture
 	 */
+	protected static function request($url, $data = null)
+	{
+		$ch = self::_getCURL();
+
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_HEADER, 1); //显示请求头
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1); //跟随重定向
+
+		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)');
+		curl_setopt($ch, CURLOPT_REFERER, $url);
+
+		if (self::$_cookie)
+		{
+			/*加入cookie*/
+			curl_setopt($ch, CURLOPT_COOKIE, self::$_cookie);
+		}
+		if ($data)
+		{
+			/*附加数据*/
+			curl_setopt($ch, CURLOPT_POST, 1); //post
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+		}
+
+		$response            = curl_exec($ch);
+		list($header, $body) = explode("\r\n\r\n", $response, 2);
+		if (preg_match('/Set-Cookie:(.*);/iU', $header, $matchs))
+		{
+			self::$_cookie = $matchs[1];
+		}
+		return $body;
+	}
+
+	/**
+	 * 解析姓名
+	 * @method parseName
+	 * @param  [type]    $html  [html代码]
+	 * @param  [type]    $start [姓名起始位置]
+	 * @param  [type]    $end   [姓名结束为止]
+	 * @return [string]           [姓名]
+	 * @author NewFuture
+	 */
+	protected static function parseName($html, $start, $end)
+	{
+		//截取$start右边的
+		$html = substr(strstr($html, $start), strlen($start));
+		$name = strstr($html, $end, true); // 截取$end左边的
+		return trim($name);
+	}
+
+	/**
+	 * 清空，删除链接和cookie
+	 * @method clear
+	 * @author NewFuture
+	 */
+	public static function clear()
+	{
+		if (self::$_curl)
+		{
+			curl_close(self::$_curl);
+			self::$_curl = null;
+		}
+		self::$_cookie = null;
+	}
+
+	/**
+	 * 获取CURL链接
+	 * @method _getCURL
+	 * @return [type]   [description]
+	 * @access private
+	 * @author NewFuture
+	 */
+	private static function _getCURL()
+	{
+		return (null === self::$_curl) ? (self::$_curl = curl_init()) : self::$_curl;
+	}
 }

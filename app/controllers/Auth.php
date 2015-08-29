@@ -46,6 +46,26 @@ class AuthController extends Yaf_Controller_Abstract
 		}
 	}
 
+	public function registerAction()
+	{
+		if (Input::I('number', $number, 'card') && Input::I('password', $password, 'trim'))
+		{
+			if (Input::I('code', $code, 'ctype_alnum'))
+			{
+				$name = Verify\TJU::getName($number, $password, $code);
+				var_dump($name);
+			}
+			else
+			{
+				$this->error('验证码错误');
+			}
+		}
+		else
+		{
+			$this->error('账号密码格式不对');
+		}
+	}
+
 	/**
 	 * 临时注册
 	 * @method register
@@ -74,14 +94,38 @@ class AuthController extends Yaf_Controller_Abstract
 	/**
 	 * 注销
 	 * @method logout
-	 * @return 重定向
+	 * @return 重定向或者json字符
 	 */
 	public function logoutAction()
 	{
 		Input::I('url', $url, FILTER_VALIDATE_URL, '/');
 		Cookie::flush();
 		Session::flush();
-		$this->redirect($url);
+		if ($this->_request->isXmlHttpRequest())
+		{
+			$response['status'] = 1;
+			$response['info']   = '注销成功';
+			echo json_encode($response, JSON_UNESCAPED_UNICODE);
+		}
+		else
+		{
+			$this->_response->setHeader('HTTP/1.1 303 See Other', '');
+			$this->redirect($url);
+		}
+	}
+
+	/**
+	 * 验证码
+	 * @method codeAction
+	 * @param  integer    $sch_id [description]
+	 * @return [type]             [description]
+	 * @author NewFuture
+	 */
+	public function codeAction($sch_id = 0)
+	{
+		$code = Verify\TJU::getCode();
+		$this->_response->setHeader('Content-type', 'image/jpeg');
+		echo $code;
 	}
 
 	/**
@@ -179,6 +223,8 @@ class AuthController extends Yaf_Controller_Abstract
 	// {
 	// 	die($url . '[OK]');
 	// }
+	//
+	//
 }
 
 ?>

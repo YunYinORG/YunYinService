@@ -39,4 +39,23 @@ class SchoolController extends Rest
 			$this->response(0, $id);
 		}
 	}
+
+	/**
+	 * 获取学校验证码
+	 * @method GET_codeAction
+	 * @param  integer        $id [description]
+	 * @author NewFuture
+	 */
+	public function GET_codeAction($id = 1)
+	{
+		if ($img = Verify\TJU::getCode())
+		{
+			$this->response(1, 'data:image/png;base64,' . base64_encode($img));
+		}
+		else
+		{
+			$this->response(0, '无需验证码');
+
+		}
+	}
 }
