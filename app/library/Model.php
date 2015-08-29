@@ -93,9 +93,9 @@ class Model implements JsonSerializable, ArrayAccess
 	 * 从属关系
 	 * 对于inner join
 	 * @method belongs
-	 * @param  [type]  $table [表名]
-	 * @param  [type]  $pk    [外键]
-	 * @return [type]         [description]
+	 * @param  [string]  $table [表名]
+	 * @param  [string]  $pk    [外键]
+	 * @return [object]         [description]
 	 * @author NewFuture
 	 */
 	public function belongs($table, $fk = null)
@@ -144,8 +144,8 @@ class Model implements JsonSerializable, ArrayAccess
 	/**
 	 * 批量查询
 	 * @method select
-	 * @param  array  $data [查询数据条件]
-	 * @return [type]       [description]
+	 * @param  array  $data  [查询数据条件]
+	 * @return [array]       [结果数组]
 	 * @author NewFuture
 	 */
 	public function select($data = array())
@@ -189,8 +189,8 @@ class Model implements JsonSerializable, ArrayAccess
 	/**
 	 * 更新数据
 	 * @method update
-	 * @param  array  $data [要更新的数据]
-	 * @return [type]       [description]
+	 * @param  array  $data  [要更新的数据]
+	 * @return [array]       [结果数组]
 	 * @author NewFuture
 	 */
 	public function update($data = array())
@@ -223,7 +223,7 @@ class Model implements JsonSerializable, ArrayAccess
 	 * 新增数据
 	 * 合并现有的data属性
 	 * @method add
-	 * @param  array $data [description]
+	 * @param  array $data [要更新的数据]
 	 * @author NewFuture
 	 */
 	public function add($data = array())
@@ -239,8 +239,8 @@ class Model implements JsonSerializable, ArrayAccess
 	/**
 	 * 插入数据库
 	 * @method insert
-	 * @param  [type] $data [description]
-	 * @return [type]       [description]
+	 * @param  [array] $data 	[要更新的数据]
+	 * @return [integer]        [返回插入行id]
 	 * @author NewFuture
 	 */
 	public function insert($data = array())
@@ -273,8 +273,8 @@ class Model implements JsonSerializable, ArrayAccess
 	/**
 	 * 删除数据
 	 * @method delete
-	 * @param  string $id [description]
-	 * @return [type]     [description]
+	 * @param  [string] $id [description]
+	 * @return [array]     	[description]
 	 * @author NewFuture
 	 */
 	public function delete($id = '')
@@ -307,9 +307,9 @@ class Model implements JsonSerializable, ArrayAccess
 	/**
 	 * 直接查询
 	 * @method query
-	 * @param  [type] $sql  [description]
-	 * @param  [type] $bind [description]
-	 * @return [type]       [description]
+	 * @param  [string] $sql  	[sql语句]
+	 * @param  [type] $bind 	[结果数组]
+	 * @return [array]       	[description]
 	 * @author NewFuture
 	 */
 	public function query($sql, $bind = null)
@@ -325,9 +325,9 @@ class Model implements JsonSerializable, ArrayAccess
 	 * field('name','username')
 	 * field('name AS username')
 	 * field('id,name,pwd')
-	 * @param  [type] $key   [description]
-	 * @param  [type] $alias [description]
-	 * @return [type]        [description]
+	 * @param  [string]	$field    	[字段]
+	 * @param  [string] 	$alias 		[description]
+	 * @return [type]        		[description]
 	 * @author NewFuture
 	 */
 	public function field($field, $alias = null)
@@ -440,9 +440,9 @@ class Model implements JsonSerializable, ArrayAccess
 	/**
 	 * 排序条件
 	 * @method order
-	 * @param  [type]  $fields      [description]
-	 * @param  boolean $desc [是否降序]
-	 * @return [type]               [description]
+	 * @param  [type]  		$fields     [description]
+	 * @param  [boolean] 	$desc 		[是否降序]
+	 * @return [array]              	[结果数组]
 	 * @author NewFuture
 	 */
 	public function order($fields, $desc = false)

@@ -10,9 +10,9 @@ class Log
 	/**
 	 * 写入日志
 	 * @method write
-	 * @param  [type]  $msg   [消息]
-	 * @param  integer $tag [日志级别]
-	 * @return [bool]         [description]
+	 * @param  [string]  $msg   [消息]
+	 * @param  [integer] $tag [日志级别]
+	 * @return [bool]         [写入状态]
 	 * @author NewFuture
 	 */
 	public static function write($msg, $tag = 'INFO')
@@ -28,8 +28,8 @@ class Log
 	/**
 	 * 获取写入流
 	 * @method getStream
-	 * @param  [type]    $tag [description]
-	 * @return [type]           [description]
+	 * @param  [integer]    $tag [日志级别]
+	 * @return [array]           [description]
 	 * @author NewFuture
 	 */
 	private static function getStream($tag)

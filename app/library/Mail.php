@@ -15,10 +15,10 @@ Class Mail
 	/**
 	 * 发送验证邮件
 	 * @method verify
-	 * @param  [type] $email [description]
-	 * @param  [type] $name  [description]
-	 * @param  [type] $link  [description]
-	 * @return [type]        [description]
+	 * @param  [string] $email 	[邮箱]
+	 * @param  [string] $name   [姓名]
+	 * @param  [type] $link 	[验证链接]
+	 * @return [type]        	[发送结果]
 	 * @author NewFuture
 	 */
 	public static function verify($email, $name, $link)
@@ -35,10 +35,10 @@ Class Mail
 	/**
 	 * 发送通知邮件
 	 * @method notify
-	 * @param  [type] $email [description]
-	 * @param  [type] $name  [description]
-	 * @param  [type] $body  [description]
-	 * @return [type]        [description]
+	 * @param  [type] $email [邮箱]
+	 * @param  [type] $name  [姓名]
+	 * @param  [type] $body  [内容]
+	 * @return [bool]        [发送状态]
 	 * @author NewFuture
 	 */
 	public static function notify($email, $name, $body)
@@ -56,10 +56,10 @@ Class Mail
 	/**
 	 * 发送邮件
 	 * @method send
-	 * @param  [type] $from [description]
-	 * @param  [type] $to   [description]
-	 * @param  [type] $msg  [description]
-	 * @return bool       [description]
+	 * @param  [string] $from 	[发送方邮箱]
+	 * @param  [string] $to   	[接收方邮箱]
+	 * @param  [array] 	$msg  	[发送信息]
+	 * @return [bool]     		[发送结果]
 	 * @author NewFuture
 	 */
 	public function send($from, $to, $msg)

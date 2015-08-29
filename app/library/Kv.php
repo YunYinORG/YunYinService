@@ -15,8 +15,8 @@ class Kv
 	/**
 	 * 设置缓存
 	 * @method set
-	 * @param  [type]  $name   [description]
-	 * @param  [type]  $value  [description]
+	 * @param  [string]  $name   [缓存名称]
+	 * @param  [mixed]  $value  [缓存值]
 	 * @param  mixed $expire [有效时间]
 	 * @author NewFuture
 	 */
@@ -28,8 +28,8 @@ class Kv
 	/**
 	 * 读取缓存数据
 	 * @method get
-	 * @param  [type] $name [description]
-	 * @return [type]       [description]
+	 * @param  [string] $name [缓存名称]
+	 * @return [mixed]       [获取值]
 	 * @author NewFuture
 	 */
 	public static function get($name)
@@ -40,7 +40,7 @@ class Kv
 	/**
 	 * 删除缓存数据
 	 * @method del
-	 * @param  [type] $name [description]
+	 * @param  [string] $name [缓存名称]
 	 * @return [bool]
 	 * @author NewFuture
 	 */
@@ -77,7 +77,6 @@ class Kv
 
 	/**
 	 * 获取处理方式
-	 * @param  [type]  $name [description]
 	 * @return $_handler
 	 * @author NewFuture
 	 */
