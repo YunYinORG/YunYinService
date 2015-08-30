@@ -28,14 +28,9 @@ abstract class Rest extends Yaf_Controller_Abstract
 			//put请求写入GOLBAL中和post get一样
 			parse_str(file_get_contents('php://input'), $GLOBALS['_PUT']);
 		}
+		
 		/*检查该action操作是否存在，存在则修改为REST接口*/
-		if (ctype_digit($action))
-		{
-			/*数字之间映射GET /user/123 => user/GET_info参数id=123;*/
-			$this->_request->setActionName($method . '_info'); //数字映射
-			$this->_request->setParam('id', $action);          //绑定参数
-		}
-		elseif (method_exists($this, $rest_action . 'Action'))
+		if (method_exists($this, $rest_action . 'Action'))
 		{
 			/*存在对应的操作*/
 			$this->_request->setActionName($rest_action);

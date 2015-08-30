@@ -129,6 +129,43 @@ class AuthController extends Yaf_Controller_Abstract
 	}
 
 	/**
+	 * 邮箱验证
+	 * @method emailAction
+	 * @param  $code
+	 * @author NewFuture
+	 */
+	public function emailAction($code = '')
+	{
+		if ($code && Validate::char_num($code))
+		{
+			$Code = new Model('code');
+
+			if (!$Code->where('code', $code)->field('use_id,type,content AS email')->find())
+			{
+				echo '验证信息不存在';
+			}
+			elseif (UserModel::getByEmail($Code->email))
+			{
+				echo '邮箱绑定过';
+			}
+			elseif (!UserModel::set('email', Encrypt::encryptEmail($email))->save($Code->use_id))
+			{
+				echo '邮箱设置失败';
+			}
+			else
+			{
+				$Code->delete();
+				echo '绑定成功！';
+			}
+
+		}
+		else
+		{
+			echo ('code有误');
+		}
+	}
+
+	/**
 	 * 登录函数
 	 * @method _login
 	 * @access private

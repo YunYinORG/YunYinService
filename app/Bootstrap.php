@@ -25,7 +25,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
 		//关闭视图
 		// $dispatcher->disableView();
 		//路由
-		// $dispatcher->getRouter()->addConfig(Config::get('routes'));
+		$dispatcher->getRouter()->addConfig(Config::get('routes'));
 	}
 
 	/**

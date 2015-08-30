@@ -2,6 +2,7 @@
 class UserController extends Rest
 {
 
+	/*欢迎信息*/
 	public function indexAction($name = '同学')
 	{
 		if (Auth::getUser())
@@ -167,6 +168,65 @@ class UserController extends Rest
 			else
 			{
 				$response['info'] = '手机号保存失败';
+			}
+		}
+	}
+
+	/**
+	 * 获取用户真实手机
+	 * GET /user/1/email
+	 * @method GET_infoAction
+	 * @param  integer        $id [description]
+	 * @author NewFuture
+	 */
+	public function GET_emailAction($id = 0)
+	{
+		$id    = $this->auth($id);
+		$email = UserModel::where('id', '=', $id)->get('email');
+		$email = $email ? Encrypt::encryptEmail($email) : null;
+		$this->response(1, $email);
+	}
+
+	/**
+	 * 绑定邮箱，发送邮箱验证信息
+	 * PUT /user/1/email {email:"xx@mail.yunyin.org"}
+	 * @method GET_infoAction
+	 * @param  integer        $id [description]
+	 * @author NewFuture
+	 */
+	public function POST_emailAction($id = 0)
+	{
+		$id = $this->auth($id);
+
+		$response['status'] = 0;
+		if (!Input::post('email', $email, 'email'))
+		{
+			$response['info'] = '无效邮箱';
+		}
+		elseif (UserModel::getByEmail($email))
+		{
+			$response['info'] = '已经绑定过用户';
+		}
+		elseif ($try_times = Cache::get('snd_mail_t' . $id) > 8)
+		{
+			$response['info'] = '发送此数过多,12小时之后重试';
+		}
+		else
+		{
+			/*邮箱发送验证码*/
+			$code = ['use_id' => $id, 'type' => 1];
+			$Code = new Model('code');
+			$Code->delete($code);
+			$code['code'] = $id . '_' . Random::w(16);
+			if ($Code->insert($code) && Mail::sendVerify($email, $code))
+			{
+				$response['status'] = 1;
+				$response['info']   = '验证邮件成功发送至：' . $email . ($try_times ? '[最多还可重发' . (8 - $try_times) . '次]' : '');
+				Cache::set('snd_mail_t' . $id, $try_times + 1, 12 * 3600);
+			}
+			else
+			{
+				$response['info'] = '邮件发送出错[最多还可重发' . (5 - $try_times) . '次]';
 			}
 		}
 	}

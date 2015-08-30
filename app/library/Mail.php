@@ -14,14 +14,14 @@ Class Mail
 
 	/**
 	 * 发送验证邮件
-	 * @method verify
+	 * @method sendVerify
 	 * @param  [string] $email 	[邮箱]
 	 * @param  [string] $name   [姓名]
 	 * @param  [type] $link 	[验证链接]
 	 * @return [type]        	[发送结果]
 	 * @author NewFuture
 	 */
-	public static function verify($email, $name, $link)
+	public static function sendVerify($email, $name, $link)
 	{
 		$instance     = self::getInstance();
 		$from         = $instance->_config['verify'];
@@ -34,14 +34,14 @@ Class Mail
 
 	/**
 	 * 发送通知邮件
-	 * @method notify
+	 * @method sendNotify
 	 * @param  [type] $email [邮箱]
 	 * @param  [type] $name  [姓名]
 	 * @param  [type] $body  [内容]
 	 * @return [bool]        [发送状态]
 	 * @author NewFuture
 	 */
-	public static function notify($email, $name, $body)
+	public static function sendNotify($email, $name, $body)
 	{
 		$instance = self::getInstance();
 
