@@ -9,7 +9,9 @@ use \Service\Smtp;
 Class Mail
 {
 	protected $_config;
+	const TPL_DIR = APP_PATH . '/app/email/';
 	private $_smtp;
+	private $_view;
 	private static $_instance = null;
 
 	/**
@@ -23,12 +25,16 @@ Class Mail
 	 */
 	public static function sendVerify($email, $name, $link)
 	{
-		$instance     = self::getInstance();
-		$from         = $instance->_config['verify'];
-		$to           = ['email' => $email, 'name' => $name ?: $email];
-		$msg['title'] = '云印验证邮件';
-		$msg['body']  = $link; //TODO 渲染模板
+		$instance = self::getInstance();
+		$from     = $instance->_config['verify'];
+		$to       = ['email' => $email, 'name' => $name ?: $email];
+		$url      = $instance->_config['verify']['baseuri'] . $link;
 
+		$msg['title'] = '云印验证邮件';
+		$msg['body']  = $instance->getView()
+		                         ->assign('name', $name)
+		                         ->assign('url', $url)
+		                         ->render('verify.tpl');
 		return $instance->send($from, $to, $msg);
 	}
 
@@ -45,7 +51,7 @@ Class Mail
 	{
 		$instance = self::getInstance();
 
-		$from = $instance->_config['notify'];
+		$from         = $instance->_config['notify'];
 		$to           = ['email' => $email];
 		$to['name']   = $name ?: $email;
 		$msg['title'] = '云印通知邮件';
@@ -77,6 +83,12 @@ Class Mail
 	public static function getInstance()
 	{
 		return self::$_instance ?: (self::$_instance = new self());
+	}
+
+	//获取模板引擎
+	private function getView()
+	{
+		return $this->_view ?: ($this->_view = new Yaf_View_Simple(self::TPL_DIR));
 	}
 
 	private function __construct()

@@ -213,12 +213,14 @@ class UserController extends Rest
 		}
 		else
 		{
-			/*邮箱发送验证码*/
+			/*生成验证码*/
+			$name = UserModel::where('id', $id)->get('name');
 			$code = ['use_id' => $id, 'type' => 1];
 			$Code = new Model('code');
 			$Code->delete($code);
 			$code['code'] = $id . '_' . Random::w(16);
-			if ($Code->insert($code) && Mail::sendVerify($email, $code))
+			/*发送邮件*/
+			if ($Code->insert($code) && Mail::sendVerify($email, $name, $code))
 			{
 				$response['status'] = 1;
 				$response['info']   = '验证邮件成功发送至：' . $email . ($try_times ? '[最多还可重发' . (8 - $try_times) . '次]' : '');
