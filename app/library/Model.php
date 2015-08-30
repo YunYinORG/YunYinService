@@ -308,8 +308,8 @@ class Model implements JsonSerializable, ArrayAccess
 	 * 直接查询
 	 * @method query
 	 * @param  [string] $sql  	[sql语句]
-	 * @param  [type] $bind 	[结果数组]
-	 * @return [array]       	[description]
+	 * @param  [type] $bind 	[description]
+	 * @return [array]       	[结果数组]
 	 * @author NewFuture
 	 */
 	public function query($sql, $bind = null)
@@ -325,9 +325,9 @@ class Model implements JsonSerializable, ArrayAccess
 	 * field('name','username')
 	 * field('name AS username')
 	 * field('id,name,pwd')
-	 * @param  [string]	$field    	[字段]
+	 * @param  [string]		$field    	[字段]
 	 * @param  [string] 	$alias 		[description]
-	 * @return [type]        		[description]
+	 * @return [object]        			[description]
 	 * @author NewFuture
 	 */
 	public function field($field, $alias = null)
@@ -362,11 +362,11 @@ class Model implements JsonSerializable, ArrayAccess
 	/**
 	 * where 查询
 	 * @method where
-	 * @param  [type] $key        [description]
-	 * @param  string $exp        [description]
-	 * @param  [type] $value      [description]
-	 * @param  string $conidition [description]
-	 * @return [type]             [description]
+	 * @param  [mixed] 	$key        [description]
+	 * @param  [string] $exp        [description]
+	 * @param  [mixed] 	$value      [description]
+	 * @param  [string] $conidition [逻辑条件]
+	 * @return [object]             [description]
 	 * @example
 	 * where($data)
 	 * where('id',1) 查询id=1
@@ -426,10 +426,10 @@ class Model implements JsonSerializable, ArrayAccess
 	/**
 	 * OR 条件
 	 * @method orWhere
-	 * @param  [type]  $key   [description]
-	 * @param  string  $exp   [description]
-	 * @param  string  $value [description]
-	 * @return [type]         [description]
+	 * @param  [mixed]  $key   	[description]
+	 * @param  [string] $exp   	[description]
+	 * @param  [string] $value 	[description]
+	 * @return [type]         	[description]
 	 * @author NewFuture
 	 */
 	public function orWhere($key, $exp = null, $value = null)

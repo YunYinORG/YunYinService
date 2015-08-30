@@ -39,7 +39,7 @@ class Random
 	 * 验证码生成
 	 * 会过滤掉0O1lL等不易辨识字符
 	 * @method code
-	 * @param  [type] $n [description]
+	 * @param  [integer] $n [description]
 	 * @return string
 	 * @author NewFuture
 	 */

@@ -19,7 +19,7 @@ class Session
 	/**
 	 * 读取
 	 * @method get
-	 * @param  [type] $name [description]
+	 * @param  [string] $name [description]
 	 */
 	public static function get($name)
 	{
@@ -29,7 +29,7 @@ class Session
 	/**
 	 * 删除
 	 * @method del
-	 * @param  [type] $name [description]
+	 * @param  [string] $name [description]
 	 */
 	public static function del($name)
 	{

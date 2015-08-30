@@ -12,9 +12,9 @@ class Validate
 	/**
 	 * 校园卡格式验证
 	 * @method card
-	 * @param  [type] &$number [description]
-	 * @param  string $school  [学校，nku,tju,默认全部]
-	 * @return [type]          [description]
+	 * @param  [type] &$number 	[description]
+	 * @param  string $school  	[学校，nku,tju,默认全部]
+	 * @return [boolean]        [验证结果]
 	 * @author NewFuture
 	 */
 	public static function card(&$number, $school = 'all')
@@ -32,9 +32,9 @@ class Validate
 	/**
 	 * 验证邮箱格式
 	 * @method email
-	 * @param  [type]  &$email       [description]
-	 * @param  boolean $ignore_mx [是否忽略对mx记录的检查]
-	 * @return [type]                [description]
+	 * @param  [type]  &$email      [description]
+	 * @param  boolean $ignore_mx 	[是否忽略对mx记录的检查]
+	 * @return [boolean]           	[验证结果]
 	 * @author NewFuture
 	 * @todo 邮箱存在性验证 https://github.com/zytzagoo/smtp-validate-email
 	 */
