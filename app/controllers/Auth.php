@@ -144,11 +144,7 @@ class AuthController extends Yaf_Controller_Abstract
 			{
 				echo '验证信息不存在';
 			}
-			elseif (UserModel::getByEmail($Code->email))
-			{
-				echo '邮箱绑定过';
-			}
-			elseif (!UserModel::set('email', Encrypt::encryptEmail($email))->save($Code->use_id))
+			elseif (!UserModel::saveEmail($email))
 			{
 				echo '邮箱设置失败';
 			}

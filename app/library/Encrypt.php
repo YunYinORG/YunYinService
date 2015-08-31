@@ -175,7 +175,7 @@ class Encrypt
 		{
 			$mid = substr($phone, -10, 6);
 			$end = substr($phone, -4);
-			return substr($phone, 0, -10) . self::_encryptMid($mid, $snum, $id) . self::_encryptEnd($end);
+			return substr($phone, 0, -10) . self::_encryptMid($mid, $snum, $id) . self::encryptPhoneTail($end);
 		}
 		else
 		{
@@ -210,13 +210,18 @@ class Encrypt
 	}
 
 	/**
-	 *  encrypt_end($endNum)
+	 *  encryptPhoneTail($endNum)
 	 *  4位尾号加密
 	 * @param $endNum 4位尾号
 	 * @return string(4) 加密后的4位数字
 	 */
-	private static function _encryptEnd($endNum)
+	public static function encryptPhoneTail($endNum)
 	{
+		if (strlen($endNum) !== 4)
+		{
+			throw new Exception('尾号不是4位数');
+			return false;
+		}
 		$key    = self::config('key_phone_end'); //获取配置密钥
 		$endNum = (int) $endNum;
 		$cipher = self::aesEncode($endNum, $key); //对后四位进行AES加密

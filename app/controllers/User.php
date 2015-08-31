@@ -160,7 +160,7 @@ class UserController extends Rest
 			Cache::del('try_code_t' . $id);
 			session::del('code_phone');
 			$phone = $verify[$code]; //读取号码
-			if (UserModel::SavePhone($id, $phone))
+			if (UserModel::SavePhone($phone))
 			{
 				$response['info']   = '手机号已经更新';
 				$response['status'] = 1;
