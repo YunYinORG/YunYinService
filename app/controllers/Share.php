@@ -48,6 +48,10 @@ class ShareController extends Rest
 			$share['fil_id'] = $fid;
 			$share['use_id'] = $userid;
 			$share['name']   = Input::post('name', $name, 'title') ? $name : $File->name;
+			if (Input::post('detail', $detail, 'text'))
+			{
+				$share['detail'] = $detail;
+			}
 			if (Input::post('anonymous', $anonymous))
 			{
 				$share['anonymous'] = boolval($anonymous);
@@ -100,15 +104,15 @@ class ShareController extends Rest
 	{
 		$userid = $this->auth();
 		/*检查输入*/
-		if (Input::post('name', $name, 'title'))
+		if (Input::put('name', $name, 'title'))
 		{
 			$share['name'] = $name;
 		}
-		if (Input::post('anonymous', $anonymous))
+		if (Input::put('anonymous', $anonymous))
 		{
 			$share['anonymous'] = boolval($anonymous);
 		}
-		if (Input::post('detail', $detail, 'text'))
+		if (Input::put('detail', $detail, 'text'))
 		{
 			$share['detail'] = $detail;
 		}
