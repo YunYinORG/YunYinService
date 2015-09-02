@@ -46,29 +46,10 @@ class TaskController extends Rest
 		}
 		else
 		{
-			$task = ['fil_id' => $fid, 'use_id' => $userid, 'pri_id' => $pid];
-
-			if (Input::post('copies', $copies, 'int'))
-			{
-				$task['copies'] = $copies;
-			}
-			if (Input::post('color', $color, FILTER_VALIDATE_BOOLEAN))
-			{
-				$task['color'] = $color;
-			}
-			if (Input::post('isdouble', $is_double, FILTER_VALIDATE_BOOLEAN))
-			{
-				$task['isdouble'] = $is_double;
-			}
-			if (Input::post('ppt', $ppt, 'int'))
-			{
-				$task['ppt'] = $ppt;
-			}
-			if (Input::post('requirements', $requirements, 'text')) //特殊字符转义
-			{
-				//todo 更严格xss防范
-				$task['requirements'] = $requirements;
-			}
+			$task           = TaskModel::create('post');
+			$task['url']    = $file['url'];
+			$task['use_id'] = $userid;
+			$task['pri_id'] = $pid;
 
 			if (!$tid = TaskModel::insert($task))
 			{
@@ -77,7 +58,7 @@ class TaskController extends Rest
 			else
 			{
 				$response['info']   = '任务添加成功';
-				$response['status'] = 0;
+				$response['status'] = 1;
 				$response['id']     = $tid;
 			}
 		}
@@ -115,29 +96,7 @@ class TaskController extends Rest
 		$userid = $this->auth();
 		if ($Task = TaskModel::where('use_id', $userid)->where('status', 1)->find($id))
 		{
-
-			if (Input::post('copies', $copies, 'int'))
-			{
-				$task['copies'] = $copies;
-			}
-			if (Input::post('color', $color, FILTER_VALIDATE_BOOLEAN))
-			{
-				$task['color'] = $color;
-			}
-			if (Input::post('isdouble', $is_double, FILTER_VALIDATE_BOOLEAN))
-			{
-				$task['isdouble'] = $is_double;
-			}
-
-			if (Input::post('ppt', $ppt, 'int'))
-			{
-				$task['ppt'] = $ppt;
-			}
-			if (Input::post('requirements', $requirements, 'text'))
-			{
-				$task['requirements'] = $requirements;
-			}
-
+			$task = TaskModel::create('put');
 			if ($Task->update($task))
 			{
 				$this->response(1, '成功修改');

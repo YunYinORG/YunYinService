@@ -45,6 +45,7 @@ class ShareController extends Rest
 		else
 		{
 			/*验证完成，开始插入*/
+			//TODO URL
 			$share['fil_id'] = $fid;
 			$share['use_id'] = $userid;
 			$share['name']   = Input::post('name', $name, 'title') ? $name : $File->name;
@@ -140,7 +141,7 @@ class ShareController extends Rest
 	public function DELETE_infoAction($id = 0)
 	{
 		$userid = $this->auth();
-		if (ShareModel::where('id', $id)->where('use_id', $userid)->set('status', 0)->save)
+		if (ShareModel::where('use_id', $userid)->set('url', '')->set('status', 0)->save($id))
 		{
 			$this->response(1, '删除成功');
 		}
@@ -148,5 +149,44 @@ class ShareController extends Rest
 		{
 			$this->response(0, '删除失败');
 		}
+	}
+
+	/**
+	 * 删除
+	 * POST /share/123/print
+	 * @method 添加打印任务
+	 * @author NewFuture
+	 */
+	public function POST_printAction($id = 0)
+	{
+		$userid             = $this->auth();
+		$response['status'] = 0;
+		if (!$url = ShareModel::where('id', $id)->where('status', '>', 0)->get('url'))
+		{
+			$response['info'] = '此分享已经删除！';
+		}
+		elseif (!Input::post('pid', $pid, 'int'))
+		{
+			$response['info'] = '请选择打印店！';
+		}
+		else
+		{
+			$task           = TaskModel::create('post');
+			$task['use_id'] = $userid;
+			$task['pid']    = $pid;
+			$task['url']    = $url;
+
+			if (!$tid = TaskModel::insert($task))
+			{
+				$response['info'] = '任务添加失败';
+			}
+			else
+			{
+				$response['info']   = '任务添加成功';
+				$response['status'] = 1;
+				$response['id']     = $tid;
+			}
+		}
+		$this->response = $response;
 	}
 }
