@@ -80,11 +80,11 @@ class UserModel extends FacadeModel
 	 */
 	public static function mask(&$user)
 	{
-		if (is_set($user['phone']) && $phone = $user['phone'])
+		if (isset($user['phone']) && $phone = $user['phone'])
 		{
 			$user['phone'] = substr_replace($phone, '********', -8);
 		}
-		if (is_set($user['email']) && $email = $user['email'])
+		if (isset($user['email']) && $email = $user['email'])
 		{
 			$user['email'] = $email[0] . '***' . strrchr($email, '@');
 		}

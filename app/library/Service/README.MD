@@ -1,4 +1,17 @@
 # 第三服务API接口
 
-### Flie.php
-七牛文件上传 
+### 文件上传
+Flie.php 七牛文件管理接口
+```php
+File::set($file,$new_file) #文件重命名
+File::get($name,$param='') #获取下载链接
+File::del($file)           #删除文件
+File::getToken($name)      #获取上传token
+```
+
+### 数据库
+Db.php 数据库PDO封装的对象
+
+### 邮件
+Smtp.php 邮件链接类
+Message.php 邮件消息

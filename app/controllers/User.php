@@ -42,11 +42,11 @@ class UserController extends Rest
 		$id = $this->auth($id);
 
 		$response['status'] = 0;
-		if (!Input::put('password', $password, 'password'))
+		if (!Input::put('password', $password, 'isMd5'))
 		{
 			$response['info'] = '新的密码格式不对';
 		}
-		elseif (!Input::put('old', $old_pwd, 'trim'))
+		elseif (!Input::put('old', $old_pwd, 'isMd5'))
 		{
 			$response['info'] = '请输入原密码';
 		}

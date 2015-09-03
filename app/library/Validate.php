@@ -68,6 +68,12 @@ class Validate
 		return ctype_alnum(strtr($str, '_', 'A'));
 	}
 
+	/*md5后的字符串*/
+	public static function isMd5($md5pwd)
+	{
+		return (strlen($md5pwd) == 32) && ctype_alnum($md5pwd);
+	}
+
 	/**
 	 * 验证字符串是否安全含有不安全字符
 	 * @todo 过于简单暴力
