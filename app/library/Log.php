@@ -19,9 +19,8 @@ class Log
 	{
 		if ($stream = self::getStream($tag))
 		{
-			$msg = '[' . date('Y-m-j H:i:s') . '] ' . $msg . PHP_EOL;
-
-			return fwrite($stream, $msg);
+			$msg = '[' . date('c') . '] ' . $msg . PHP_EOL;
+			return $stream == 'sae' ? sae_debug($tag . $msg) : fwrite($stream, $msg);
 		}
 	}
 
@@ -36,22 +35,33 @@ class Log
 	{
 		if (null === self::$_dir)
 		{
-			//日志目录
-			$logdir = Config::get('log.dir');
-			if (!Storage\File::mkdir($logdir))
+			if (Config::get('log.type') == 'sae')
 			{
-				throw new Exception('目录文件无法创建' . $logdir, 1);
+				self::$_dir = 'sae';
 			}
-			self::$_dir = $logdir;
+			else
+			{
+				//日志目录
+				$logdir = Config::get('log.dir');
+				if (!Storage\File::mkdir($logdir))
+				{
+					throw new Exception('目录文件无法创建' . $logdir, 1);
+				}
+				self::$_dir = $logdir;
+			}
 			//日志级别
 			self::$_tags = explode(',', Config::get('log.allow'));
 			date_default_timezone_set('PRC');
 		}
-
 		/*级别过滤*/
 		if (!in_array($tag, self::$_tags))
 		{
 			return false;
+		}
+		/*sae*/
+		if (self::$_dir == 'sae')
+		{
+			return 'sae';
 		}
 		/*打开文件*/
 		if (!isset(self::$_stream[$tag]))
@@ -60,7 +70,7 @@ class Log
 			$file = self::$_dir . DIRECTORY_SEPARATOR . $tag . '.log';
 			if (!self::$_stream[$tag] = fopen($file, 'a'))
 			{
-				throw new Exception('Cannot log to file: ' . $file);
+				throw new Exception('Cannot open to log file: ' . $file);
 			}
 		}
 		return self::$_stream[$tag];
