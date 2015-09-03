@@ -37,4 +37,26 @@ class PrintersController extends Rest
 			$this->response(0, '不存在');
 		}
 	}
+
+	/**
+	 * 获取价格
+	 * GET /printers/123/price
+	 * @method GET_priceAction
+	 * @param  integer         $id [description]
+	 * @author NewFuture
+	 */
+	public function GET_priceAction($id = 0)
+	{
+		$this->auth();
+		if ($printer = PrinterModel::field('price,other')->find($id))
+		{
+			$price          = json_decode($printer['price']);
+			$price['other'] = $printer['other'];
+			$this->response(1, $price);
+		}
+		else
+		{
+			$this->response(0, '不存在此店');
+		}
+	}
 }
