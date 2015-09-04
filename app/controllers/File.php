@@ -151,7 +151,7 @@ class FileController extends Rest
 		$userid = $this->auth();
 		if (Input::put('name', $name, 'title'))
 		{
-			if (FileModel::where('id', $id)->where('use_id', $userid)->update(['name' => $name]))
+			if (FileModel::saveName($id, $name))
 			{
 				$this->response(1, '成功修改为：' . $name);
 			}
