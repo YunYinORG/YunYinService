@@ -62,8 +62,7 @@ class BooksController extends Rest
 			$task['name']   = $book['name'];
 			if ($tid = TaskModel::insert($task))
 			{
-				$response['id']   = $tid;
-				$response['info'] = '保存成功';
+				$response['info'] = ['id' => $tid, 'msg' => '保存成功'];
 			}
 			else
 			{

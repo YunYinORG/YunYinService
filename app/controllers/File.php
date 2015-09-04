@@ -59,8 +59,7 @@ class FileController extends Rest
 			elseif (!$fid = FileModel::add($file));
 			{
 				$response['status'] = 1;
-				$response['info']   = '保存成功';
-				$response['id']     = $fid;
+				$response['info']   = ['msg' => '保存成功', 'id' => $fid];
 			}
 		}
 		$this->response = $response;

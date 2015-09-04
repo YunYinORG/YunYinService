@@ -64,8 +64,7 @@ class ShareController extends Rest
 				//TODO
 				//分享文件预处理
 				$response['status'] = 1;
-				$response['info']   =
-				$response['id']     = $id;
+				$response['info']   = ['msg' => '分享成功', 'id' => $id];
 			}
 			else
 			{
@@ -182,9 +181,8 @@ class ShareController extends Rest
 			}
 			else
 			{
-				$response['info']   = '任务添加成功';
 				$response['status'] = 1;
-				$response['id']     = $tid;
+				$response['info']   = ['msg' => '任务添加成功', 'id' => $tid];
 			}
 		}
 		$this->response = $response;

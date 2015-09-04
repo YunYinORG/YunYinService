@@ -57,9 +57,9 @@ class TaskController extends Rest
 			}
 			else
 			{
-				$response['info']   = '任务添加成功';
+
 				$response['status'] = 1;
-				$response['id']     = $tid;
+				$response['info']   = ['msg' => '打印任务添加成功', 'id' => $tid];
 			}
 		}
 		$this->response = $response;

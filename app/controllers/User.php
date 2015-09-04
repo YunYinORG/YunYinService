@@ -5,13 +5,14 @@ class UserController extends Rest
 	/*欢迎信息*/
 	public function indexAction($name = '同学')
 	{
-		if (Auth::getUser())
+		if ($id = Auth::id())
 		{
-			$this->response(1, '亲爱的' . $name . ',已经成功登陆');
+			$info = ['msg' => '亲爱的' . $name . ',已经成功登录', 'name' => $name, 'id' => $id];
+			$this->response(1, $info);
 		}
 		else
 		{
-			$this->response = ['status' => self::AUTH_FAIL, 'info' => '尚未登陆', 'url' => '/Auth/'];
+			$this->response = ['status' => self::AUTH_FAIL, 'info' => '尚未登录', 'url' => '/Auth/'];
 		}
 	}
 
