@@ -77,12 +77,14 @@ class FileController extends Rest
 		if (Input::post('name', $name, 'title')) //FILTER_SANITIZE_EMAIL过滤特殊字符
 		{
 			$key   = uniqid('temp_') . '_' . $userid;
-			$token = File::getToken($key);
+			$token = File::getToken($name, $key);
 			if ($token)
 			{
+				header('Access-Control-Allow-Origin:http://upload.qiniu.com');
 				Cache::set($key, $name, 1200);
 				$response['token'] = $files;
 				$response['key']   = $key;
+				$response['name']  = $name;
 				$this->response(1, $response);
 			}
 			else

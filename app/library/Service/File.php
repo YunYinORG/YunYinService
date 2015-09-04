@@ -65,15 +65,44 @@ class File
 	 * @return [type]         [description]
 	 * @author NewFuture
 	 */
-	public static function getToken($name)
+	public static function getToken(&$name, $key)
 	{
+		if ($pname = self::parseName($name))
+		{
+			return false;
+		}
+		elseif (!in_array($pname['ext'], explode(',', \Config::get('upload.exts'))))
+		{
+			return false;
+		}
+		$name    = $pname['base'] . '.' . $pname['ext'];
 		$timeout = 600;
 		$setting = array(
-			'scope' => self::config('bucket') . ':' . $name,
+			'scope' => self::config('bucket') . ':' . $key,
 			'deadline' => $timeout + $_SERVER['REQUEST_TIME'],
 		);
 		$setting = self::qiniuEncode(json_encode($setting));
 		return self::sign($setting) . ':' . $setting;
+	}
+
+	/**
+	 * 文件名过滤
+	 * @method parseName
+	 * @param  string   $name [description]
+	 * @return [type]         [description]
+	 * @author NewFuture
+	 */
+	public static function parseName($name)
+	{
+		if (!$ext = strrchr($name, '.'))
+		{
+			return false;
+		}
+		$end = min(32, mb_strlen($name)) - strlen($ext);
+		return array(
+			'base' => mb_substr($name, 0, $end),
+			'ext' => substr($ext, 1),
+		);
 	}
 
 	/**
@@ -99,7 +128,7 @@ class File
 			/*操作出错*/
 			if (\Config::get('isdebug'))
 			{
-				\PC::debug($response,'七牛请求出错');
+				\PC::debug($response, '七牛请求出错');
 			}
 			\Log::write('七牛错误' . $url . ':' . json_encode($response, JSON_UNESCAPED_UNICODE), 'ERROR');
 			return false;
