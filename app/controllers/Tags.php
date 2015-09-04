@@ -12,14 +12,9 @@ class TagsController extends Rest
 	 */
 	public function GET_indexAction()
 	{
-		if ($tags = TagModel::order('count', 'DESC')->select('id,name'))
-		{
-			$this->response(1, $tags);
-		}
-		else
-		{
-			$this->response(0, '没有找到〒_〒');
-		}
+		Input::get('page', $page, 'int', 1);
+		$tags = TagModel::order('count', 'DESC')->page($page)->select('id,name');
+		$this->response(1, $tags);
 	}
 
 	/**

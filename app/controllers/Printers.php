@@ -15,7 +15,8 @@ class PrintersController extends Rest
 		{
 			$Printer->where('sch_id', $sch_id);
 		}
-		$printers = $Printer->order('rank', 'DESC')->select('id,name,sch_id,address');
+		Input::get('page', $page, 'int', 1);
+		$printers = $Printer->order('rank', 'DESC')->page($page)->select('id,name,sch_id,address');
 		$this->response(1, $printers);
 	}
 

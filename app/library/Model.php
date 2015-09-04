@@ -473,6 +473,19 @@ class Model implements JsonSerializable, ArrayAccess
 	}
 
 	/**
+	 * 翻页
+	 * @method page
+	 * @param  integer $p [页码]
+	 * @param  integer $n [每页个数]
+	 * @return [type]     [description]
+	 * @author NewFuture
+	 */
+	public function page($p = 1, $n = 10)
+	{
+		return $this->limit($n, ($p - 1) * $n);
+	}
+
+	/**
 	 * 统计
 	 * @method count
 	 * @param  [type] $field [description]

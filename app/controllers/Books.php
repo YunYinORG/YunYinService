@@ -12,7 +12,8 @@ class BooksController extends Rest
 	 */
 	public function GET_indexAction()
 	{
-		if ($books = BookModel::select())
+		Input::get('page', $page, 'int', 1);
+		if ($books = BookModel::page($page)->select())
 		{
 			$this->response(1, $books);
 		}

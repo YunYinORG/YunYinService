@@ -14,18 +14,18 @@ class TaskController extends Rest
 	public function GET_indexAction()
 	{
 		$userid = $this->auth();
-		$tasks  = TaskModel::where('use_id', '=', $userid)->belongs('flie')->belongs('printer')->select();
+		Input::get('page', $page, 'int', 1);
+		$tasks = TaskModel::where('use_id', '=', $userid)->belongs('printer')->page($page)->select();
 		$this->response(1, $tasks);
 	}
 
 	/**
-	 * 上传文件
+	 * 打印任务
 	 * POST /task/
 	 * @method POST_index
 	 * @param fid 文件id
 	 * @param pid 打印店id
 	 * @param
-	 * @todo  文件状态验证，共享文件验证
 	 */
 	public function POST_indexAction()
 	{

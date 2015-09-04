@@ -15,7 +15,8 @@ class FileController extends Rest
 	public function GET_indexAction()
 	{
 		$userid = $this->auth();
-		$files  = FileModel::where('use_id', '=', $userid)->select('id,name,time');
+		Input::get('page', $page, 'int', 1);
+		$files = FileModel::where('use_id', '=', $userid)->page($page)->select('id,name,time');
 		$this->response(1, $files);
 	}
 

@@ -16,7 +16,8 @@ class ShareController extends Rest
 	public function GET_indexAction()
 	{
 		$userid = $this->auth();
-		$shares = ShareModel::where('use_id', '=', $userid)->select('id,name,time');
+		Input::get('page', $page, 'int', 1);
+		$shares = ShareModel::where('use_id', '=', $userid)->page($page)->select('id,name,time');
 		$this->response(1, $shares);
 	}
 
