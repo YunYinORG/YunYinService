@@ -21,4 +21,11 @@ class Filter
 	{
 		return filter_var($str, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_ENCODE_HIGH | FILTER_FLAG_ENCODE_AMP);
 	}
+
+	/*标签字符过滤*/
+	public static function tag($str)
+	{
+		$str = filter_var(trim($str), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW);
+		return (strpbrk($str, '<>&/\\%|{} ,;　，；、') === false) ? $str : false;
+	}
 }

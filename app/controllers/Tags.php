@@ -13,7 +13,14 @@ class TagsController extends Rest
 	public function GET_indexAction()
 	{
 		Input::get('page', $page, 'int', 1);
-		$tags = TagModel::order('count', 'DESC')->page($page)->select('id,name');
+		if (Input::get('key', $key, 'tag')) //关键字
+		{
+			$tags = TagModel::where('name', 'LIKE', "%$key%")->order('count', 'DESC')->page($page)->select('id,name');
+		}
+		else
+		{
+			$tags = TagModel::order('count', 'DESC')->page($page)->select('id,name');
+		}
 		$this->response(1, $tags);
 	}
 

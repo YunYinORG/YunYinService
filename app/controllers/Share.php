@@ -188,4 +188,23 @@ class ShareController extends Rest
 		}
 		$this->response = $response;
 	}
+
+	/**
+	 * 搜索
+	 * @method GET_searchAction
+	 * @author NewFuture
+	 */
+	public function GET_searchAction()
+	{
+		Input::get('page', $page, 'int', 1);
+		if (Input::get('key', $key, 'tag'))
+		{
+			$shares = ShareModel::where('name', 'LIKE', "%$key%")->orWhere('detail', 'LIKE', "%$key%")->page($page)->select('id,name');
+		}
+		else
+		{
+			$shares = ShareModel::page($page)->select('id,name');
+		}
+		$this->response(1, $shares);
+	}
 }

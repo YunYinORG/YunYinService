@@ -415,7 +415,7 @@ class Model implements JsonSerializable, ArrayAccess
 		else
 		{
 			$name  = $key . '_w_eq';
-			$where = $conidition . '(' . self::backQoute($key) . $exp . ':' . $name . ')';
+			$where = $conidition . '(' . self::backQoute($key) . $exp . ' :' . $name . ')';
 
 			$this->param[$name] = $value;
 		}
