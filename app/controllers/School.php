@@ -10,13 +10,19 @@ class SchoolController extends Rest
 	 */
 	public function GET_indexAction()
 	{
-		if ($schools = SchoolModel::all())
+		if (Input::get('key', $key))
+		{
+			$key     = '%' . strtr($key, ' ', '%') . '%';
+			$schools = SchoolModel::where('name', 'LIKE', $key)->select();
+			$this->response(1, $schools);
+		}
+		elseif ($schools = SchoolModel::all())
 		{
 			$this->response(1, $schools);
 		}
 		else
 		{
-			$thsi->response(0, '无法查看学校信息');
+			$this->response(0, '无法查看学校信息');
 		}
 
 	}

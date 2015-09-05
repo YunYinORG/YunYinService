@@ -197,9 +197,10 @@ class ShareController extends Rest
 	public function GET_searchAction()
 	{
 		Input::get('page', $page, 'int', 1);
-		if (Input::get('key', $key, 'tag'))
+		if (Input::get('key', $key))
 		{
-			$shares = ShareModel::where('name', 'LIKE', "%$key%")->orWhere('detail', 'LIKE', "%$key%")->page($page)->select('id,name');
+			$key    = '%' . strtr($key, ' ', '%') . '%';
+			$shares = ShareModel::where('name', 'LIKE', $key)->orWhere('detail', 'LIKE', $key)->page($page)->select('id,name');
 		}
 		else
 		{
