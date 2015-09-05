@@ -15,11 +15,12 @@ class TagsController extends Rest
 		Input::get('page', $page, 'int', 1);
 		if (Input::get('key', $key, 'tag')) //关键字
 		{
-			$tags = TagModel::where('name', 'LIKE', "%$key%")->order('count', 'DESC')->page($page)->select('id,name');
+			$key  = '%' . strtr($key, ' ', '%') . '%';
+			$tags = TagModel::where('name', 'LIKE', $key)->order('count', 'DESC')->page($page)->select('id,name,detail,image');
 		}
 		else
 		{
-			$tags = TagModel::order('count', 'DESC')->page($page)->select('id,name');
+			$tags = TagModel::order('count', 'DESC')->page($page)->select('id,name,detail,image');
 		}
 		$this->response(1, $tags);
 	}
@@ -69,6 +70,36 @@ class TagsController extends Rest
 		else
 		{
 			$this->response(0, '信息已经删除');
+		}
+	}
+
+	/**
+	 * 添加标签
+	 * 开放权限
+	 * @method POST_infoAction
+	 * @param  integer         $id [description]
+	 * @author NewFuture
+	 */
+	public function POST_infoAction($id = 0)
+	{
+		$uid = $this->auth();
+		if (Input::post('sid', $sid, 'int') && TagModel::where('id', $id)->inc('count'))
+		{
+			$Hastag = new Model('hastag');
+			$hastag = ['tag_id' => $id, 'sha_id' => $sid];
+			if ($Hastag->update($hastag))
+			{
+				$this->response(1, '添加成功');
+			}
+			else
+			{
+				TagModel::where('id', $id)->inc('count', '-1');
+				$this->response(0, '添加出错');
+			}
+		}
+		else
+		{
+			$this->response(0, '分享或者标签有误');
 		}
 	}
 }

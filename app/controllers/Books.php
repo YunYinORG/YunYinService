@@ -13,14 +13,16 @@ class BooksController extends Rest
 	public function GET_indexAction()
 	{
 		Input::get('page', $page, 'int', 1);
-		if ($books = BookModel::page($page)->select())
+		if (Input::get('key', $key, 'tag')) //关键字
 		{
-			$this->response(1, $books);
+			$key   = '%' . strtr($key, ' ', '%') . '%';
+			$books = BookModel::where('name', 'LIKE', $key)->orWhere('detail', 'LIKE', $key)->order('count', 'DESC')->page($page)->select('id,name,pri_id');
 		}
 		else
 		{
-			$this->response(0, '没有找到〒_〒');
+			$books = BookModel::order('count', 'DESC')->page($page)->select('id,name,pri_id');
 		}
+		$this->response(1, $books);
 	}
 
 	/**

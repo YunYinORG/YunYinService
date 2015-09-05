@@ -1,8 +1,9 @@
 <?php
 namespace Service;
-use \PDO;
 use \Config;
-Use \Log;
+use \Log;
+use \PDO;
+
 /**
  * Class and Function List:
  * Function list:
@@ -111,27 +112,31 @@ class Db
 	public function query($query, $params = null, $fetchmode = PDO::FETCH_ASSOC)
 	{
 		$query = trim($query);
-
 		if (!$this->init($query, $params))
 		{
 			return false;
 		}
-		# Which SQL statement is used
-		$statement = strstr($query, ' ', true);
-		switch (strtoupper($statement))
+		$result = $this->sQuery->fetchAll($fetchmode);
+		$this->sQuery->closeCursor();
+		return $result;
+	}
+
+	/**
+	 * 执行sql语句
+	 * @method execute
+	 * @param  [type] $query     [description]
+	 * @param  [type] $params    [description]
+	 * @param  [type] $fetchmode [description]
+	 * @return [int]            [影响条数]
+	 */
+	public function execute($query, $params = null, $fetchmode = PDO::FETCH_ASSOC)
+	{
+		$query = trim($query);
+		if (!$this->init($query, $params))
 		{
-			case 'SELECT':
-			case 'SHOW':
-				$result = $this->sQuery->fetchAll($fetchmode);
-				break;
-			case 'UPDATE':
-			case 'INSERT':
-			case 'DELETE':
-				$result = $this->sQuery->rowCount();
-				break;
-			default:
-				$result = null;
+			return false;
 		}
+		$result = $this->sQuery->rowCount();
 		$this->sQuery->closeCursor();
 		return $result;
 	}

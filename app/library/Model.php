@@ -203,7 +203,7 @@ class Model implements JsonSerializable, ArrayAccess
 			$data   = array_intersect_key($data, $field);
 		}
 
-		if (!empty($data))
+		if (is_array($data) && !empty($data))
 		{
 			$this->param   = array_merge($this->param, $data);
 			$update_string = '';
@@ -211,12 +211,26 @@ class Model implements JsonSerializable, ArrayAccess
 			{
 				$update_string .= self::backQoute($key) . '=:' . $key . ',';
 			}
-			$sql = 'UPDATE' . self::backQoute($this->table);
-			$sql .= ' SET ' . trim($update_string, ',');
-			$sql .= $this->buildWhereSql();
-
-			return $this->query($sql, $this->param);
+			$update_string = trim($update_string, ',');
 		}
+		elseif (is_string($data))
+		{
+			$update_string = $data;
+		}
+		else
+		{
+			if (Config::get('isdebug'))
+			{
+				throw new Exception('未知参数', 1);
+			}
+			return false;
+		}
+
+		$sql = 'UPDATE' . self::backQoute($this->table);
+		$sql .= 'SET' . $update_string;
+		$sql .= $this->buildWhereSql();
+
+		return $this->execute($sql, $this->param);
 	}
 
 	/**
@@ -265,7 +279,7 @@ class Model implements JsonSerializable, ArrayAccess
 			});
 			$sql = 'INSERT INTO' . self::backQoute($this->table);
 			$sql .= '(' . implode(',', $quote_fields) . ')VALUES(:' . implode(',:', $fields) . ')';
-			$this->query($sql, $data);
+			$this->execute($sql, $data);
 			return self::$_db->lastInsertId();
 		}
 	}
@@ -300,12 +314,12 @@ class Model implements JsonSerializable, ArrayAccess
 		else
 		{
 			$sql .= $where;
-			return $this->query($sql, $this->param);
+			return $this->execute($sql, $this->param);
 		}
 	}
 
 	/**
-	 * 直接查询
+	 * 数据读取操作
 	 * @method query
 	 * @param  [string] $sql  	[sql语句]
 	 * @param  [type] $bind 	[description]
@@ -315,6 +329,21 @@ class Model implements JsonSerializable, ArrayAccess
 	public function query($sql, $bind = null)
 	{
 		$result = self::$_db->query($sql, $bind);
+		$this->clear();
+		return $result;
+	}
+
+	/**
+	 * 数据写入修改操作
+	 * @method execute
+	 * @param  [string] $sql  	[sql语句]
+	 * @param  [type] $bind 	[description]
+	 * @return [array]       	[结果数组]
+	 * @author NewFuture
+	 */
+	public function execute($sql, $bind = null)
+	{
+		$result = self::$_db->execute($sql, $bind);
 		$this->clear();
 		return $result;
 	}
@@ -501,6 +530,23 @@ class Model implements JsonSerializable, ArrayAccess
 		$result = self::$_db->single($sql, $this->param);
 		$this->clear();
 		return $result;
+	}
+
+	/**
+	 * 表达式查询
+	 * @method inc
+	 * @param  [type]  $field [description]
+	 * @param  [type]  $exp   [description]
+	 * @param  integer $n     [description]
+	 * @return [type]         [description]
+	 * @author NewFuture
+	 */
+	public function inc($field, $step = 1)
+	{
+		$sql = self::backQoute($field) . '=' . self::backQoute($field) . '+:_inc_step';
+
+		$this->param['_inc_step'] = $step;
+		return $this->update($sql);
 	}
 
 	public function __call($op, $args)
