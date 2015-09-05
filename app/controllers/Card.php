@@ -37,8 +37,15 @@ class CardController extends rest
 	{
 		$uid = $this->auth($id);
 		$Cardlog = new CardlogModel;
-		$log['lost'] = $Cardlog->where('lost_id','=',$uid)->order('id','desc')->select();
-		$find = $Cardlog->where('find_id','=',$uid)->order('id','desc')->select();
+		//连表查询
+		$sql = 'select usr.name,usr.number,cl.id,cl.find_id,cl.time,cl.status from user usr left join 
+				cardlog cl on usr.id = cl.lost_id and ' . $uid . '= cl.lost_id order by cl.id desc';
+		$log['lost'] = $Cardlog->query($sql);
+		//$log['lost'] = $Cardlog->where('lost_id','=',$uid)->order('id','desc')->select();
+		$sql = 'select usr.name,usr.number,cl.id,cl.lost_id,cl.time,cl.status from user usr left join 
+				cardlog cl on usr.id = cl.find_id and ' . $uid . '= cl.find_id order by cl.id desc';
+		//$find = $Cardlog->where('find_id','=',$uid)->order('id','desc')->select();
+		$find = $Cardlog->query($sql);
 		foreach ($find as &$value)  
 		{
 			if (! $value['lost_id'])
@@ -337,7 +344,7 @@ class CardController extends rest
 			}
 			else
 			{
-				Cache::set('send_'.$uid,$times + 1);
+				Cache::set('send_'.$uid,$times + 1，3600);
 			}
 			$receiver_id = $receiver['uid'] ? $receiver['uid'] : 0;
 			$log    = array('find_id' => $uid, 'lost_id' => $receiver_id, 'status' => 0);
