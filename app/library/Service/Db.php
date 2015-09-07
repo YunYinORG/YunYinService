@@ -31,6 +31,7 @@ class Db
 	private $pdo;
 	# @object, PDO statement object
 	private $sQuery;
+	private $_isdebug;
 
 	public function __construct($dsn, $username, $password)
 	{
@@ -40,6 +41,10 @@ class Db
 
 		# Disable emulation of prepared statements, use REAL prepared statements instead.
 		$this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+		if ($this->_isdebug = Config::get('isdebug'))
+		{
+			$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		}
 	}
 
 	/**
@@ -54,30 +59,16 @@ class Db
 	 */
 	private function init($query, $parameters = '')
 	{
-		try
+		// Prepare query
+		if ($this->sQuery = $this->pdo->prepare($query))
 		{
-			// Prepare query
-			if (Config::get('isdebug'))
-			{
-				Log::write($query, 'SQL');
-				\PC::DB($query, 'prepare');
-			}
-			if ($this->sQuery = $this->pdo->prepare($query))
-			{
-				# Add parameters to the parameter array
-				$parameters = is_array($parameters) ? $this->bind($parameters) : array();
-				#excute
-				if (Config::get('isdebug'))
-				{
-					Log::write('SQL param:' . json_encode($parameters), 'SQL');
-					\PC::DB($parameters, 'parameters');
-				}
-				return $this->sQuery->execute($parameters);
-			}
+			# Add parameters to the parameter array
+			$parameters = is_array($parameters) ? $this->bind($parameters) : array();
+			return $this->sQuery->execute($parameters);
 		}
-		catch (PDOException $e)
+		else
 		{
-			Log::write('数据库链接错误:' . $e->getMessage() . '执行：' . $query, 'ERROR');
+			return false;
 		}
 	}
 
@@ -101,39 +92,66 @@ class Db
 	}
 
 	/**
-	 *   	If the SQL query  contains a SELECT or SHOW statement it returns an array containing all of the result set row
-	 *	If the SQL statement is a DELETE, INSERT, or UPDATE statement it returns the number of affected rows
-	 *
-	 *  @param  string $query
+	 *  If the SQL query  contains a SELECT or SHOW statement it returns an array containing all of the result set row
+	 *  @param  string $sql
 	 *	@param  array  $params
 	 *	@param  int    $fetchmode
 	 *	@return mixed
 	 */
-	public function query($query, $params = null, $fetchmode = PDO::FETCH_ASSOC)
+	public function query($sql, $params = null, $fetchmode = PDO::FETCH_ASSOC)
 	{
-		$query = trim($query);
-		if (!$this->init($query, $params))
+		if ($this->_isdebug)
 		{
-			return false;
+			Log::write($sql . json_encode($params), 'SQL');
+			\PC::DB($sql, 'sql');
+			$params and \PC::DB($params, 'params');
 		}
-		$result = $this->sQuery->fetchAll($fetchmode);
-		$this->sQuery->closeCursor();
-		return $result;
+
+		if (empty($params))
+		{
+			/*无参数直接查询*/
+			if ($result = $this->pdo->query($sql, $fetchmode))
+			{
+				return $result->fetchAll($fetchmode);
+			}
+		}
+		elseif ($this->init($sql, $params))
+		{
+			/*分步查询*/
+			$result = $this->sQuery->fetchAll($fetchmode);
+			$this->sQuery->closeCursor();
+			return $result;
+
+		}
+		/*查询失败*/
+		$this->error($sql . PHP_EOL . json_encode($params));
+		return false;
+
 	}
 
 	/**
 	 * 执行sql语句
 	 * @method execute
-	 * @param  [type] $query     [description]
-	 * @param  [type] $params    [description]
+	 * @param  [string] $sql     [description]
+	 * @param  [array] $params    [description]
 	 * @param  [type] $fetchmode [description]
 	 * @return [int]            [影响条数]
 	 */
-	public function execute($query, $params = null, $fetchmode = PDO::FETCH_ASSOC)
+	public function execute($sql, $params = null)
 	{
-		$query = trim($query);
-		if (!$this->init($query, $params))
+		if ($this->_isdebug)
 		{
+			Log::write($sql . json_encode($params), 'SQL');
+			\PC::DB($sql, 'prepare');
+			$params AND \PC::DB($params, 'params');
+		}
+		if (empty($params))
+		{
+			return $this->pdo->exec($sql);
+		}
+		elseif (!$this->init($sql, $params))
+		{
+			$this->error($sql . PHP_EOL . json_encode($params));
 			return false;
 		}
 		$result = $this->sQuery->rowCount();
@@ -166,6 +184,10 @@ class Db
 			$this->sQuery->closeCursor();
 			return $result;
 		}
+		else
+		{
+			$this->error($sql . PHP_EOL . json_encode($params));
+		}
 	}
 
 	/**
@@ -177,12 +199,38 @@ class Db
 	 */
 	public function single($query, $params = null)
 	{
-		if ($this->init($query, $params))
+		if ($this->_isdebug)
 		{
+			Log::write($query . json_encode($params), 'SQL');
+			\PC::DB($query, 'prepare');
+			$params AND \PC::DB($params, 'params');
+		}
+
+		if (empty($params))
+		{
+			/*无参数直接查询*/
+			if ($result = $this->pdo->query($query))
+			{
+				return $result->fetchColumn();
+			}
+		}
+		elseif ($this->init($query, $params))
+		{
+			/*参数分步查询*/
 			$result = $this->sQuery->fetchColumn();
 			$this->sQuery->closeCursor();
 			return $result;
 		}
+		/*查询出错*/
+		$this->error($query . PHP_EOL . json_encode($params));
+		return false;
+	}
+
+	/*错误处理*/
+	private function error($msg)
+	{
+		Log::write('{SQL PDO exec PRE ERROR}:' . $msg, 'ERROR');
+		$this->_isdebug AND \PC::DB($msg, 'ERROR');
 	}
 
 	/*
