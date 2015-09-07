@@ -27,25 +27,26 @@ class School
 	 * 验证学校
 	 * @method verify
 	 * @param  array  $info   [description]
-	 * @param  integer $sch_id [description]
 	 * @return [mixed]          [description]
 	 * @author NewFuture
 	 */
-	public static function verify($info, $sch_id = 0)
+	public static function verify($student, $except = [])
 	{
-		if ($sch_id > 0)
+		$param = [$student['number'], $student['password'], isset($student['code']) ? $student['code'] : null];
+
+		if (isset($student['sch_id']) && $sch_id = $student['sch_id'])
 		{
-			if ($school = SchoolModel::find($sch_id))
+			if ($school = self::getAbbr($sch_id))
 			{
-				return call_user_func_array(array('Verify\\' . strtoupper($school['abbr']), 'getName'), $info);
+				return [$sch_id => call_user_func_array(array('Verify\\' . strtoupper($school), 'getName'), $param)];
 			}
 		}
 		else
 		{
-			$list = self::guess($info['number']);
+			$list = self::guess($info['number'], $except);
 			foreach ($list as $i => $school)
 			{
-				$list[$i] = call_user_func_array(array('Verify\\' . strtoupper($school), 'getName'), $info);
+				$list[$i] = call_user_func_array(array('Verify\\' . strtoupper($school), 'getName'), $param);
 			}
 			return $list;
 		}
@@ -73,7 +74,7 @@ class School
 		}
 		else
 		{
-			$list = self::getList();
+			$list = self::_getList();
 		}
 
 		if (!empty($black_list))
@@ -90,12 +91,26 @@ class School
 	}
 
 	/**
-	 * 获取学校列表
-	 * @method getList
-	 * @return array
+	 * 获取学校的缩写
+	 * @method getAbbr
+	 * @param  [type]  $id [description]
+	 * @return [type]      [description]
 	 * @author NewFuture
 	 */
-	private static function getList()
+	public static function getAbbr($id)
+	{
+		$list = self::_getList();
+		return isset($list[$id]) ? $list[$id] : false;
+	}
+
+	/**
+	 * [_getList description]
+	 * @method _getList
+	 * @return [type]   [description]
+	 * @access private
+	 * @author NewFuture
+	 */
+	private static function _getList()
 	{
 		if (!$list = Cache::get('v_school_list'))
 		{
@@ -104,7 +119,7 @@ class School
 			{
 				$list[$school['id']] = strtolower($school['abbr']);
 			}
-			Cache::set('v_school_list', $list);
+			Cache::set('v_school_list', $list, 864000);
 		}
 		return $list;
 	}

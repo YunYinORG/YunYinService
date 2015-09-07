@@ -20,24 +20,36 @@ class AuthController extends Yaf_Controller_Abstract
 		{
 			Input::I('redirect', $url, FILTER_VALIDATE_URL);
 			$sch_id = $this->_request->getPost('sch_id', 0);
-			// if($sch_id){}
-			// TODO 学号冲突
-
+			$login  = null;
 			/*尝试登陆*/
-			$login = $this->_login($number, md5($password), $sch_id);
-			if ($login === true)
+			if (!Input::post('code', $code, 'ctype_alnum'))
 			{
-				/*登录成功*/
-				$this->forward('index', 'user', 'index');
+				$login = $this->_login($number, md5($password), $sch_id);
+				if ($login === true)
+				{
+					/*登录成功*/
+					$this->forward('index', 'user', 'index');
+				}
 			}
-			elseif ($verify = $this->_verify($number, $password, $sch_id, $login))
+			else
+			{
+				$student['code'] = $code;
+			}
+
+			/*学校验证*/
+			$student['number']   = $number;
+			$student['password'] = $password;
+			$student['sch_id']   = $sch_id;
+			$verify              = $this->verify($student, $login);
+
+			if ($verify === true)
 			{
 				/*注册验证通过*/
 				$this->register();
 			}
 			else
 			{
-
+				echo '验证失败';
 			}
 		}
 		else
@@ -46,23 +58,22 @@ class AuthController extends Yaf_Controller_Abstract
 		}
 	}
 
+	/**
+	 * 注册
+	 * @method registerAction
+	 * @return [type]         [description]
+	 * @author NewFuture
+	 */
 	public function registerAction()
 	{
-		if (Input::I('number', $number, 'card') && Input::I('password', $password, 'trim'))
+		if ($this->verify($_POST))
 		{
-			if (Input::I('code', $code, 'ctype_alnum'))
-			{
-				$name = Verify\TJU::getName($number, $password, $code);
-				var_dump($name);
-			}
-			else
-			{
-				$this->error('验证码错误');
-			}
+			/*注册验证通过*/
+			$this->register();
 		}
 		else
 		{
-			$this->error('账号密码格式不对');
+			$this->error('验证失败');
 		}
 	}
 
@@ -187,8 +198,8 @@ class AuthController extends Yaf_Controller_Abstract
 		}
 		else
 		{
-			$password        = Encrypt::encryptPwd($password, $number);
-			$reg_school_list = [];
+			$password    = Encrypt::encryptPwd($password, $number);
+			$reg_schools = [];
 			foreach ($users as &$user)
 			{
 				if ($user['password'] == $password)
@@ -205,11 +216,12 @@ class AuthController extends Yaf_Controller_Abstract
 				}
 				else
 				{
-					$reg_school_list[] = $users['sch_id'];
+					$sid               = $users['sch_id'];
+					$reg_schools[$sid] = School::getAbbr($sid);
 				}
 			}
 			$this->msg = '密码错误!';
-			return $reg_school_list;
+			return $reg_schools;
 		}
 	}
 
@@ -218,33 +230,25 @@ class AuthController extends Yaf_Controller_Abstract
 	 * @method _verify
 	 * @access private
 	 * @author NewFuture[newfuture@yunyin.org]
-	 * @param  [number]   $number      [学号]
-	 * @param  [string]   $password    [md5密码]
 	 * @param  array      $user        [$sch_id]
 	 * @return [bool/int] [用户id]
 	 */
-	private function _verify($number, $password, $sch_id = 0, $except = [])
+	private function verify($info, $except = null)
 	{
-		if ($name = Verify\Connect::getName($number, $password, $sch_id, $except))
+		if ($result = School::verify($info, $except))
 		{
-			$regInfo = ['number' => $number, 'password' => md5($password), 'name' => $name];
-			Session::set('reg', $regInfo);
-			return true;
+			foreach ($result as $sid => $name)
+			{
+				if ($name)
+				{
+					$regInfo = ['number' => $info['number'], 'password' => md5($info['password']), 'name' => $name];
+					Session::set('reg', $regInfo);
+					return true;
+				}
+			}
+			return $result;
 		}
-		// if ($result = Verify\Connect::getName($number, $password, $sch_id, $except))
-		// {
-		// 	/*验证结果*/
-		// 	foreach ($result as $sch => $name)
-		// 	{
-		// 		if ($name)
-		// 		{
-		// 			$regInfo = ['number' => $number, 'password' => md5($password), 'name' => $name];
-		// 			Session::set('reg', $regInfo);
-		// 			return true;
-		// 		}
-		// 	}
-		// 	return array_keys($result);
-		// }
+		return false;
 	}
 
 	protected function error($msg = '')
