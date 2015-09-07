@@ -18,17 +18,20 @@ abstract class Rest extends Yaf_Controller_Abstract
 	 */
 	protected function init()
 	{
-		Yaf_Dispatcher::getInstance()->disableView(); //关闭视图模板引擎
-		$action      = $this->_request->getActionName();
-		$method      = strtoupper($this->_request->getMethod());
-		$rest_action = $method . '_' . $action; //REST对应的action如PUT_info
 
-		if ($method == 'PUT')
+		Yaf_Dispatcher::getInstance()->disableView(); //关闭视图模板引擎
+		$action = $this->_request->getActionName();
+		//数字id映射带info控制器
+		if (is_numeric($action))
 		{
-			//put请求写入GOLBAL中和post get一样
-			parse_str(file_get_contents('php://input'), $GLOBALS['_PUT']);
+			$this->_request->setParam('id', intval($action));
+			$path   = substr(strstr($_SERVER['PATH_INFO'], $action), strlen($action) + 1);
+			$action = $path ? strstr($path . '/', '/', true) : 'info';
 		}
-		
+		//对应REST_Action
+		$method      = $this->_request->getMethod();
+		$rest_action = $method . '_' . $action;
+
 		/*检查该action操作是否存在，存在则修改为REST接口*/
 		if (method_exists($this, $rest_action . 'Action'))
 		{
@@ -37,7 +40,7 @@ abstract class Rest extends Yaf_Controller_Abstract
 		}
 		elseif (!method_exists($this, $action . 'Action'))
 		{
-			/*action和REST_actiodn 都不存在*/
+			/*action和REST_action 都不存在*/
 			$this->response = array(
 				'error' => '未定义操作',
 				'method' => $method,
@@ -46,6 +49,9 @@ abstract class Rest extends Yaf_Controller_Abstract
 			);
 			exit;
 		}
+
+		//put请求写入GOLBAL中和post get一样
+		($method == 'PUT') AND parse_str(file_get_contents('php://input'), $GLOBALS['_PUT']);
 	}
 
 	/**
@@ -110,7 +116,7 @@ abstract class Rest extends Yaf_Controller_Abstract
 				case 'json':
 				default:
 					header('Content-type: application/json');
-					echo json_encode($this->response,JSON_UNESCAPED_UNICODE);//unicode不转码
+					echo json_encode($this->response, JSON_UNESCAPED_UNICODE); 	//unicode不转码
 					break;
 			}
 		}
