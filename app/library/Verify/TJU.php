@@ -25,8 +25,12 @@ class TJU extends Connect
 	 * @param  [type]  $code   [description]
 	 * @return [type]          [description]
 	 */
-	public static function getName($number, $pwd, $code)
+	public static function getName($number, $pwd, $code = null)
 	{
+		if (!$code)
+		{
+			return 0;
+		}
 		$data['uid']      = $number;
 		$data['password'] = $pwd;
 		$data['captchas'] = $code;

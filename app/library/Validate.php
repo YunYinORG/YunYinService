@@ -69,7 +69,7 @@ class Validate
 	}
 
 	/*md5后的字符串*/
-	public static function isMd5($md5pwd)
+	public static function isMD5($md5pwd)
 	{
 		return (strlen($md5pwd) == 32) && ctype_alnum($md5pwd);
 	}

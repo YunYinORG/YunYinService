@@ -33,7 +33,6 @@ class School
 	public static function verify($student, $except = [])
 	{
 		$param = [$student['number'], $student['password'], isset($student['code']) ? $student['code'] : null];
-
 		if (isset($student['sch_id']) && $sch_id = $student['sch_id'])
 		{
 			if ($school = self::getAbbr($sch_id))
@@ -49,6 +48,21 @@ class School
 				$list[$i] = call_user_func_array(array('Verify\\' . strtoupper($school), 'getName'), $param);
 			}
 			return $list;
+		}
+	}
+
+	/**
+	 * 获取验证码
+	 * @method code
+	 * @param  [type] $id [学校id]
+	 * @return [type]     [description]
+	 * @author NewFuture
+	 */
+	public static function code($id)
+	{
+		if ($school = self::getAbbr($id))
+		{
+			return call_user_func(array('Verify\\' . strtoupper($school), 'getCode'));
 		}
 	}
 

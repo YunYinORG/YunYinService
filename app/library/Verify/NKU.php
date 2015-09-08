@@ -15,7 +15,7 @@ class NKU extends Connect
 		return '南开测试';
 		$data['IPT_LOGINUSERNAME'] = $number;
 		$data['IPT_LOGINPASSWORD'] = $pwd;
-		parent::getCode(self::LOGIN_URL, $data); //获取缓存
+		parent::getHtml(self::LOGIN_URL, $data); //获取缓存
 		$result = parent::post('GBK', self::INFO_URL);
 		$name   = substr($result, strpos($result, '姓名：') + 9, (strlen($result) - strpos($result, '</li>')) * (-1));
 		return $name;

@@ -10,7 +10,7 @@ class TIFERT extends Connect
 	const LOGIN_URL = 'http://jw.tifert.edu.cn/2003/Logon.do?method=logon'; //登录url
 	const INFO_URL  = 'http://jw.tifert.edu.cn/2003/framework/main.jsp';    //抓取信息url
 	const SUCC_KEY  = 'window.location.href=\'http://jw.tifert.edu.cn/2003/framework/main.jsp';
-	
+
 	public static function getName($number, $pwd)
 	{
 		$data   = "USERNAME=$number&PASSWORD=$pwd";
@@ -19,10 +19,10 @@ class TIFERT extends Connect
 		{
 			if ($result = parent::getHtml(self::INFO_URL, $data))
 			{
-				$name = parent::parseName($result, '当前用户：', '</td>');
-				return trim($name);
+				return parent::parseName($result, '当前用户：', '</td>');
 			}
 		}
+		return false;
 	}
 
 }
