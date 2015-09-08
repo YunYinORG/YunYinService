@@ -9,96 +9,82 @@ class AuthController extends Yaf_Controller_Abstract
 	}
 
 	/**
-	 * 验证
+	 * 登录注册验证
 	 * @method indexAction
 	 * @return [type]     [description]
 	 * @author NewFuture
 	 */
 	public function indexAction()
 	{
-		if (Input::I('number', $number, 'card') && Input::I('password', $password, 'trim'))
+		if (Input::I('number', $this->number, 'card') && Input::I('password', $this->password, 'trim'))
 		{
-			Input::I('redirect', $url, FILTER_VALIDATE_URL);
-			$sch_id = $this->_request->getPost('sch_id', 0);
-			$login  = null;
-			/*尝试登陆*/
-			if (!Input::post('code', $code, 'ctype_alnum'))
+			// Input::I('redirect', $url, FILTER_VALIDATE_URL);
+			Input::I('sch_id', $this->sch_id, 'int');
+
+			/*尝试登录*/
+			$result = $this->login(md5($this->password));
+			if ($result)
 			{
-				$login = $this->_login($number, md5($password), $sch_id);
-				if ($login === true)
-				{
-					/*登录成功*/
-					$this->forward('index', 'user', 'index');
-				}
+				/*登录成功*/
+				$this->success('登录成功', '/user/index');
+			}
+			elseif ($sch_id && false === $result)
+			{
+				/*登录失败*/
+				$this->error('登录失败', '/auth/');
+			}
+			elseif ($this->verify()) //尝试验证
+			{
+				/*验证成功*/
+				$this->success('验证成功,继续完成注册', '/auth/register');
 			}
 			else
 			{
-				$student['code'] = $code;
-			}
-
-			/*学校验证*/
-			$student['number']   = $number;
-			$student['password'] = $password;
-			$student['sch_id']   = $sch_id;
-			$verify              = $this->verify($student, $login);
-
-			if ($verify === true)
-			{
-				/*注册验证通过*/
-				$this->register();
-			}
-			else
-			{
-				echo '验证失败';
+				/*验证失败*/
+				$this->error('验证出错', '/auth/');
 			}
 		}
 		else
 		{
-			return $this->error('账号或者密码错误');
+			$this->error('账号或者密码错误', '/');
 		}
 	}
 
 	/**
-	 * 注册
+	 * 确认注册【设定密码】
 	 * @method registerAction
 	 * @return [type]         [description]
 	 * @author NewFuture
 	 */
 	public function registerAction()
 	{
-		if ($this->verify($_POST))
-		{
-			/*注册验证通过*/
-			$this->register();
-		}
-		else
-		{
-			$this->error('验证失败');
-		}
-	}
-
-	/**
-	 * 临时注册
-	 * @method register
-	 * @return [type]   [description]
-	 * @author NewFuture
-	 */
-	public function register()
-	{
 		if ($regInfo = Session::get('reg'))
 		{
 			Session::del('reg');
-			$password            = $regInfo['password'];
+			if (!Input::post('password', $password, 'isMD5'))
+			{
+				/*设置新的密码*/
+				$password = $regInfo['password'];
+			}
 			$regInfo['password'] = Encrypt::encryptPwd($password, $regInfo['number']);
 			if ($id = UserModel::insert($regInfo))
 			{
+				/*注册成功*/
 				$regInfo['id'] = $id;
 				$token         = Auth::token($regInfo);
 				Cookie::set('token', [$id => $token]);
 				unset($regInfo['password']);
 				Session::set('user', $regInfo);
-				$this->forward('index', 'user', 'index');
+				$this->success('注册成功!', '/user/index');
 			}
+			else
+			{
+				$this->error('注册失败!');
+			}
+		}
+		else
+		{
+			$this->error('注册信息失效', '/auth/');
 		}
 	}
 
@@ -112,17 +98,7 @@ class AuthController extends Yaf_Controller_Abstract
 		Input::I('url', $url, FILTER_VALIDATE_URL, '/');
 		Cookie::flush();
 		Session::flush();
-		if ($this->_request->isXmlHttpRequest())
-		{
-			$response['status'] = 1;
-			$response['info']   = '注销成功';
-			echo json_encode($response, JSON_UNESCAPED_UNICODE);
-		}
-		else
-		{
-			$this->_response->setHeader('HTTP/1.1 303 See Other', '');
-			$this->redirect($url);
-		}
+		$this->success('注销成功');
 	}
 
 	/**
@@ -134,7 +110,7 @@ class AuthController extends Yaf_Controller_Abstract
 	 */
 	public function codeAction($sch_id = 0)
 	{
-		$code = Verify\TJU::getCode();
+		$code = School::code($sch_id);
 		$this->_response->setHeader('Content-type', 'image/jpeg');
 		echo $code;
 	}
@@ -153,115 +129,189 @@ class AuthController extends Yaf_Controller_Abstract
 
 			if (!$Code->where('code', $code)->field('use_id,type,content AS email')->find())
 			{
-				echo '验证信息不存在';
+				$this->jump('/', '验证信息不存在', 10);
 			}
 			elseif (!UserModel::saveEmail($email))
 			{
-				echo '邮箱设置失败';
+				$this->jump('/', '邮箱设置失败', 10);
 			}
 			else
 			{
 				$Code->delete();
-				echo '绑定成功！';
+				$this->jump('/', '邮箱绑定成功', 3);
 			}
-
 		}
 		else
 		{
-			echo ('code有误');
+			$this->jump('/', '验证码信息有误', 10);
 		}
 	}
 
 	/**
 	 * 登录函数
-	 * @method _login
+	 * @method login
 	 * @access private
 	 * @author NewFuture[newfuture@yunyin.org]
-	 * @param  [number]   $number      [学号]
 	 * @param  [string]   $password    [md5密码]
-	 * @param  array      $user        [$sch_id]
 	 * @return [bool/int] [用户id]
 	 */
-	private function _login($number, $password, $sch_id = 0)
+	private function login($password)
 	{
+		$conditon = ['number' => $this->number];
+		//指定学校
+		$this->sch_id AND $conditon['sch_id'] = $this->sch_id;
 
-		$conditon = ['number' => $number];
-		if ($sch_id)
-		{
-			$conditon['sch_id'] = $sch_id;
-		}
-
-		$users = UserModel::where($conditon)->field('id,password,sch_id')->select();
+		$users = UserModel::where($conditon)->select('id,password,sch_id');
 		if (empty($users))
 		{
-			return null; //未注册
+			/*未注册*/
+			return null;
 		}
 		else
 		{
-			$password    = Encrypt::encryptPwd($password, $number);
+			/*验证结果*/
+			$password    = Encrypt::encryptPwd($password, $this->number);
 			$reg_schools = [];
 			foreach ($users as &$user)
 			{
 				if ($user['password'] == $password)
 				{
-					$user['number'] = $number;
-					// $user['token']  = Auth::token($user);
-					// 保存cookie
+					/*登录成功*/
+					$user['number'] = $this->number;
 					Cookie::set('token', [$user['id'] => Auth::token($user)]);
 					unset($user['password']);
-					// $code = Auth::createCode($user);
 					Session::set('user', $user);
-
-					return true; //登录成功
+					return true;
 				}
 				else
 				{
+					//登录成功
 					$sid               = $users['sch_id'];
 					$reg_schools[$sid] = School::getAbbr($sid);
 				}
 			}
-			$this->msg = '密码错误!';
-			return $reg_schools;
+			$this->reg_schools = $reg_schools;
+			return false;
 		}
 	}
 
 	/**
 	 * 验证准备注册
-	 * @method _verify
+	 * @method verify
 	 * @access private
 	 * @author NewFuture[newfuture@yunyin.org]
-	 * @param  array      $user        [$sch_id]
-	 * @return [bool/int] [用户id]
+	 * @return bool|null
 	 */
-	private function verify($info, $except = null)
+	private function verify()
 	{
-		if ($result = School::verify($info, $except))
+		$info = array(
+			'number' => $this->number,
+			'password' => $this->password,
+			'sch_id' => $this->sch_id,
+		);
+
+		if (Input::post('code', $code, 'ctype_alnum'))
+		{
+			/*验证码*/
+			$info['code'] = $code;
+		}
+
+		if ($result = School::verify($info, $this->reg_schools))
 		{
 			foreach ($result as $sid => $name)
 			{
 				if ($name)
 				{
-					$regInfo = ['number' => $info['number'], 'password' => md5($info['password']), 'name' => $name];
+					/*验证成功*/
+					$regInfo = array(
+						'number' => $info['number'],
+						'password' => md5($info['password']),
+						'name' => $name,
+						'sch_id' => $sid,
+					);
 					Session::set('reg', $regInfo);
 					return true;
 				}
 			}
-			return $result;
 		}
 		return false;
 	}
 
-	protected function error($msg = '')
+	/**
+	 * 错误提示
+	 * @method error
+	 * @param  [type] $msg [description]
+	 * @param  string $url [description]
+	 * @return [type]      [description]
+	 * @author NewFuture
+	 */
+	protected function error($msg, $url = '/')
 	{
-		die($msg);
+		if ($this->_request->isXmlHttpRequest())
+		{
+			$response['status'] = 0;
+			$response['info']   = ['msg' => $msg, 'url' => $url];
+			$this->json($response);
+		}
+		else
+		{
+			$this->jump($url, $msg);
+		}
 	}
 
-	// protected function success($url)
-	// {
-	// 	die($url . '[OK]');
-	// }
-	//
-	//
-}
+	/**
+	 * 成功提示
+	 * @method success
+	 * @param  [type]  $msg [description]
+	 * @param  [type]  $url [description]
+	 * @return [type]       [description]
+	 * @author NewFuture
+	 */
+	protected function success($msg, $url)
+	{
+		if ($this->_request->isXmlHttpRequest())
+		{
+			$response['status'] = 1;
+			$response['info']   = ['msg' => $msg, 'url' => $url];
+			$this->json($response);
+		}
+		else
+		{
+			$this->jump($url, $msg);
+		}
+	}
 
+	/**
+	 * 输出json
+	 * @method dump
+	 * @param  array $response [输出信息]
+	 * @author NewFuture
+	 */
+	protected function json($response)
+	{
+		header('Content-type: application/json');
+		die(json_encode($response, JSON_UNESCAPED_UNICODE));
+	}
+
+	/**
+	 * 页面跳转
+	 * @method jump
+	 * @param  string  $url  [url]
+	 * @param  string  $msg  [消息]
+	 * @param  integer $time [跳转时间]
+	 * @author NewFuture
+	 */
+	protected function jump($url, $msg = null, $time = 1)
+	{
+		if ($msg)
+		{
+			$this->_view->assign('time', $time)->assign('url', $url)->assign('msg', $msg)->display('jump.phtml');
+		}
+		else
+		{
+			$this->_response->setHeader('HTTP/1.1 303 See Other', '');
+			$this->redirect($url);
+		}
+	}
+}
 ?>

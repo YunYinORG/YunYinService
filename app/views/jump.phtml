@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title><?=$msg?></title>
+        <meta http-equiv="refresh" content="<?=$time?>;url=<?=$url?>"/>
+        <style type="text/css">
+        body{ background: #fff; color: #333; padding: 24px 48px; }
+        h1{ font-size: 100px; font-weight: normal; line-height: 120px; margin-bottom: 12px; }
+        </style>
+    </head>
+    <h1><?=$msg?></h1>
+    <p> <b id="wait"><?=$time?></b>s后自动 <a id="href" href="<?=$url?>">跳转</a></p>
+    <body>
+        <script type="text/javascript">
+        (function(){
+        var wait = document.getElementById('wait'),href = document.getElementById('href').href;
+        var interval = setInterval(function(){
+        var time = --wait.innerHTML;
+        if(time <= 0) {location.href = href;clearInterval(interval);};
+        }, 1000);
+        })();
+        </script>
+    </body>
+</html>
