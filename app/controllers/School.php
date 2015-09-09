@@ -69,12 +69,26 @@ class SchoolController extends Rest
 		}
 	}
 
+	/**
+	 * 分析学号所在学校
+	 * @method POST_numberAction
+	 * @author NewFuture
+	 */
 	public function POST_numberAction()
 	{
 		if (Input::post('number', $number, 'card'))
 		{
-			Input::post('white', $white);
-			Input::post('black', $black);
+			/*排除学校*/
+			if (Input::post('black', $black))
+			{
+				$this->parse($black);
+			}
+			/*限定学校*/
+			if (Input::post('white', $white))
+			{
+				$this->parse($white);
+			}
+
 			if ($schools = School::guess($number, $black, $white))
 			{
 				if ($reg = UserModel::where('number', $number)->select('sch_id'))
@@ -95,5 +109,23 @@ class SchoolController extends Rest
 		{
 			$this->response(0, '学号格式有误');
 		}
+	}
+
+	private function parse(&$s)
+	{
+		/*如果是字符切成数组*/
+		if (is_string($s))
+		{
+			$s = explode(',', $s);
+		}
+		/*id转成缩写*/
+		if (is_numeric(end($s)))
+		{
+			array_walk($s, function (&$v)
+			{
+				$v = School::getAbbr($v);
+			});
+		}
+		return $s;
 	}
 }
