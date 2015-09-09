@@ -10,11 +10,12 @@ YYF核心库
 * Kv.php : 键值对存储类(Kv)
 * Log.php : 日志管理类(Log)
 * Mail.php : 邮件管理类(Mail)
-* Model.php : 核心model类(Model) 
+* Model.php : 核心model类(Model)
 * Random.php : 随机数生成器(Random)
 * Rest.php : REST核心controller类(Rest)
+* Rsa.php : Rsa 加解密类(Rsa)
 * Session.php : session操作管理(Session)
-* Validate.php : 验证管理(Validate)
+* Validate.php : 格式验证(Validate)
 
 Auth
 ------
@@ -38,10 +39,28 @@ Cache::del($name)   #删除缓存
 Cache::flush()      #清空缓存
 ```
 
+Config
+------
+配置读取与管理
+```php
+Config::get($name) #快速获取配置支持多级操作
+Config::getSecret($name,$key=null) #获取私有配置项
+```
+
+Cookie
+------
+安全Cookie管理
+```php
+Cookie::set($name, $value, $path='/',$expire = false) #设置cookie
+Cookie::get($name)   #读取cookie
+Cookie::del($name)   #删除cookie
+Cookie::flush()      #清空cookie
+```
+
 Encrypt
 -----
 加密库
-```php 
+```php
 /*基础编码和加密*/
 Encrypt::base64Encode($str) #路径安全的Base64编码
 Encrypt::base64Decode($str) #安全base64解码
@@ -61,7 +80,7 @@ Input
 * 返回true(输入存在且有效)或者false,
 * 输入结果存在$export中
 * $filter为参数格式验证或者过滤方法支持：正则表达式，系统函数，php的filter_var常量,自定义的验证过滤函数
-```php 
+```php
 Input::post($name, &$export, $filter = null, $default = null)
 Input::get($name, &$export, $filter = null, $default = null)
 Input::put($name, &$export, $filter = null, $default = null)
@@ -122,7 +141,7 @@ $Book->where('amount',0)->delete(); #删除
 Random
 -------
 快速随机数生成器
-```php 
+```php
 Random::n($n = 4)  #生成随机number[0-9]
 Random::w($n = 8)  #随机word[0-9|a-Z]
 Random::c($n=10)   #生成随机char[a-Z]
@@ -137,13 +156,23 @@ REST控制器核心基类
 * 自动绑定参数id
 * 自动输出xml或者json格式数据
 
-`private $response_type='json'` 数据格式json和xml 
-`protected $response `响应的数据 
+`private $response_type='json'` 数据格式json和xml
+`protected $response `响应的数据
 `protected response(status,info)`快速设置响应方法
+
+Rsa
+-------
+Rsa 非对称加密库
+```
+Rsa::pubKey()   #获取公钥
+Rsa::encode($s) #加密
+Rsa::decode($s) #解密
+```
+
 
 Session
 --------
-Session操作管理 
+Session操作管理
 支持数组
 ```php
 Session::set($name, $data) #设置

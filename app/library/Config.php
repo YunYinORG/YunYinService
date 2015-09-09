@@ -57,37 +57,3 @@ class Config
 		return self::$_config;
 	}
 }
-/**
- * 设置配置
- * @method set
- * @param  [type] $key   [description]
- * @param  [type] $value [description]
- * @author NewFuture
- */
-// public static function set($key, $value)
-// {
-// 	if (is_array($key))
-// 	{
-// 		self::$_config = array_merge(self::$_config, $value);
-// 	}
-// 	elseif (strpos($key, '.'))
-// 	{
-// 		//多维数组
-// 		$name   = explode('.', $key);
-// 		$config = &self::$_config;
-// 		foreach ($name as $k)
-// 		{
-
-// 			if (!isset($config[$k]))
-// 			{
-// 				$config[$k] = [];
-// 			}
-// 			$config = &$config;
-// 		}
-// 		return $config;
-// 	}
-// 	else
-// 	{
-// 		self::$_config[$key] = $value;
-// 	}
-// }

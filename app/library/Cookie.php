@@ -30,17 +30,14 @@ class Cookie
 	 * 获取cookie
 	 * @method get
 	 * @param  [string] $name [cookie名称]
-	 * @return [json]	
+	 * @return [json]
 	 * @author NewFuture
 	 */
 	public static function get($name)
 	{
-		if (isset($_COOKIE[$name]))
+		if (isset($_COOKIE[$name]) && $data = Encrypt::aesDecode($_COOKIE[$name], self::config('key'), true)) //AES解密
 		{
-			if ($data = Encrypt::aesDecode($_COOKIE[$name], self::config('key'), true)) //AES解密
-			{
-				return @json_decode($data); 
-			}
+			return @json_decode($data);
 		}
 	}
 
@@ -54,9 +51,9 @@ class Cookie
 	{
 		if (isset($_COOKIE[$name]))
 		{
+			unset($_COOKIE[$name]);
 			$path = $path ?: self::config('path');
 			return setcookie($name, '', 100, $path, self::config('domain'), self::config('secure'), self::config('httponly'));
-			unset($_COOKIE[$name]);	
 		}
 	}
 
@@ -85,13 +82,18 @@ class Cookie
 	 */
 	private static function config($name)
 	{
-		if (null === self::$_config)
+		if (!$config = self::$_config)
 		{
-			$config        = Config::get('cookie');
-			$path          = Config::get('secret_config_path');
-			$secureConfig  = new Yaf_Config_Ini($path, 'cookie');
-			self::$_config = array_merge($config, $secureConfig->toArray());
+			$config = Config::get('cookie');
+			if (!$key = Kv::get('COOKIE_aes_key'))
+			{
+				/*重新生成加密密钥*/
+				$key = Random::word(32);
+				Kv::set('COOKIE_aes_key', $key);
+			}
+			$config['key'] = $key;
+			self::$_config = $config;
 		}
-		return isset(self::$_config[$name]) ? self::$_config[$name] : null;
+		return isset($config[$name]) ? $config[$name] : null;
 	}
 }

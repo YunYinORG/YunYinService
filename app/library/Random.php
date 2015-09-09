@@ -6,11 +6,11 @@ class Random
 {
 	/**
 	 * 生成指定长度的随机数字
-	 * @method N
+	 * @method number
 	 * @param  integer $n [description]
 	 * @author NewFuture
 	 */
-	public static function n($n = 4)
+	public static function number($n = 4)
 	{
 		if ($n < 9 && $n >= 2)
 		{
@@ -24,13 +24,13 @@ class Random
 	}
 
 	/*数字和字母组合的随机字符串*/
-	public static function w($n = 8)
+	public static function word($n = 8)
 	{
 		return $n < 1 ? '' : substr(str_shuffle(str_repeat('abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', ($n + 3) / 4)), 0, $n);
 	}
 
 	/*只有字符*/
-	public static function c($n = 10)
+	public static function char($n = 10)
 	{
 		return $n < 1 ? '' : substr(str_shuffle(str_repeat('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', ($n + 3) / 4)), 0, $n);
 	}

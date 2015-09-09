@@ -219,7 +219,7 @@ class UserController extends Rest
 			$code = ['use_id' => $id, 'type' => 1];
 			$Code = new Model('code');
 			$Code->delete($code);
-			$code['code'] = $id . '_' . Random::w(16);
+			$code['code'] = $id . '_' . Random::word(16);
 			/*发送邮件*/
 			if ($Code->insert($code) && Mail::sendVerify($email, $name, $code))
 			{

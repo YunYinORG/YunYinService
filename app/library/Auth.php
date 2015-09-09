@@ -106,7 +106,7 @@ class Auth
 	 */
 	public static function createCode($session)
 	{
-		$code = $session['id'] . 'C' . Random::w(10);
+		$code = $session['id'] . 'C' . Random::word(10);
 		Cache::set('auth_' . $code, $session, 300); //5分钟有效
 		return $code;
 	}
