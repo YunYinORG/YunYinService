@@ -113,7 +113,7 @@ class UserController extends Rest
 			/*手机有效，发送验证码*/
 			$code = Random::code(6);
 			session::set('code_phone', [$code => $phone]);
-			if (Sms::sendCode($phone, $code))
+			if (Sms::bind($phone, $code))
 			{
 				$response['status'] = 1;
 				$response['info']   = '发送成功[最多还可重发' . (5 - $try_times) . '次]';
