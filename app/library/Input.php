@@ -35,23 +35,27 @@ class Input
 			$input = &$_REQUEST;
 			$name  = $param;
 		}
-		return self::filter($input, $name, $export, $filter) || ($export = $default);
+		$r = self::filter($input, $name, $export, $filter) OR ($export = $default);
+		return $r;
 	}
 
 	/*put,get，post等输入过滤*/
 	public static function put($name, &$export, $filter = null, $default = null)
 	{
-		return self::filter($GLOBALS['_PUT'], $name, $export, $filter) || ($export = $default);
+		($r = self::filter($GLOBALS['_PUT'], $name, $export, $filter)) OR ($export = $default);
+		return $r;
 	}
 
 	public static function get($name, &$export, $filter = null, $default = null)
 	{
-		return self::filter($_GET, $name, $export, $filter) || ($export = $default);
+		($r = self::filter($_GET, $name, $export, $filter)) OR ($export = $default);
+		return $r;
 	}
 
 	public static function post($name, &$export, $filter = null, $default = null)
 	{
-		return self::filter($_POST, $name, $export, $filter) || ($export = $default);
+		($r = self::filter($_POST, $name, $export, $filter)) OR ($export = $default);
+		return $r;
 	}
 
 	/**
@@ -69,50 +73,67 @@ class Input
 		if (isset($input[$index]))
 		{
 			$export = $input[$index];
-			if (empty($filter))
+
+			switch (gettype($filter))
 			{
-				/*不用过滤*/
-				return true;
-			}
-			elseif (is_int($filter))
-			{
-				/*使用PHP自带的的过滤器*/
-				return (bool) $export = filter_var($export, $filter);
-			}
-			elseif ($filter[0] == '/')
-			{
-				/*正则表达式验证*/
-				return preg_match($filter, $export);
-			}
-			elseif (method_exists('Parse\Filter', $filter))
-			{
-				/*过滤器过滤*/
-				return (bool) $export = call_user_func_array(array('Parse\Filter', $filter), [$export]);
-			}
-			elseif (method_exists('Validate', $filter))
-			{
-				/*Validate方法验证*/
-				return call_user_func_array(array('Validate', $filter), [$export]);
-			}
-			elseif (function_exists($filter))
-			{
-				/*函数*/
-				return $filter($export);
-			}
-			elseif ($filter = (string) Config::get('regex.' . $filter))
-			{
-				/*尝试配置正则*/
-				return preg_match($filter, $export);
-			}
-			else
-			{
-				throw new Exception('未知过方法' . $filter);
+				case 'NULL':
+				case NULL:	//无需过滤
+					return true;
+
+				case 'int':	//整型常量
+				/*系统过滤函数*/
+					return $export = filter_var($export, $filter);
+
+				case 'object':
+				/*匿名回调函数*/
+					$r = $filter($export);
+					return $r ? ($export = $r) : false;
+
+				case 'string':	//字符串
+
+					if ($filter[0] == '/')
+					{
+					/*正则表达式验证*/
+						return preg_match($filter, $export);
+					}
+					elseif (function_exists($filter))
+					{
+					/*已经定义的函数*/
+						return $export = $filter($export);
+					}
+					elseif (method_exists('Parse\Filter', $filter))
+					{
+					/*过滤器过滤*/
+						return (bool) $export = call_user_func_array(array('Parse\Filter', $filter), [$export]);
+					}
+					elseif (method_exists('Validate', $filter))
+					{
+					/*Validate方法验证*/
+						return call_user_func_array(array('Validate', $filter), [$export]);
+					}
+					elseif ($filterid = filter_id($filter))
+					{
+					/*系统过滤函数*/
+						return $export = filter_var($export, $filterid);
+					}
+					elseif ($regex = (string) Config::get('regex.' . $filter))
+					{
+					/*尝试配置正则*/
+						return preg_match($regex, $export);
+					}
+				//继续往下走
+				default:
+					if (Config::get('isdebug'))
+					{
+						throw new Exception('未知过方法' . $filter);
+					}
+					return false;
 			}
 		}
 		else
 		{
 			/*不存在*/
-			return false;
+			return null;
 		}
 	}
 }
