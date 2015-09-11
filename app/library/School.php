@@ -62,7 +62,7 @@ class School
 	{
 		if ($school = self::getAbbr($id))
 		{
-			return call_user_func(array('Verify\\' . strtoupper($school), 'getCode'));
+			return call_user_func(array('Verify\\' . strtoupper($school), 'getCode'),[]);
 		}
 	}
 

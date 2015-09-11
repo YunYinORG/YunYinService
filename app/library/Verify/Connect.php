@@ -8,6 +8,12 @@ abstract class Connect
 	private static $_curl     = null; //curl链接状态,每次请求使用同一个，
 	protected static $_cookie = null; //cookie保存位置
 
+	/*获取验证码*/
+	public static function getCode()
+	{
+		return false;
+	}
+
 	/**
 	 * post数据
 	 * @method post
