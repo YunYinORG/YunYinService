@@ -28,7 +28,7 @@ class AuthController extends Yaf_Controller_Abstract
 				/*登录成功*/
 				$this->success('登录成功', '/user/index');
 			}
-			elseif ($sch_id && false === $result)
+			elseif ($this->sch_id && false === $result)
 			{
 				/*登录失败*/
 				$this->error('登录失败', '/auth/');
@@ -36,7 +36,9 @@ class AuthController extends Yaf_Controller_Abstract
 			elseif ($this->verify()) //尝试验证
 			{
 				/*验证成功*/
-				$this->success('验证成功,继续完成注册', '/auth/register');
+				$response         = ['status' => 0];
+				$response['info'] = ['msg' => '验证成功,继续完成注册', 'url' => '/auth/register'];
+				$this->json($response);
 			}
 			else
 			{
@@ -215,8 +217,8 @@ class AuthController extends Yaf_Controller_Abstract
 			/*验证码*/
 			$info['code'] = $code;
 		}
-
-		if ($result = School::verify($info, $this->reg_schools))
+		$black = isset($this->reg_schools) ? $this->reg_schools : [];
+		if ($result = School::verify($info, $black))
 		{
 			foreach ($result as $sid => $name)
 			{
@@ -249,7 +251,7 @@ class AuthController extends Yaf_Controller_Abstract
 	{
 		if ($this->_request->isXmlHttpRequest())
 		{
-			$response['status'] = 0;
+			$response['status'] = -1;
 			$response['info']   = ['msg' => $msg, 'url' => $url];
 			$this->json($response);
 		}

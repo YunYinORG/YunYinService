@@ -26,7 +26,7 @@ class School
 	/**
 	 * 验证学校
 	 * @method verify
-	 * @param  array  $info   [description]
+	 * @param  array  $student   [description]
 	 * @return [mixed]          [description]
 	 * @author NewFuture
 	 */
@@ -42,7 +42,7 @@ class School
 		}
 		else
 		{
-			$list = self::guess($info['number'], $except);
+			$list = self::guess($student['number'], $except);
 			foreach ($list as $i => $school)
 			{
 				$list[$i] = call_user_func_array(array('Verify\\' . strtoupper($school), 'getName'), $param);
