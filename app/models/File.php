@@ -11,11 +11,10 @@ class FileModel extends FacadeModel
 	 * @return [type]         [description]
 	 * @author NewFuture
 	 */
-	public static function saveName($name)
+	public static function saveName($fid, $name)
 	{
-		if ($pname = Service\File::parseName($name))
+		if ($name = File::filterName($name))
 		{
-			$name = $pname['base'] . '.' . $pname['ext'];
 			return parent::where('use_id', Auth::id())->set('name', $name)->save($fid);
 		}
 	}

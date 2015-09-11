@@ -2,7 +2,6 @@
 /**
  * 文件管理
  */
-use Service\File;
 
 class FileController extends Rest
 {
@@ -47,7 +46,7 @@ class FileController extends Rest
 		{
 
 			Cache::del($key);
-			//文件名由 temp_xxxx,重命名为 file_xxxx,
+			/*文件名由 temp_xxxx,重命名为 file_xxxx*/
 			$newfile        = strtr($key, 'temp', 'file') . '_' . $_SERVER['REQUEST_TIME'];
 			$file['name']   = $name;
 			$file['url']    = $newfile;
@@ -75,15 +74,15 @@ class FileController extends Rest
 	public function POST_tokenAction()
 	{
 		$userid = $this->auth();
-		if (Input::post('name', $name, 'title')) //FILTER_SANITIZE_EMAIL过滤特殊字符
+		if (Input::post('name', $name, 'title') && $name = File::filterName($name))
 		{
-			$key   = uniqid('temp_') . '_' . $userid;
-			$token = File::getToken($name, $key);
+			$key   = uniqid('temp_' . $userid . '_');
+			$token = File::token($key);
 			if ($token)
 			{
 				header('Access-Control-Allow-Origin:http://upload.qiniu.com');
 				Cache::set($key, $name, 1200);
-				$response['token'] = $files;
+				$response['token'] = $token;
 				$response['key']   = $key;
 				$response['name']  = $name;
 				$this->response(1, $response);
