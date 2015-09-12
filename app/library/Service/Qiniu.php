@@ -23,7 +23,7 @@ class Qiniu
 	 * @return string        url
 	 * @author NewFuture
 	 */
-	public static function download($name, $param = [])
+	public function download($name, $param = [])
 	{
 		$url   = $this->_config['domain'] . '/' . $name . '?' . http_build_query($param);
 		$token = $this->sign($url);
@@ -33,16 +33,29 @@ class Qiniu
 	/**
 	 * 重命名【移动】
 	 * @method move
-	 * @param  [type] $file     [description]
-	 * @param  [type] $new_file [description]
+	 * @param  [type] $from     [description]
+	 * @param  [type] $to [description]
 	 * @author NewFuture
 	 */
-	public function move($file, $new_file)
+	public function move($from, $to)
 	{
-		$bucket   = $this->_config['bucket'];
-		$file     = self::qiniuEncode($bucket . ':' . trim($file));
-		$new_file = self::qiniuEncode($bucket . ':' . trim($new_file));
-		$op       = '/move/' . $file . '/' . $new_file;
+		$bucket = $this->_config['bucket'];
+		$op     = '/move/' . self::qiniuEncode($bucket . ':' . $from) . '/' . self::qiniuEncode($bucket . ':' . $to);
+		return self::opration($op);
+	}
+
+	/**
+	 * 复制文件
+	 * @method copy
+	 * @param  [type] $file     [description]
+	 * @param  [type] $copyName [description]
+	 * @return [type]           [description]
+	 * @author NewFuture
+	 */
+	public function copy($file, $copyName)
+	{
+		$bucket = $this->_config['bucket'];
+		$op     = '/copy/' . self::qiniuEncode($bucket . ':' . $file) . '/' . self::qiniuEncode($bucket . ':' . $copyName);
 		return self::opration($op);
 	}
 
@@ -59,6 +72,7 @@ class Qiniu
 		$setting = array(
 			'scope' => $this->_config['bucket'] . ':' . $key,
 			'deadline' => $timeout + $_SERVER['REQUEST_TIME'],
+			'fsizeLimit' => Config::get('upload.max'),
 		);
 		$setting = self::qiniuEncode(json_encode($setting));
 		return $this->sign($setting) . ':' . $setting;
@@ -71,7 +85,7 @@ class Qiniu
 	 * @return bool      [description]
 	 * @author NewFuture
 	 */
-	public static function delete($file)
+	public function delete($file)
 	{
 		$file = self::qiniuEncode($this->_config['bucket'] . ':' . trim($file));
 		return self::opration('/delete/' . $file);
@@ -84,7 +98,7 @@ class Qiniu
 	 * @return bool     	[操作结果]
 	 * @author NewFuture
 	 */
-	private static function opration($op)
+	private function opration($op)
 	{
 		$token  = $this->sign($op . PHP_EOL);
 		$url    = self::QINIU_RS . $op;

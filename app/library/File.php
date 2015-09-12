@@ -13,9 +13,11 @@ class File
 	 * @return [url]        [下载链接]
 	 * @author NewFuture
 	 */
-	public static function get($name, $param = [])
+	public static function get($name, $alias = null)
 	{
 		$param['e'] = $_SERVER['REQUEST_TIME'] + 300; //下载过期时间
+
+		$alias AND $param['attname'] = urlencode($alias);
 		return self::handler()->download(trim($name), $param);
 	}
 
@@ -41,6 +43,19 @@ class File
 	public static function del($name)
 	{
 		return self::handler()->delete($name);
+	}
+
+	/**
+	 * 负责文件
+	 * @method copy
+	 * @param  [type] $file      [description]
+	 * @param  [type] $copyeName [description]
+	 * @return [type]            [description]
+	 * @author NewFuture
+	 */
+	public static function copy($file, $copyName)
+	{
+		return self::handler()->copy($file, $copyName);
 	}
 
 	/**

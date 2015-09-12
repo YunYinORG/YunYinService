@@ -131,6 +131,7 @@ class FileController extends Rest
 		$userid = $this->auth();
 		if ($file = FileModel::where('use_id', '=', $userid)->find($id))
 		{
+			$file->url = File::get($file->url, $file->name);
 			$this->response(1, $file);
 		}
 		else

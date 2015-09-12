@@ -46,10 +46,14 @@ class ShareController extends Rest
 		else
 		{
 			/*验证完成，开始插入*/
-			//TODO URL
+
+			$url             = $File->url;
+			$url             = substr_replace($url, 'share', 0, 4);
+			$share['url']    = $url;
 			$share['fil_id'] = $fid;
 			$share['use_id'] = $userid;
 			$share['name']   = Input::post('name', $name, 'title') ? $name : $File->name;
+
 			if (Input::post('detail', $detail, 'text'))
 			{
 				$share['detail'] = $detail;
