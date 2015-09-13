@@ -40,7 +40,7 @@ class TJU extends Connect
 		if ($result)
 		{
 			$name = parent::parseName($result, "当前用户：$number(", ')');
-			return $name;
+			return trim($name);
 		}
 		return false;
 	}

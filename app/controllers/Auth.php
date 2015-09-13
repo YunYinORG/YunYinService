@@ -16,10 +16,10 @@ class AuthController extends Yaf_Controller_Abstract
 	 */
 	public function indexAction()
 	{
-		if (Input::I('number', $this->number, 'card') && Input::I('password', $this->password, 'trim'))
+		if (Input::post('number', $this->number, 'card') && Input::post('password', $this->password, 'trim'))
 		{
 			// Input::I('redirect', $url, FILTER_VALIDATE_URL);
-			Input::I('sch_id', $this->sch_id, 'int');
+			Input::post('sch_id', $this->sch_id, 'int');
 
 			/*尝试登录*/
 			$result = $this->login(md5($this->password));
@@ -63,9 +63,15 @@ class AuthController extends Yaf_Controller_Abstract
 		if ($regInfo = Session::get('reg'))
 		{
 			Session::del('reg');
-			if (!Input::post('password', $password, 'isMD5'))
+
+			if (Input::post('password', $password, 'isMD5') === false)
 			{
-				/*设置新的密码*/
+				/*密码未md5*/
+				$this->error('密码通讯不安全', '/auth/register');
+			}
+			elseif (!$password)
+			{
+				/*未设置密码*/
 				$password = $regInfo['password'];
 			}
 			$regInfo['password'] = Encrypt::encryptPwd($password, $regInfo['number']);
@@ -100,7 +106,7 @@ class AuthController extends Yaf_Controller_Abstract
 		Input::I('url', $url, FILTER_VALIDATE_URL, '/');
 		Cookie::flush();
 		Session::flush();
-		$this->success('注销成功');
+		$this->success('注销成功', $url);
 	}
 
 	/**
