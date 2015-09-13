@@ -106,8 +106,8 @@ class AuthController extends Yaf_Controller_Abstract
 	/**
 	 * 验证码
 	 * @method codeAction
-	 * @param  integer    $sch_id [description]
-	 * @return [type]             [description]
+	 * @param  integer    $sch_id [学校id]
+	 * @return [image]            [description]
 	 * @author NewFuture
 	 */
 	public function codeAction($sch_id = 0)
@@ -242,8 +242,8 @@ class AuthController extends Yaf_Controller_Abstract
 	/**
 	 * 错误提示
 	 * @method error
-	 * @param  [type] $msg [description]
-	 * @param  string $url [description]
+	 * @param  [string] $msg [信息]
+	 * @param  string $url [跳转url]
 	 * @return [type]      [description]
 	 * @author NewFuture
 	 */
@@ -264,8 +264,8 @@ class AuthController extends Yaf_Controller_Abstract
 	/**
 	 * 成功提示
 	 * @method success
-	 * @param  [type]  $msg [description]
-	 * @param  [type]  $url [description]
+	 * @param  [string]  $msg [信息]
+	 * @param  [string]  $url [url]
 	 * @return [type]       [description]
 	 * @author NewFuture
 	 */
