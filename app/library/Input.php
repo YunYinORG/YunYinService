@@ -100,9 +100,8 @@ class Input
 					{
 					/*已经定义的函数*/
 						$r = $filter($export);
-
-						is_bool($r) OR $export = $r;//返回值不是bool型的进行赋值（过滤），否则进行验证
-						return $r;
+						//返回值不是true型的进行赋值（过滤），否则进行验证
+						return $r ? (is_bool($r) OR $export = $r) : $export = $r;
 					}
 					elseif (method_exists('Parse\Filter', $filter))
 					{
