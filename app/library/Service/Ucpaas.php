@@ -3,7 +3,7 @@
  * 短信发送
  */
 namespace Service;
-class Ucpass
+class Ucpaas
 {
 	private $_url = false;
 	private $_appid;
@@ -17,7 +17,7 @@ class Ucpass
 		$sig          = strtoupper(md5($accountSid . $token . $timestamp));
 		$this->_appid = $appId;
 		$this->_url   = $baseUrl . $softVersion . '/Accounts/' . $accountSid . '/Messages/templateSMS?sig=' . $sig;
-		$auth->auth   = trim(base64_encode($accountSid . ':' . $timestamp));
+		$this->auth   = trim(base64_encode($accountSid . ':' . $timestamp));
 	}
 
 	/**
@@ -30,7 +30,7 @@ class Ucpass
 
 		$ch = curl_init($this->_url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json;charset=utf-8', 'Authorization:' . $this->$auth));
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json;charset=utf-8', 'Authorization:' . $this->auth));
 		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);

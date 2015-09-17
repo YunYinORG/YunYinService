@@ -194,7 +194,7 @@ class AuthController extends Yaf_Controller_Abstract
 				else
 				{
 					//登录成功
-					$sid               = $users['sch_id'];
+					$sid               = $user['sch_id'];
 					$reg_schools[$sid] = School::getAbbr($sid);
 				}
 			}

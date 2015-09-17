@@ -11,7 +11,7 @@ class Sms
 	 * 绑定手机
 	 * @param $code验证码
 	 */
-	public function bind($Phone, $code)
+	public function bind($phone, $code)
 	{
 		$msg = $code . ',5';
 		return self::send($phone, $msg, 'bind');
@@ -68,7 +68,7 @@ class Sms
 		if (null == self::$_handler)
 		{
 			$config          = Config::getSecret('sms');
-			$_handler        = new Service\Ucpass($config['account'], $config['appid'], $config['token']);
+			self::$_handler  = new Service\Ucpaas($config['account'], $config['appid'], $config['token']);
 			self::$_template = $config['template'];
 		}
 		return self::$_handler->send($phone, $msg, self::$_template[$tplName]);

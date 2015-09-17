@@ -108,15 +108,15 @@ class UserController extends Rest
 		{
 			$response['info'] = '已经绑定过用户';
 		}
-		elseif ($try_times = Cache::get('snd_code_t' . $id) > 5)
+		elseif (($try_times = Cache::get('snd_code_t' . $id)) > 5)
 		{
 			$response['info'] = '发送此数过多,12小时之后重试';
 		}
 		else
 		{
 			/*手机有效，发送验证码*/
-			$code = Random::code(6);
-			session::set('code_phone', [$code => $phone]);
+			$code = strtoupper(Random::code(6));
+			Session::set('code_phone', [$code => $phone]);
 			if (Sms::bind($phone, $code))
 			{
 				$response['status'] = 1;
@@ -128,6 +128,7 @@ class UserController extends Rest
 				$response['info'] = '短信发送出错[最多还可重发' . (5 - $try_times) . '次]';
 			}
 		}
+		$this->response = $response;
 	}
 
 	/**
@@ -142,11 +143,11 @@ class UserController extends Rest
 		$id = $this->auth($id);
 
 		$response['status'] = 0;
-		if (!Input::post('code', $code, 'ctype_alnum')) //数字或者字母
+		if (!Input::put('code', $code, 'ctype_alnum')) //数字或者字母
 		{
 			$response['info'] = '验证码格式不对';
 		}
-		elseif ($verify = Session::get('code_phone'))
+		elseif (!$verify = Session::get('code_phone'))
 		{
 			$response['info'] = '验证码已过期,请重新生成';
 		}
@@ -155,7 +156,7 @@ class UserController extends Rest
 			$response['info'] = '此验证码尝试次数过多,请重新发送短信';
 			Session::del('code_phone');
 		}
-		elseif (key($verify) != $code)
+		elseif (key($verify) != strtoupper($code))
 		{
 			$response['info'] = '验证码错误';
 			Cache::set('try_code_t' . $id, $try_times + 1);
@@ -164,7 +165,7 @@ class UserController extends Rest
 		{
 			Cache::del('try_code_t' . $id);
 			session::del('code_phone');
-			$phone = $verify[$code]; //读取号码
+			$phone = $verify[strtoupper($code)]; //读取号码
 			if (UserModel::SavePhone($phone))
 			{
 				$response['info']   = '手机号已经更新';
@@ -175,6 +176,7 @@ class UserController extends Rest
 				$response['info'] = '手机号保存失败';
 			}
 		}
+		$this->response = $response;
 	}
 
 	/**
