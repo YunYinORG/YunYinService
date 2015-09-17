@@ -135,11 +135,11 @@ class AuthController extends Yaf_Controller_Abstract
 		{
 			$Code = new Model('code');
 
-			if (!$Code->where('code', $code)->field('use_id,type,content AS email')->find())
+			if (!$Code->where('code', $code)->field('use_id AS uid,type,content AS email')->find())
 			{
 				$this->jump('/', '验证信息不存在', 10);
 			}
-			elseif (!UserModel::saveEmail($email))
+			elseif (!UserModel::saveEmail($Code['email'], $Code['uid']))
 			{
 				$this->jump('/', '邮箱设置失败', 10);
 			}

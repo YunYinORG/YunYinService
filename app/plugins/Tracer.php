@@ -10,9 +10,9 @@ class TracerPlugin extends Yaf_Plugin_Abstract
 	public function __construct()
 	{
 		$start = $_SERVER['REQUEST_TIME_FLOAT'] * 1000;
-		Log::write($start . ' 请求:' . getenv('REQUEST_URI'), 'TRACER');
+		Log::write(getenv('REQUEST_METHOD') . getenv('REQUEST_URI'), 'TRACER');
 		$this->time['request'] = $start;
-		$this->mem['start']    = memory_get_usage() / 1024;//启动内存，包括调试插件占用
+		$this->mem['start']    = memory_get_usage() / 1024; //启动内存，包括调试插件占用
 	}
 
 	//在路由之前触发，这个是7个事件中, 最早的一个. 但是一些全局自定的工作, 还是应该放在Bootstrap中去完成

@@ -190,7 +190,7 @@ class UserController extends Rest
 	{
 		$id    = $this->auth($id);
 		$email = UserModel::where('id', '=', $id)->get('email');
-		$email = $email ? Encrypt::encryptEmail($email) : null;
+		$email = $email ? Encrypt::decryptEmail($email) : null;
 		$this->response(1, $email);
 	}
 
@@ -225,9 +225,10 @@ class UserController extends Rest
 			$code = ['use_id' => $id, 'type' => 1];
 			$Code = new Model('code');
 			$Code->delete($code);
-			$code['code'] = $id . '_' . Random::word(16);
+			$code['code']    = $id . '_' . Random::word(16);
+			$code['content'] = $email;
 			/*发送邮件*/
-			if ($Code->insert($code) && Mail::sendVerify($email, $name, $code))
+			if ($Code->insert($code) && Mail::sendVerify($email, $name, $code['code']))
 			{
 				$response['status'] = 1;
 				$response['info']   = '验证邮件成功发送至：' . $email . ($try_times ? '[最多还可重发' . (8 - $try_times) . '次]' : '');
@@ -238,5 +239,6 @@ class UserController extends Rest
 				$response['info'] = '邮件发送出错[最多还可重发' . (5 - $try_times) . '次]';
 			}
 		}
+		$this->response = $response;
 	}
 }

@@ -74,17 +74,39 @@ PUT /user/123
 ```
 GET /user/123/phone
 ```
+响应
+```
+{
+    "status": 1,
+    "info": "13888888888"
+}
+
+```
 
 发送手机验证码
 ```
 POST /user/123/phone
 {phone:'手机号'}
 ```
+响应
+```
+{
+    "status": 1,
+    "info": "已发送"
+}
+```
 
 修改绑定手机
 ```
 PUT /user/123/phone
 {code:'验证码'}
+```
+响应
+```
+{
+    "status": 1,
+    "info": "绑定成功"
+}
 ```
 
 #### /user/:id/email
@@ -93,11 +115,26 @@ PUT /user/123/phone
 ```
 GET /user/123/email
 ```
+响应
+```
+{
+    "status": 1,
+    "info": "13888888888@139.com"
+}
+
+```
 
 绑定邮箱
 ```
 POST /user/123/email
-{email:'邮箱地址'}
+{email:'test@test.cn'}
+```
+响应
+```
+{
+    "status": 1,
+    "info": "验证邮件成功发送至：test@test.cn"
+}
 ```
 
 ## file
@@ -239,4 +276,3 @@ POST /share/:id/up
 DElETE /share/:id/up
 POST /share/:id/down
 DElETE /share/:id/down
- 

@@ -142,10 +142,10 @@ class UserModel extends FacadeModel
 		}
 	}
 
-	public static function saveEmail($email)
+	public static function saveEmail($email, $id)
 	{
 
-		if (!$id = Auth::id())
+		if (!($id || $id = Auth::id()))
 		{
 			//无法获取用户
 			return false;
