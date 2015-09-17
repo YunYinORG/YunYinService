@@ -6,12 +6,13 @@
 class TracerPlugin extends Yaf_Plugin_Abstract
 {
 	private $time = [];
-
+	private $mem  = [];
 	public function __construct()
 	{
 		$start = $_SERVER['REQUEST_TIME_FLOAT'] * 1000;
 		Log::write($start . ' 请求:' . getenv('REQUEST_URI'), 'TRACER');
 		$this->time['request'] = $start;
+		$this->mem['start']    = memory_get_usage() / 1024;//启动内存，包括调试插件占用
 	}
 
 	//在路由之前触发，这个是7个事件中, 最早的一个. 但是一些全局自定的工作, 还是应该放在Bootstrap中去完成
@@ -30,6 +31,7 @@ class TracerPlugin extends Yaf_Plugin_Abstract
 	public function dispatchLoopStartup(Yaf_Request_Abstract $request, Yaf_Response_Abstract $response)
 	{
 		$this->time['dispatchloopstartup'] = self::mtime();
+		$this->mem['dispatch']             = memory_get_usage() / 1024;
 	}
 
 // //分发之前触发	如果在一个请求处理过程中, 发生了forward, 则这个事件会被触发多次
@@ -64,17 +66,26 @@ class TracerPlugin extends Yaf_Plugin_Abstract
 	 */
 	public static function mtime()
 	{
-		list($usec, $sec) = explode(' ', microtime());
-		return ((float) $usec + (float) $sec) * 1000;
+		return microtime(true) * 1000;
 	}
 
 	public function __destruct()
 	{
+
 		$included_files = get_included_files();
 		$file_msg       = '文件加载[' . count($included_files) . ']' . print_r($included_files, true);
-		$time           = $this->time;
-		$end            = self::mtime();
-		$time_msg       = '启动时间:' . $time['request'];
+
+		$mem     = $this->mem;
+		$mem_end = memory_get_usage() / 1024;
+		$mem_msg = PHP_EOL . '[内存消耗统计]';
+		$mem_msg .= PHP_EOL . '启动消耗内存:' . $mem['start'] . 'Kb';
+		$mem_msg .= PHP_EOL . '路由消耗内存:' . ($mem['dispatch'] - $mem['start']) . 'Kb';
+		$mem_msg .= PHP_EOL . '处理消耗内存:' . ($mem_end - $mem['dispatch']) . 'Kb';
+		$mem_msg .= PHP_EOL . '总共消耗内存:' . $mem_end . 'Kb';
+
+		$time     = $this->time;
+		$end      = self::mtime();
+		$time_msg = '启动时间:' . $time['request'];
 		$time_msg .= PHP_EOL . '结束时间:' . $end;
 		$time_msg .= PHP_EOL . '框架启动耗时：' . ($time['routerstartup'] - $time['request']) . 'ms';
 		$time_msg .= PHP_EOL . '路由处理耗时：' . ($time['routershutdown'] - $time['routerstartup']) . 'ms';
@@ -91,6 +102,6 @@ class TracerPlugin extends Yaf_Plugin_Abstract
 		}
 
 		$time_msg .= PHP_EOL . '总耗时：' . ($end - $time['request']) . 'ms';
-		Log::write($file_msg . $time_msg . PHP_EOL, 'TRACER');
+		Log::write($file_msg . $time_msg . $mem_msg . PHP_EOL, 'TRACER');
 	}
 }
