@@ -11,17 +11,61 @@ POST /auth/
 
 ## user
 
+#### /user/
+
+获取登录信息
+
+```
+GET /user/
+```
+响应
+```
+{
+    "status": 1,
+    "info": {
+        "msg": "亲爱的同学,已经成功登录",
+        "name": "同学",
+        "id": "5"
+    }
+}
+```
+
 #### /user/:id
 
 获取用户信息
+
 ````
 GET /user/123
 ````
+
+响应
+```
+{
+    "status": 1,
+    "info": {
+        "name": "姓名",
+        "number": "学号",
+        "phone": null,
+        "email": null,
+        "school": "天津大学"
+    }
+}
+```
+
+
 
 修改信息(密码)
 ```
 PUT /user/123
 {password:'md5($password)',old:'md5(old)'}
+```
+
+响应
+```
+{
+    "status": 0,
+    "info": "原密码错误"
+}
 ```
 
 #### /user/:id/phone

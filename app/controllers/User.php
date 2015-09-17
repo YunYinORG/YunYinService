@@ -54,16 +54,20 @@ class UserController extends Rest
 		else
 		{
 			/*数据库中读取用户数据*/
-			$User = new Model('user');
-			$data = $User->field('id,password,number')->find($id);
-			if (!($data && Encrypt::encryptPwd($old_pwd, $data['number']) == $data['password']))
+			$user   = UserModel::field('password,number')->find($id);
+			$number = $user->number;
+			if (!$user || Encrypt::encryptPwd($old_pwd, $number) != $user['password'])
 			{
 				$response['info'] = '原密码错误';
 			}
-			elseif ($User->set('password', Encrypt::encryptPwd($password, $data['number']))->save()) //修改数据
+			elseif (UserModel::set('password', Encrypt::encryptPwd($password, $number))->save($id) >= 0) //修改数据
 			{
 				$response['info']   = '修改成功';
 				$response['status'] = 1;
+			}
+			else
+			{
+				$response['info'] = '修改失败';
 			}
 		}
 		$this->response = $response;

@@ -863,17 +863,17 @@ class Model implements JsonSerializable, ArrayAccess
 
 	public function offsetGet($offset)
 	{
-		return $this->get($offsetSet, false);
+		return $this->get($offset, false);
 	}
 
 	public function offsetSet($offset, $value)
 	{
-		$this->data[$offsetSet] = $value;
+		$this->data[$offset] = $value;
 	}
 
 	public function offsetUnset($offset)
 	{
-		unset($this->data[$offsetSet]);
+		unset($this->data[$offset]);
 	}
 }
 ?>
