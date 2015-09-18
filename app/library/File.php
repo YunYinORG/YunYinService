@@ -118,7 +118,7 @@ class File
 		if (!self::$_handler)
 		{
 			$type           = Config::get('upload.type');
-			$uploader       = 'Service\\' . $type;
+			$uploader       = 'Service\\' . ucfirst($type);
 			self::$_handler = new $uploader(Config::getSecret($type));
 		}
 		return self::$_handler;
