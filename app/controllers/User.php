@@ -3,11 +3,13 @@ class UserController extends Rest
 {
 
 	/*欢迎信息*/
-	public function indexAction($name = '同学')
+	public function indexAction($name = '')
 	{
 		if ($id = Auth::id())
 		{
-			$info = ['msg' => '亲爱的' . $name . ',已经成功登录', 'name' => $name, 'id' => $id];
+			$name OR $name = UserModel::where('id', '=', $id)->get('name');
+
+			$info = ['msg' => '亲爱的' . $name . ',您已经成功登录', 'name' => $name, 'id' => $id];
 			$this->response(1, $info);
 		}
 		else

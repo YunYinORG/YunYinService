@@ -139,18 +139,6 @@ POST /user/123/email
 
 ## file
 
-### /file/
-
-获取文件列表
-```
-GET /file/
-```
-
-上传文件(客户端上传的方案)
-```
-POST /file/
-{key:'上传凭证'}
-```
 ### /file/token
 
 获取上传token
@@ -160,9 +148,41 @@ POST /file/token
 {name:'上传的文件名'}
 ```
 
+响应
+```
+{
+    "status": 1,
+    "info": {
+        "token": "5zyb0hc1R6HVYx_sxfbSz4afdqv7fZeCY0_44QQ6:530opUa1agcnTY_2o1yDc2EnZjk=:eyJzY29wZSI6InVwbG9hZHRlc3Q6dGVtcF81XzU1ZmMzM2Y2OTVjZGIiLCJkZWFkbGluZSI6MTQ0MjU5MjMzNCwiZnNpemVMaW1pdCI6IjIwOTcxNTIwIn0=",
+        "key": "temp_5_55fc33f695cdb",
+        "name": "12.doc"
+    }
+}
+```
+
 删除token（放弃上传）
 ```
-DELETE /file/token/:key
+DELETE /file/token/key/:key
+```
+响应
+```
+{
+    "status": 1,
+    "info": "已经成功取消123.doc"
+}
+```
+
+### /file/
+
+提交上传文件(客户端上传的方案)
+```
+POST /file/
+{key:'上传凭证'}
+```
+
+获取文件列表
+```
+GET /file/
 ```
 
 ### /file/id

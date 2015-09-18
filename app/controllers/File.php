@@ -108,15 +108,16 @@ class FileController extends Rest
 	{
 		if ($key && $name = Cache::get($key))
 		{
-			$userid = substr(strrchr($key, '_'), 1);
+			list(, $userid) = explode('_', $key, 3);
+
 			$userid = $this->auth($userid);
 			Cache::del($key);
 			File::del($key);
-			$this->response(1, '已经成功取消' . $name);
+			$this->response(1, '已经成功删除' . $name);
 		}
 		else
 		{
-			$this->response(0, '此任务不存在');
+			$this->response(0, '此上传信息不存在');
 		}
 	}
 

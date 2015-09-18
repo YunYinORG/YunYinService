@@ -72,7 +72,7 @@ class Qiniu
 		$setting = array(
 			'scope' => $this->_config['bucket'] . ':' . $key,
 			'deadline' => $timeout + $_SERVER['REQUEST_TIME'],
-			'fsizeLimit' => \Config::get('upload.max'),
+			'fsizeLimit' => intval(\Config::get('upload.max')),
 		);
 		$setting = self::qiniuEncode(json_encode($setting));
 		return $this->sign($setting) . ':' . $setting;
