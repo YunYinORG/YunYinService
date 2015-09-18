@@ -244,7 +244,10 @@ PUT /file/123
 ```
 DELETE /file/123
 ```
-
+响应
+```
+{"status":1,"info":"已经删除"}
+```
 
 ## task
 

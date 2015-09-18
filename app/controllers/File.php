@@ -186,7 +186,7 @@ class FileController extends Rest
 		{
 			$response['info'] = '删除出错';
 		}
-		elseif ($File->set('url', '')->set('status', 0)->save())
+		if ($File->update(['url' => '', 'status' => 0]))
 		{
 			$response['status'] = 1;
 			$response['info']   = '已经删除';
