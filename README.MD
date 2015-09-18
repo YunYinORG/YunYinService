@@ -179,10 +179,33 @@ DELETE /file/token/key/:key
 POST /file/
 {key:'上传凭证'}
 ```
+响应
+```
+{
+    "status": 1,
+    "info": {
+        "msg": "保存成功",
+        "id": "1"
+    }
+}
+```
 
 获取文件列表
 ```
 GET /file/
+```
+响应
+```
+{
+    "status": 1,
+    "info": [
+        {
+            "id": "1",
+            "name": "云印南开用户操作流程.docx",
+            "time": "2015-09-18 16:52:42"
+        }
+    ]
+}
 ```
 
 ### /file/id
@@ -191,10 +214,30 @@ GET /file/
 GET /file/123
 ```
 
+```
+{
+    "status": 1,
+    "info": {
+        "id": "1",
+        "use_id": "5",
+        "name": "云印南开用户操作流程.docx",
+        "url": "http://uploadtest.yunyin.org/file_5_55fc40a641356_1442595162?e=1442595553&attname=%25E4%25BA%2591%25E5%258D%25B0%25E5%258D%2597%25E5%25BC%2580%25E7%2594%25A8%25E6%2588%25B7%25E6%2593%258D%25E4%25BD%259C%25E6%25B5%2581%25E7%25A8%258B.docx&token=5zyb0hc1R6HVYx_sxfbSz4afdqv7fZeCY0_44QQ6:oIqCwp09j_BjtvHI-Qe7yMH5wuc=",
+        "time": "2015-09-18 16:52:42"
+    }
+}
+```
+
 修改文件名
 ```
 PUT /file/123
 {name:'新的文件名'}
+```
+响应
+```
+{
+    "status": 1,
+    "info": "成功修改为：用户操作流程.docx"
+}
 ```
 
 删除文件
