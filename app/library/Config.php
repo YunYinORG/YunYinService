@@ -52,7 +52,7 @@ class Config
 	{
 		if (null === self::$_config)
 		{
-			self::$_config = Yaf_Application::app()->getConfig();
+			self::$_config = $GLOBALS['app']->getConfig();
 		}
 		return self::$_config;
 	}

@@ -4,6 +4,7 @@
  */
 class Bootstrap extends Yaf_Bootstrap_Abstract
 {
+
 	/**
 	 * 开启调试输出
 	 * @method _initDebug
@@ -42,4 +43,19 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
 			PhpConsole\Helper::register();
 		}
 	}
+
+	/**
+	 * 加载插件
+	 * @method _initPlugin
+	 * @param  Yaf_Dispatcher $dispatcher [description]
+	 * @return [type]                     [description]
+	 * @access private
+	 * @author NewFuture
+	 */
+	public function _initPlugin(Yaf_Dispatcher $dispatcher)
+	{
+		$tracer = new TracerPlugin();
+		$dispatcher->registerPlugin($tracer);
+	}
+
 }

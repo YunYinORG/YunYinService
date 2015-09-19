@@ -138,7 +138,8 @@ class Model implements JsonSerializable, ArrayAccess
 		$this->limit = 1;
 		$result      = $this->select();
 		$this->data  = isset($result[0]) ? $result[0] : $result;
-		return $this->data ? $this : null;
+		$this->id    = $id;
+		return $result ? $this : null;
 	}
 
 	/**
@@ -183,6 +184,11 @@ class Model implements JsonSerializable, ArrayAccess
 			$data       = $this->data;
 			$this->data = array();
 		}
+		elseif (empty($data))
+		{
+			$data       = $this->data;
+			$this->data = array();
+		}
 		return $this->update($data);
 	}
 
@@ -203,13 +209,15 @@ class Model implements JsonSerializable, ArrayAccess
 			$data   = array_intersect_key($data, $field);
 		}
 
-		if (is_array($data) && !empty($data))
+		if (is_array($data))
 		{
-			$this->param   = array_merge($this->param, $data);
+
 			$update_string = '';
-			foreach (array_keys($data) as $key)
+			foreach ($data as $key => $v)
 			{
-				$update_string .= self::backQoute($key) . '=:' . $key . ',';
+				$param_key = 's_' . $key;
+				$update_string .= self::backQoute($key) . '=:' . $param_key . ',';
+				$this->param[$param_key] = $v;
 			}
 			$update_string = trim($update_string, ',');
 		}
@@ -863,17 +871,17 @@ class Model implements JsonSerializable, ArrayAccess
 
 	public function offsetGet($offset)
 	{
-		return $this->get($offsetSet, false);
+		return $this->get($offset, false);
 	}
 
 	public function offsetSet($offset, $value)
 	{
-		$this->data[$offsetSet] = $value;
+		$this->data[$offset] = $value;
 	}
 
 	public function offsetUnset($offset)
 	{
-		unset($this->data[$offsetSet]);
+		unset($this->data[$offset]);
 	}
 }
 ?>

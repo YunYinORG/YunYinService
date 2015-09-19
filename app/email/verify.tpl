@@ -3,7 +3,7 @@
 <head>
 <meta name="viewport" content="width=device-width">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>云印南天验证邮件</title>
+<title>云印服务验证邮件</title>
 </head>
 
 <body bgcolor="#f6f6f6" style="-webkit-font-smoothing:antialiased; -webkit-text-size-adjust:none; height:100%; width:100%" height="100%" width="100%">
@@ -16,17 +16,17 @@
 			<table style="width:100%" width="100%">
 				<tr>
 					<td>
-						<h3 style='color:#000; font-family:"Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; font-size:22px; font-weight:200; line-height:1.2; margin:40px 0 10px'>亲爱的=$name?&gt;</h3>
+						<h3 style='color:#000; font-family:"Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; font-size:22px; font-weight:200; line-height:1.2; margin:40px 0 10px'>亲爱的<?=$name?></h3>
 						<h3 style='color:#000; font-family:"Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; font-size:22px; font-weight:200; line-height:1.2; margin:40px 0 10px'>这是来自云印南天yunyin.org的验证邮件</h3>
 						<h3 style='color:#000; font-family:"Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; font-size:22px; font-weight:200; line-height:1.2; margin:40px 0 10px'>请确定这是您的个人操作</h3>
 						<table style="width:100%" width="100%">
 							<tr>
 								<td style="padding:10px 0">
-									<p style="font-size:14px; font-weight:normal; margin-bottom:10px"><a href="&lt;?=%24url?&gt;" style="background-color:#348eda; border:solid #348eda; border-radius:15px; border-width:10px 20px; color:#FFF; cursor:pointer; display:inline-block; font-weight:bold; line-height:2; margin-right:10px; text-align:center; text-decoration:none" bgcolor="#348eda" align="center">点击以验证邮箱</a></p>
+									<p style="font-size:14px; font-weight:normal; margin-bottom:10px"><a href="<?=$url?>" style="background-color:#348eda; border:solid #348eda; border-radius:15px; border-width:10px 20px; color:#FFF; cursor:pointer; display:inline-block; font-weight:bold; line-height:2; margin-right:10px; text-align:center; text-decoration:none" bgcolor="#348eda" align="center">点击以验证邮箱</a></p>
 								</td>
 							</tr>
 						</table>
-						<h3 style='color:#000; font-family:"Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; font-size:22px; font-weight:200; line-height:1.2; margin:10px 0 10px'>如果无法正常打开请复制<code>=$url?&gt;</code>到浏览器</h3>
+						<h3 style='color:#000; font-family:"Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; font-size:22px; font-weight:200; line-height:1.2; margin:10px 0 10px'>如果无法正常打开请复制<code><?=$url?></code>到浏览器</h3>
 						<br>
 						<p style="font-size:14px; font-weight:normal; margin-bottom:10px">关注新浪微博<a href="http://weibo.com/cloudPrint" style="color:#348eda">@云印南天</a></p>
 						<p style="font-size:14px; font-weight:normal; margin-bottom:10px">关注项目最新进度<a href="https://github.com/YunYinORG/YunYinService" style="color:#348eda">Github</a></p>

@@ -33,9 +33,8 @@ class FileController extends Rest
 			$this->response(0, '未收到数据');
 			return;
 		}
-		$userid = substr(strrchr($key, '_'), 1);
-		$userid = $this->auth($userid);
-
+		list(, $userid)     = explode('_', $key, 3);
+		$userid             = $this->auth($userid);
 		$response['status'] = 0;
 
 		if (!$name = Cache::get($key))
@@ -108,15 +107,16 @@ class FileController extends Rest
 	{
 		if ($key && $name = Cache::get($key))
 		{
-			$userid = substr(strrchr($key, '_'), 1);
+			list(, $userid) = explode('_', $key, 3);
+
 			$userid = $this->auth($userid);
 			Cache::del($key);
 			File::del($key);
-			$this->response(1, '已经成功取消' . $name);
+			$this->response(1, '已经成功删除' . $name);
 		}
 		else
 		{
-			$this->response(0, '此任务不存在');
+			$this->response(0, '此上传信息不存在');
 		}
 	}
 
@@ -176,9 +176,9 @@ class FileController extends Rest
 	public function DELETE_infoAction($id = 0)
 	{
 		$userid             = $this->auth();
-		$File               = FileModel::where('id', '=', $id)->where('userid', '=', $userid);
+		$File               = FileModel::where('use_id', '=', $userid)->field('url')->find($id);
 		$response['status'] = 0;
-		if (!$path = $File->get('url'))
+		if (!$path = $File['url'])
 		{
 			$response['info'] = '没有找这个文件';
 		}
@@ -186,7 +186,7 @@ class FileController extends Rest
 		{
 			$response['info'] = '删除出错';
 		}
-		elseif ($File->set('url', '')->set('status', 0)->save())
+		if ($File->update(['url' => '', 'status' => 0]))
 		{
 			$response['status'] = 1;
 			$response['info']   = '已经删除';

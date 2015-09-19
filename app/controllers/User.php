@@ -3,11 +3,13 @@ class UserController extends Rest
 {
 
 	/*欢迎信息*/
-	public function indexAction($name = '同学')
+	public function indexAction($name = '')
 	{
 		if ($id = Auth::id())
 		{
-			$info = ['msg' => '亲爱的' . $name . ',已经成功登录', 'name' => $name, 'id' => $id];
+			$name OR $name = UserModel::where('id', '=', $id)->get('name');
+
+			$info = ['msg' => '亲爱的' . $name . ',您已经成功登录', 'name' => $name, 'id' => $id];
 			$this->response(1, $info);
 		}
 		else
@@ -54,16 +56,20 @@ class UserController extends Rest
 		else
 		{
 			/*数据库中读取用户数据*/
-			$User = new Model('user');
-			$data = $User->field('id,password,number')->find($id);
-			if (!($data && Encrypt::encryptPwd($old_pwd, $data['number']) == $data['password']))
+			$user   = UserModel::field('password,number')->find($id);
+			$number = $user->number;
+			if (!$user || Encrypt::encryptPwd($old_pwd, $number) != $user['password'])
 			{
 				$response['info'] = '原密码错误';
 			}
-			elseif ($User->set('password', Encrypt::encryptPwd($password, $data['number']))->save()) //修改数据
+			elseif (UserModel::set('password', Encrypt::encryptPwd($password, $number))->save($id) >= 0) //修改数据
 			{
 				$response['info']   = '修改成功';
 				$response['status'] = 1;
+			}
+			else
+			{
+				$response['info'] = '修改失败';
 			}
 		}
 		$this->response = $response;
@@ -104,15 +110,15 @@ class UserController extends Rest
 		{
 			$response['info'] = '已经绑定过用户';
 		}
-		elseif ($try_times = Cache::get('snd_code_t' . $id) > 5)
+		elseif (($try_times = Cache::get('snd_code_t' . $id)) > 5)
 		{
 			$response['info'] = '发送此数过多,12小时之后重试';
 		}
 		else
 		{
 			/*手机有效，发送验证码*/
-			$code = Random::code(6);
-			session::set('code_phone', [$code => $phone]);
+			$code = strtoupper(Random::code(6));
+			Session::set('code_phone', [$code => $phone]);
 			if (Sms::bind($phone, $code))
 			{
 				$response['status'] = 1;
@@ -124,6 +130,7 @@ class UserController extends Rest
 				$response['info'] = '短信发送出错[最多还可重发' . (5 - $try_times) . '次]';
 			}
 		}
+		$this->response = $response;
 	}
 
 	/**
@@ -138,11 +145,11 @@ class UserController extends Rest
 		$id = $this->auth($id);
 
 		$response['status'] = 0;
-		if (!Input::post('code', $code, 'ctype_alnum')) //数字或者字母
+		if (!Input::put('code', $code, 'ctype_alnum')) //数字或者字母
 		{
 			$response['info'] = '验证码格式不对';
 		}
-		elseif ($verify = Session::get('code_phone'))
+		elseif (!$verify = Session::get('code_phone'))
 		{
 			$response['info'] = '验证码已过期,请重新生成';
 		}
@@ -151,7 +158,7 @@ class UserController extends Rest
 			$response['info'] = '此验证码尝试次数过多,请重新发送短信';
 			Session::del('code_phone');
 		}
-		elseif (key($verify) != $code)
+		elseif (key($verify) != strtoupper($code))
 		{
 			$response['info'] = '验证码错误';
 			Cache::set('try_code_t' . $id, $try_times + 1);
@@ -160,7 +167,7 @@ class UserController extends Rest
 		{
 			Cache::del('try_code_t' . $id);
 			session::del('code_phone');
-			$phone = $verify[$code]; //读取号码
+			$phone = $verify[strtoupper($code)]; //读取号码
 			if (UserModel::SavePhone($phone))
 			{
 				$response['info']   = '手机号已经更新';
@@ -171,6 +178,7 @@ class UserController extends Rest
 				$response['info'] = '手机号保存失败';
 			}
 		}
+		$this->response = $response;
 	}
 
 	/**
@@ -184,7 +192,7 @@ class UserController extends Rest
 	{
 		$id    = $this->auth($id);
 		$email = UserModel::where('id', '=', $id)->get('email');
-		$email = $email ? Encrypt::encryptEmail($email) : null;
+		$email = $email ? Encrypt::decryptEmail($email) : null;
 		$this->response(1, $email);
 	}
 
@@ -219,9 +227,10 @@ class UserController extends Rest
 			$code = ['use_id' => $id, 'type' => 1];
 			$Code = new Model('code');
 			$Code->delete($code);
-			$code['code'] = $id . '_' . Random::word(16);
+			$code['code']    = $id . '_' . Random::word(16);
+			$code['content'] = $email;
 			/*发送邮件*/
-			if ($Code->insert($code) && Mail::sendVerify($email, $name, $code))
+			if ($Code->insert($code) && Mail::sendVerify($email, $name, $code['code']))
 			{
 				$response['status'] = 1;
 				$response['info']   = '验证邮件成功发送至：' . $email . ($try_times ? '[最多还可重发' . (8 - $try_times) . '次]' : '');
@@ -232,5 +241,6 @@ class UserController extends Rest
 				$response['info'] = '邮件发送出错[最多还可重发' . (5 - $try_times) . '次]';
 			}
 		}
+		$this->response = $response;
 	}
 }

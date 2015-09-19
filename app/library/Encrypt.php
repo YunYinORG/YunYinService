@@ -326,11 +326,15 @@ class Encrypt
 	 */
 	private static function _cipherTable($key)
 	{
-		$tableName = 'et_' . $key;        //缓存表名称
-		$table     = Kv::get($tableName); //读取缓存中的密码表
-		if (!$table)
+		$tableName = 'et_' . urlencode($key); //缓存表名称
+		if ($table = Kv::get($tableName))
 		{
-			//密码表不存在则重新生成
+			/*读取缓存中的密码表*/
+			$table = unserialize($table);
+		}
+		else
+		{
+			/*密码表不存在则重新生成*/
 			//对所有数字,逐个进行AES加密生成密码表
 			$td = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_ECB, '');
 			mcrypt_generic_init($td, $key, '0000000000000000');
@@ -339,8 +343,8 @@ class Encrypt
 				$table[] = mcrypt_generic($td, $i);
 			}
 			mcrypt_generic_deinit($td);
-			sort($table);                //根据加密后内容排序得到密码表
-			Kv::set($tableName, $table); //缓存密码表
+			sort($table);                           //根据加密后内容排序得到密码表
+			Kv::set($tableName, serialize($table)); //缓存密码表
 		}
 		return $table;
 	}

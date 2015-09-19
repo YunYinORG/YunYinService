@@ -42,7 +42,10 @@ class School
 		}
 		else
 		{
-			$list = self::guess($student['number'], $except);
+			if (!$list = self::guess($student['number'], $except))
+			{
+				return false;
+			}
 			foreach ($list as $i => $school)
 			{
 				$list[$i] = call_user_func_array(array('Verify\\' . strtoupper($school), 'getName'), $param);
@@ -62,7 +65,7 @@ class School
 	{
 		if ($school = self::getAbbr($id))
 		{
-			return call_user_func(array('Verify\\' . strtoupper($school), 'getCode'),[]);
+			return call_user_func(array('Verify\\' . strtoupper($school), 'getCode'), []);
 		}
 	}
 

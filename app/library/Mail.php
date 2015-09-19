@@ -19,7 +19,7 @@ Class Mail
 	 * @method sendVerify
 	 * @param  [string] $email 	[邮箱]
 	 * @param  [string] $name   [姓名]
-	 * @param  [type] $link 	[验证链接]
+	 * @param  [string] $link 	[验证链接]
 	 * @return [type]        	[发送结果]
 	 * @author NewFuture
 	 */
