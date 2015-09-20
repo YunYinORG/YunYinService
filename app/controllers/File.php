@@ -15,7 +15,10 @@ class FileController extends Rest
 	{
 		$userid = $this->auth();
 		Input::get('page', $page, 'int', 1);
-		$files = FileModel::where('use_id', '=', $userid)->page($page)->select('id,name,time');
+		$files = FileModel::where('use_id', '=', $userid)
+			->where('status', '>', 0)
+			->page($page)
+			->select('id,name,time');
 		$this->response(1, $files);
 	}
 

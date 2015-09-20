@@ -60,7 +60,7 @@ class BooksController extends Rest
 		}
 		else
 		{
-			$task           = ['use_id' => $uid, 'url' => 'book_' . $id];
+			$task           = ['use_id' => $uid, 'url' => 'book/' . $id];
 			$task['pri_id'] = $book['pri_id'];
 			$task['name']   = $book['name'];
 			if ($tid = TaskModel::insert($task))
