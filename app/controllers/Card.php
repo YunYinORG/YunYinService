@@ -273,10 +273,10 @@ class CardController extends rest
 	 * 若已感谢、举报或忽略，显示按钮失效
 	 * @param [int] id 拾得者id
 	 */
-	public function POST_phoneAction($id = 0)
+	public function GET_phoneAction($id = 0)
 	{
 		$uid = $this->auth($id);
-		if (! Input::post('id',$id,'int'))
+		if (! Input::get('id',$id,'int'))
 		{
 			$findid = CardlogModel::where('id','=',$id)->where('lost_id','=',$uid)->get('find_id'))
 			$finder = UserModel::field('phone,number')->find($findid);
