@@ -99,32 +99,84 @@ class Auth
 	}
 
 	/**
-	 * @method code
-	 * @param  [type] $uid [description]
-	 * @return [type]      [description]
+	 * 获取当前登录的打印店
+	 * @method getPrinter
+	 * @return [type]     [description]
 	 * @author NewFuture
 	 */
-	public static function createCode($session)
+	public static function getPrinter()
 	{
-		$code = $session['id'] . 'C' . Random::word(10);
-		Cache::set('auth_' . $code, $session, 300); //5分钟有效
-		return $code;
+		if ($printer = Session::get('printer'))
+		{
+			/*session中的信息*/
+			return $printer;
+		}
+		elseif ($tokenInfo = Cookie::get('token'))
+		{
+			/*解析cookie*/
+			$id = key($tokenInfo);
+			if ($printer = self::checkPritnerToken($id, $tokenInfo[$id]))
+			{
+				/*token有效*/
+				Session::set('printer', $printer);
+				return $printer;
+			}
+		}
+		elseif (Input::I('SERVER.HTTP_TOKEN', $token, 'token'))
+		{
+			/*http头中的请求*/
+
+		}
 	}
 
 	/**
-	 * 验证code码
-	 * @method checkCode
-	 * @param  [type]    $code [description]
-	 * @return [type]          [description]
+	 * 获取打印店ID
+	 * @method priId
+	 * @return [type] [description]
 	 * @author NewFuture
 	 */
-	public static function checkCode($code)
+	public static function priId()
 	{
-		$key = 'auth_' . $code;
-		if ($session = Cache::get($key))
+		if ($printer = self::getPrinter())
 		{
-			Cache::del($key);
-			return $session;
+			return $printer['id'];
+		}
+	}
+
+	/**
+	 * printer 生成token
+	 * @method printerToken
+	 * @param  [type]       $printer [description]
+	 * @return [type]                [description]
+	 * @author NewFuture
+	 */
+	public static function printerToken($printer)
+	{
+		if ($printer &&
+			(is_numeric($printer) && $data = PrinterModel::field('id,name,password,sch_id')->find($printer))
+			|| (isset($printer['id']) && $data['id'] = $printer['id']
+				&& isset($printer['name']) && $data['name'] = $printer['name']
+				&& isset($printer['password']) && $data['password'] = $printer['password']
+				&& isset($printer['sch_id']) && $data['sch_id'] = $printer['sch_id']))
+		{
+			return self::createBaseToken($data);
+		}
+	}
+
+	/**
+	 * checkPrinterToken description
+	 * @method checkPrinterToken
+	 * @param  [type]            $id    [description]
+	 * @param  [type]            $token [description]
+	 * @return [type]                   [description]
+	 * @author NewFuture
+	 */
+	public static function checkPrinterToken($id, $token)
+	{
+		if ($p = UserModel::field('id,name,password,sch_id')->find(intval($uid)))
+		{
+			$base_token = self::createBaseToken($p);
+			return $token == $base_token ? $p : null;
 		}
 	}
 
@@ -134,4 +186,34 @@ class Auth
 		$token = hash_hmac('md5', implode('|', $user), $user['password'], true);
 		return Encrypt::base64Encode($token);
 	}
+
+	///**
+	//  * @method code
+	//  * @param  [type] $uid [description]
+	//  * @return [type]      [description]
+	//  * @author NewFuture
+	//  */
+	// public static function createCode($session)
+	// {
+	// 	$code = $session['id'] . 'C' . Random::word(10);
+	// 	Cache::set('auth_' . $code, $session, 300); //5分钟有效
+	// 	return $code;
+	// }
+
+	// /**
+	//  * 验证code码
+	//  * @method checkCode
+	//  * @param  [type]    $code [description]
+	//  * @return [type]          [description]
+	//  * @author NewFuture
+	//  */
+	// public static function checkCode($code)
+	// {
+	// 	$key = 'auth_' . $code;
+	// 	if ($session = Cache::get($key))
+	// 	{
+	// 		Cache::del($key);
+	// 		return $session;
+	// 	}
+	// }
 }
