@@ -40,7 +40,7 @@ class TaskController extends Rest
 		{
 			$response['info'] = '未选择打印店';
 		}
-		elseif (!$file = FileModel::where('use_id', $userid)->where('status', '>', 0)->filed('url,status')->find($fid))
+		elseif (!$file = FileModel::where('use_id', $userid)->where('status', '>', 0)->field('url,status')->find($fid))
 		{
 			$response['info'] = '没有该文件或者此文件已经删除';
 		}
