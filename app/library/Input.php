@@ -80,7 +80,9 @@ class Input
 				case NULL:	//无需过滤
 					return true;
 
-				case 'int':	//整型常量
+				case 'int'://整型常量
+				case 'integer':
+
 				/*系统过滤函数*/
 					return $export = filter_var($export, $filter);
 
