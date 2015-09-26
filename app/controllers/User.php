@@ -19,6 +19,50 @@ class UserController extends Rest
 	}
 
 	/**
+	 * 注册
+	 * @method POST_indexAction
+	 * @param  string      $name [description]
+	 * @return [type]            [description]
+	 * @author NewFuture
+	 */
+	public function POST_indexAction()
+	{
+		$response['status'] = 0;
+		if (!$regInfo = Session::get('reg'))
+		{
+			$response['info'] = '注册信息失效';
+		}
+		elseif (Input::post('password', $password, 'isMD5') === false)
+		{
+			/*密码未md5*/
+			$response['info'] = '前端密码未加密处理';
+		}
+		else
+		{
+			$password = $password ?: $regInfo['password'];
+
+			$regInfo['password'] = Encrypt::encryptPwd($password, $regInfo['number']);
+			if (!$id = UserModel::insert($regInfo))
+			{
+				$response['info'] = '注册失败';
+			}
+			else
+			{
+				/*注册成功*/
+				$regInfo['id'] = $id;
+				$token         = Auth::token($regInfo);
+				Cookie::set('token', [$id => $token]);
+				unset($regInfo['password']);
+				Session::del('reg');
+				Session::set('user', $regInfo);
+				$response['status'] = 1;
+				$response['info']   = $regInfo;
+			}
+		}
+		$this->response = $response;
+	}
+
+	/**
 	 * 获取用户信息
 	 * GET /user/1
 	 * @method GET_infoAction

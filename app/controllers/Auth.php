@@ -193,7 +193,7 @@ class AuthController extends Yaf_Controller_Abstract
 				}
 				else
 				{
-					//登录成功
+					/*验证失败*/
 					$sid               = $user['sch_id'];
 					$reg_schools[$sid] = School::getAbbr($sid);
 				}
@@ -210,7 +210,7 @@ class AuthController extends Yaf_Controller_Abstract
 	 * @author NewFuture[newfuture@yunyin.org]
 	 * @return bool|null
 	 */
-	private function verify()
+	public function verify()
 	{
 		$info = array(
 			'number' => $this->number,
