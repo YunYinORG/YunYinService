@@ -312,7 +312,7 @@ class Model implements JsonSerializable, ArrayAccess
 				$this->data[$this->pk] = $id;
 			}
 		}
-		$sql = 'DELETE';
+		$sql = 'DELETE ';
 		$sql .= $this->buildFromSql();
 		$where = $this->buildWhereSql();
 		if (!$where)

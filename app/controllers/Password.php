@@ -136,9 +136,7 @@ class PasswordController extends REST
 		else
 		{
 			Session::del('find_info');
-			unset($info['code']);
-			Session::set('find_user', $info);
-
+			Session::set('find_user', ['id' => $info['id'], 'number' => $info['number']]);
 			$respone['status'] = 1;
 			$respone['info']   = '验证成功,请重置密码';
 		}
