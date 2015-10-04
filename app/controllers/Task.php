@@ -15,7 +15,7 @@ class TaskController extends Rest
 	{
 		$userid = $this->auth();
 		Input::get('page', $page, 'int', 1);
-		$tasks = TaskModel::where('use_id', '=', $userid)->belongs('file')->belongs('printer')->page($page)->select();
+		$tasks = TaskModel::where('use_id', '=', $userid)->belongs('printer')->page($page)->select();
 		$this->response(1, $tasks);
 	}
 
@@ -40,13 +40,14 @@ class TaskController extends Rest
 		{
 			$response['info'] = '未选择打印店';
 		}
-		elseif (!$file = FileModel::where('use_id', $userid)->where('status', '>', 0)->field('url,status')->find($fid))
+		elseif (!$file = FileModel::where('use_id', $userid)->where('status', '>', 0)->field('url,name,status')->find($fid))
 		{
 			$response['info'] = '没有该文件或者此文件已经删除';
 		}
 		else
 		{
 			$task           = TaskModel::create('post');
+			$task['name']   = $file['name'];
 			$task['url']    = $file['url'];
 			$task['use_id'] = $userid;
 			$task['pri_id'] = $pid;

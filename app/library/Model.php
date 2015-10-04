@@ -1,38 +1,4 @@
 <?php
-/**
- * Class and Function List:
- * Function list:
- * - __construct()
- * - find()
- * - select()
- * - save()
- * - update()
- * - add()
- * - insert()
- * - delete()
- * - query()
- * - field()
- * - where()
- * - orWhere()
- * - order()
- * - limit()
- * - count()
- * - __call()
- * - __set()
- * - __get()
- * - __unset()
- * - set()
- * - get()
- * - clear()
- * - parseField()
- * - parseData()
- * - buildSelectSql()
- * - buildFromSql()
- * - buildWhereSql()
- * - buildTailSql()
- * Classes list:
- * - Model
- */
 class Model implements JsonSerializable, ArrayAccess
 {
 	/**
@@ -410,32 +376,35 @@ class Model implements JsonSerializable, ArrayAccess
 	 * where('id','>',1)
 	 * @author NewFuture
 	 */
-	public function where($key, $exp = null, $value = null, $conidition = 'AND')
+	public function where($key, $exp = null, $value = null)
 	{
-		if ($conidition !== 'OR')
-		{
-			$conidition = 'AND';
-		}
-
+		// if ($conidition !== 'OR')
+		// {
+		// 	$conidition = 'AND';
+		// }
+		$and = isset($this->where['and']) ? $this->where['and'] : [];
 		if (null === $exp) //单个参数，where($array)或者where($sql)
 		{
 			if (is_string($key))
 			{
 				//直接sql条件
 				//TO 安全过滤
-				$where = 'AND(' . $key . ')';
+				$and[] = $key;
 			}
 			elseif (is_array($key))
 			{
 				/*数组形式*/
-				$where = [];
 				foreach ($key as $k => $v)
 				{
-					$name               = $k . '_w_eq';
-					$where[]            = self::backQoute($k) . '=:' . $name;
-					$this->param[$name] = $v;
+					$and[] = array($k, '=', $v);
 				}
-				$where = $conidition . '((' . implode(')AND(', $where) . '))';
+				// foreach ($key as $k => $v)
+				// {
+				// 	$name               = $k . '_w_eq';
+				// 	$where[]            = self::backQoute($k) . '=:' . $name;
+				// 	$this->param[$name] = $v;
+				// }
+				// $where = $conidition . '((' . implode(')AND(', $where) . '))';
 			}
 			else
 			{
@@ -444,19 +413,19 @@ class Model implements JsonSerializable, ArrayAccess
 		}
 		elseif (null === $value) //where($key,$v)等价于where($key,'=',$v);
 		{
-			$name  = $key . '_w_eq';
-			$where = $conidition . '(' . self::backQoute($key) . '=:' . $name . ')';
-
-			$this->param[$name] = $exp;
+			// $name  = $key . '_w_eq';
+			// $where = $conidition . '(' . self::backQoute($key) . '=:' . $name . ')';
+			// $this->param[$name] = $exp;
+			$and[] = [$key, '=', $exp];
 		}
 		else
 		{
-			$name  = $key . '_w_eq';
-			$where = $conidition . '(' . self::backQoute($key) . $exp . ' :' . $name . ')';
-
-			$this->param[$name] = $value;
+			// $name  = $key . '_w_eq';
+			// $where = $conidition . '(' . self::backQoute($key) . $exp . ' :' . $name . ')';
+			// $this->param[$name] = $value;
+			$and[] = [$key, $exp, $value];
 		}
-		$this->where .= $where;
+		$this->where['and'] = $and;
 		return $this;
 	}
 
@@ -471,7 +440,39 @@ class Model implements JsonSerializable, ArrayAccess
 	 */
 	public function orWhere($key, $exp = null, $value = null)
 	{
-		return $this->where($key, $exp, $value, 'OR');
+		$or = isset($this->where['or']) ? $this->where['or'] : [];
+		if (null === $exp) //单个参数，where($array)或者where($sql)
+		{
+			if (is_string($key))
+			{
+				//直接sql条件
+				//TO 安全过滤
+				$or[] = $key;
+			}
+			elseif (is_array($key))
+			{
+				/*数组形式*/
+				foreach ($key as $k => $v)
+				{
+					$or[] = array($k, '=', $v);
+				}
+			}
+			else
+			{
+				throw new Exception('非法where查询:' . json_encode($key));
+			}
+		}
+		elseif (null === $value)
+		{
+			//where($key,$v)等价于where($key,'=',$v);
+			$or[] = [$key, '=', $exp];
+		}
+		else
+		{
+			$or[] = [$key, $exp, $value];
+		}
+		$this->where['or'] = $or;
+		return $this;
 	}
 
 	/**
@@ -789,20 +790,63 @@ class Model implements JsonSerializable, ArrayAccess
 	 */
 	private function buildWhereSql()
 	{
-		$pre     = $this->belongs_to_tables ? self::backQoute($this->table) . '.' : '';
-		$datastr = $this->parseData(')AND(' . $pre);
-		$where   = null;
-		if ($datastr)
-		{
-			$where = '(' . $pre . $datastr . ')' . $this->where;
-		}
-		elseif ($this->where)
-		{
-			//去掉第一个AND或者OR
-			$where = strstr($this->where, '(');
-		}
+		$pre   = $this->belongs_to_tables ? self::backQoute($this->table) . '.' : '';
+		$sql   = empty($this->data) ? '' : '(' . $pre . $this->parseData(')AND(' . $pre) . ')';
+		$where = $this->where;
 
-		return $where ? ' WHERE ' . $where : '';
+		if (!empty($where))
+		{
+			/*AND*/
+			$and = isset($where['and']) ? $where['and'] : [];
+			foreach ($and as $c)
+			{
+				//逐个and条件处理
+				if (is_string($c))
+				{
+					//字符串形式sql
+					$conidition[] = $c;
+				}
+				else
+				{
+					//数组关系式
+					list($key, $exp, $value) = $c;
+					$name                    = 'w_and_' . $key; //字段名带上表前缀
+					$field                   = strpos($key, '.') ? $key . ' ' : $pre . self::backQoute($key);
+					$conidition[]            = $field . $exp . ':' . $name;
+					$this->param[$name]      = $value;
+				}
+			}
+			if (!empty($conidition))
+			{
+				$and = '(' . implode(')AND(', $conidition) . ')';
+				$sql = $sql ? $sql . 'AND' . $and : $and;
+			}
+
+			/*OR*/
+			$or = isset($where['or']) ? $where['or'] : [];
+			unset($conidition);
+			foreach ($or as $c)
+			{
+				if (is_string($c))
+				{
+					$conidition[] = $c;
+				}
+				else
+				{
+					list($key, $exp, $value) = $c;
+					$name                    = 'w_or_' . $key;
+					$field                   = strpos($key, '.') ? $key . ' ' : $pre . self::backQoute($key);
+					$conidition[]            = $field . $exp . ':' . $name;
+					$this->param[$name]      = $value;
+				}
+			}
+			if (!empty($conidition))
+			{
+				$or  = '(' . implode(')OR(', $conidition) . ')';
+				$sql = $sql ? $sql . 'OR' . $or : $or;
+			}
+		}
+		return $sql ? ' WHERE ' . $sql : '';
 	}
 
 	/**

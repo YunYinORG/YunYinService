@@ -165,7 +165,7 @@ class ShareController extends Rest
 	{
 		$userid             = $this->auth();
 		$response['status'] = 0;
-		if (!$url = ShareModel::where('id', $id)->where('status', '>', 0)->get('url'))
+		if (!$share = ShareModel::where('status', '>', 0)->field('name,url')->find())
 		{
 			$response['info'] = '此分享已经删除！';
 		}
@@ -178,7 +178,8 @@ class ShareController extends Rest
 			$task           = TaskModel::create('post');
 			$task['use_id'] = $userid;
 			$task['pid']    = $pid;
-			$task['url']    = $url;
+			$task['url']    = $share['url'];
+			$task['name']   = $share['name'];
 
 			if (!$tid = TaskModel::insert($task))
 			{
