@@ -308,12 +308,11 @@ GET /printers/12
 ## share
 
 #### /share/
-获取当前用户的分享列表
+获取当前用户的分享列表（参数可选）
 ```
-GET /share/
+GET /share/?page=1
 ```
 
-TODO 搜索
 
 ```
 POST /share/
@@ -337,8 +336,110 @@ PUT /share/123
 DElETE /share/123
 ```
 
+#### /share/search
+搜索分享
+
+```
+GET /share/search?page=1&key='关键字'&tag=1
+```
+
+#### /share/:id/print
+打印
+```
+POST /share/123/print
+{pri_id='打印店id',copies="份数",color="颜色",isdouble="双面",ppt="ppt类型",requrements="要求"}
+```
+
 TODO
 POST /share/:id/up
 DElETE /share/:id/up
 POST /share/:id/down
 DElETE /share/:id/down
+
+
+## Tags
+
+#### /tags/
+获取标签列表
+```
+GET /task/?key='关键字可缺省'
+```
+
+新建标签
+```
+POST /tags/
+{'name':'标签名'}
+```
+
+#### /tags/:id
+获取标签详情
+```
+GET /tags/123
+```
+
+关联标签
+```
+POST /tags/123
+{'sid':'关联的shareid'}
+```
+
+
+##Books
+
+#### /books/
+搜索书籍列表
+```
+GET /books/?page=1&key='关键字'
+```
+
+#### /books/:id
+获取书籍详情
+```
+GET /books/123
+```
+
+#### /books/:id/print
+打印
+```
+POST /books/123/print
+{'requirements':'备注说明,暂时缺省'}
+```
+
+
+## Password
+
+#### /password/phone
+手机找回密码（发送验证码）
+```
+POST /password/phone
+{'phone':'手机号','number':'学号'}
+```
+
+#### /password/email
+邮箱找回密码（发送验证码）
+```
+POST /password/email
+{'email':'邮箱','number':'学号'}
+```
+
+#### /password/code
+验证验证码
+```
+POST /password/code
+{'code':'验证码字符'}
+```
+
+#### /password/
+重置密码(完成验证之后进行)
+```
+POST /password/
+{'password':'MD5之后的密码'}
+```
+
+#### /password/verify/
+通过学号信箱验证
+```
+POST /password/
+{'number':'学号','password':'密码'，'code':'验证码'}
+```
+

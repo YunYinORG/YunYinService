@@ -213,4 +213,12 @@ class ShareController extends Rest
 		}
 		$this->response(1, $shares);
 	}
+
+	// /**
+	// * 赞
+	// * POST /share/123/up
+	// */
+	// public function POST_upAction($id)
+	// {
+	// }
 }
