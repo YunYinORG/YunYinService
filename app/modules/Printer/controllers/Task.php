@@ -10,17 +10,32 @@ class TaskController extends PrinterRest
 	 * @return [type]      [description]
 	 * @author NewFuture
 	 */
-	public function GET_listAction()
+	public function GET_newAction()
 	{
-		$userid = $this->auth();
+		$pid = $this->auth();
 		Input::get('page', $page, 'int', 1);
-		$tasks = TaskModel::where('use_id', '=', $userid)->belongs('user')->page($page)->select();
+		$tasks = TaskModel::where('pri_id', '=', $pid)->where('status','>',0)->belongs('user')->page($page)->select('name,id,color,ppt,double,copies,status,name,time,requirements');
 		$this->response(1, $tasks);
+	}
+
+	public function GET_infoAction($id)
+	{
+		$pid = $this->auth();
+		if (!$id)
+		{
+			$response['info'] = 'id错误';
+		}
+		else
+		{
+			$task=TaskModel::where()
+		}
 	}
 
 	public function PUT_infoAction($id)
 	{
-		$userid = $this->auth();
+		$pid = $this->auth();
+		$status = I('status');
+		$this->where();
 	}
 }
 ?>

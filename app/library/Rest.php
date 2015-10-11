@@ -20,23 +20,38 @@ abstract class Rest extends Yaf_Controller_Abstract
 	{
 
 		Yaf_Dispatcher::getInstance()->disableView(); //关闭视图模板引擎
-		$action = $this->_request->getActionName();
+		$requset=& $this->_request;
+
+		//对应REST_Action
+		$method      =$requset->getMethod();
+		if($method=='OPTIONS')
+		{
+			header(Config::get('cors_header'));
+			exit();
+		}
+		elseif($method == 'PUT') 
+		{
+			//put请求写入GOLBAL中和post get一样
+			parse_str(file_get_contents('php://input'), $GLOBALS['_PUT']);
+		}
+
+
+		$action = $request->getActionName();
 		//数字id映射带info控制器
 		if (is_numeric($action))
 		{
-			$this->_request->setParam('id', intval($action));
+			$request->setParam('id', intval($action));
 			$path   = substr(strstr($_SERVER['PATH_INFO'], $action), strlen($action) + 1);
 			$action = $path ? strstr($path . '/', '/', true) : 'info';
 		}
-		//对应REST_Action
-		$method      = $this->_request->getMethod();
+
 		$rest_action = $method . '_' . $action;
 
 		/*检查该action操作是否存在，存在则修改为REST接口*/
 		if (method_exists($this, $rest_action . 'Action'))
 		{
 			/*存在对应的操作*/
-			$this->_request->setActionName($rest_action);
+			$request->setActionName($rest_action);
 		}
 		elseif (!method_exists($this, $action . 'Action'))
 		{
@@ -45,13 +60,10 @@ abstract class Rest extends Yaf_Controller_Abstract
 				'error' => '未定义操作',
 				'method' => $method,
 				'action' => $action,
-				'controller' => $this->_request->getControllerName(),
+				'controller' => $request->getControllerName(),
 			);
 			exit;
 		}
-
-		//put请求写入GOLBAL中和post get一样
-		($method == 'PUT') AND parse_str(file_get_contents('php://input'), $GLOBALS['_PUT']);
 	}
 
 	/**
