@@ -6,7 +6,8 @@ namespace Service;
  */
 class Qiniu
 {
-	const QINIU_RS = 'http://rs.qbox.me';
+	const QINIU_RS  = 'http://rs.qbox.me';
+	const QINIU_API = 'http://api.qiniu.com';
 
 	private $_config = null;
 
@@ -41,7 +42,7 @@ class Qiniu
 	{
 		$bucket = $this->_config['bucket'];
 		$op     = '/move/' . self::qiniuEncode($bucket . ':' . $from) . '/' . self::qiniuEncode($bucket . ':' . $to);
-		return self::opration($op);
+		return $this->opration($op);
 	}
 
 	/**
@@ -56,7 +57,7 @@ class Qiniu
 	{
 		$bucket = $this->_config['bucket'];
 		$op     = '/copy/' . self::qiniuEncode($bucket . ':' . $file) . '/' . self::qiniuEncode($bucket . ':' . $copyName);
-		return self::opration($op);
+		return $this->opration($op);
 	}
 
 	/**
@@ -88,7 +89,15 @@ class Qiniu
 	public function delete($file)
 	{
 		$file = self::qiniuEncode($this->_config['bucket'] . ':' . trim($file));
-		return self::opration('/delete/' . $file);
+		return $this->opration('/delete/' . $file);
+	}
+
+	public function toPdf($file, $saveName)
+	{
+		$op   = '/pfop/';
+		$data = 'bucket=' . $this->_config['bucket'] . '&key=' . $file . '&fops=yifangyun_preview&saveKey=' . $saveName;
+		return $this->opration($op, $data, self::QINIU_API);
+		// ;'bucket=ztest&key=preview_test.docx&fops=yifangyun_preview&notifyURL=http%3A%2F%2Ffake.com%2Fqiniu%2Fnotify'
 	}
 
 	/**
@@ -98,10 +107,10 @@ class Qiniu
 	 * @return bool     	[操作结果]
 	 * @author NewFuture
 	 */
-	private function opration($op)
+	private function opration($op, $data = null, $host = self::QINIU_RS)
 	{
-		$token  = $this->sign($op . PHP_EOL);
-		$url    = self::QINIU_RS . $op;
+		$token  = $this->sign(is_string($data) ? $op . "\n" . $data : $op . "\n");
+		$url    = $host . $op;
 		$header = array('Authorization: QBox ' . $token);
 
 		if ($ch = curl_init($url))
@@ -110,7 +119,7 @@ class Qiniu
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
 			curl_setopt($ch, CURLOPT_POST, true);
-			// curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+			$data AND curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 			curl_setopt($ch, CURLOPT_HEADER, 1);
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
@@ -145,6 +154,23 @@ class Qiniu
 		$ak   = $this->_config['accesskey'];
 		return $ak . ':' . self::qiniuEncode($sign);
 	}
+
+	// *
+	//  * 请求签名验证
+	//  * @param  [type] $urlString   [description]
+	//  * @param  [type] $body        [description]
+	//  * @param  [type] $contentType [description]
+	//  * @return [type]              [description]
+
+	// 	private function signRequest($url, $body)
+	//    {
+	//         $data =$url. "\n";
+	//        if ($body != null &&
+
+	//            $data .= $body;
+	//        }
+	//        return $this->sign($data);
+	//    }
 
 	/**
 	 * 七牛安全编码
