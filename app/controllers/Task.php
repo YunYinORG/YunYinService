@@ -48,17 +48,19 @@ class TaskController extends Rest
 		{
 			$task           = TaskModel::create('post');
 			$task['name']   = $file['name'];
-			$task['url']    = File::addTask($file['url']);
 			$task['use_id'] = $userid;
 			$task['pri_id'] = $pid;
 
-			if (!$tid = TaskModel::insert($task))
+			if (!$task['url'] = File::addTask($file['url']))
+			{
+				$response['info'] = '文件转换出错';
+			}
+			elseif (!$tid = TaskModel::insert($task))
 			{
 				$response['info'] = '任务添加失败';
 			}
 			else
 			{
-
 				$response['status'] = 1;
 				$response['info']   = ['msg' => '打印任务添加成功', 'id' => $tid];
 			}

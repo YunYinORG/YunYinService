@@ -60,7 +60,7 @@ class File
 	 */
 	public static function share($uri)
 	{
-		$bucket    = Config::getSecret('share', 'bucket');
+		$bucket    = Config::getSecret('qiniu', 'share');
 		$share_uri = $bucket . strchr($uri, ':');
 		return Qiniu::copy($uri, $share_uri) ? $share_uri : false;
 	}
@@ -86,19 +86,20 @@ class File
 	 */
 	public static function addTask($uri)
 	{
-		$bucket = Config::get('task', 'bucket');
-		$saveas = $bucket . strchr($uri, ':');
-		$ext    = strrchr($uri, '.');
+		list($bucket, $key) = explode(':', $uri, 2);
+		$saveas             = Config::getSecret('qiniu', 'task') . ':' . $key;
+		$ext                = strrchr($uri, '.');
+
 		if (in_array($ext, ['.doc', '.docx', '.odt', '.rtf', '.wps', '.ppt', '.pptx', '.odp', '.dps', '.xls', '.xlsx', '.ods', '.csv', '.et']))
 		{
 			/*office系列 转pdf*/
 			$saveas .= '.pdf';
-			return (Qiniu::has($bucket, $saveas) || Qiniu::toPdf($uri, $saveas)) ? $saveas : false;
+			return (Qiniu::has($saveas) || Qiniu::toPdf($bucket, $key, $saveas)) ? $saveas : false;
 		}
 		else
 		{
 			/*其他文件直接复制*/
-			return (Qiniu::has($bucket, $saveas) || Qiniu::copy($uri, $saveas)) ? $saveas : false;
+			return (Qiniu::has($saveas) || Qiniu::copy($uri, $saveas)) ? $saveas : false;
 		}
 	}
 

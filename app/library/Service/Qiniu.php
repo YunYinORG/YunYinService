@@ -93,9 +93,9 @@ class Qiniu
 	 * @param  [type]  $key    [description]
 	 * @return boolean         [description]
 	 */
-	public static function has($bucket, $key)
+	public static function has($uri)
 	{
-		$op = '/stat/' . self::qiniuEncode($bucket . ':' . $key);
+		$op = '/stat/' . self::qiniuEncode($uri);
 		return self::opration($op);
 	}
 
