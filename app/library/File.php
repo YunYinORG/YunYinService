@@ -1,24 +1,32 @@
 <?php
+use \Service\Qiniu;
 
 class File
 {
 
-	private static $_handler;
+	// private static $_handler;
 
 	/**
 	 * 获取文件
 	 * @method get
-	 * @param  [type] $name  [description]
+	 * @param  [type] $key  [description]
 	 * @param  array  $param [description]
 	 * @return [url]        [下载链接]
 	 * @author NewFuture
 	 */
-	public static function get($name, $alias = null)
+	public static function get($uri, $alias = null)
 	{
-		$param['e'] = $_SERVER['REQUEST_TIME'] + 300; //下载过期时间
 
+		list($bucket, $key) = implode(':', $uri, 2);
+		if ($bucket == 'book');
+		{
+			//店内电子书
+			return $uri;
+		}
+
+		$param['e']                  = $_SERVER['REQUEST_TIME'] + 300; //下载过期时间
 		$alias AND $param['attname'] = urlencode($alias);
-		return self::handler()->download(trim($name), $param);
+		return Qiniu::download($domain, $key, $param);
 	}
 
 	/**
@@ -28,34 +36,33 @@ class File
 	 * @param  [type] $newName [description]
 	 * @author NewFuture
 	 */
-	public static function set($name, $newName)
+	public static function set($uir, $new_uri)
 	{
-		return self::handler()->move($name, $newName);
+		return Qiniu::move($uir, $new_uri);
 	}
 
 	/**
 	 * 删除文件
 	 * @method del
-	 * @param  [type] $name [description]
+	 * @param  [type] $uri [删除文件的uri]
 	 * @return [type]       [description]
 	 * @author NewFuture
 	 */
-	public static function del($name)
+	public static function del($uri)
 	{
-		return self::handler()->delete($name);
+		return Qiniu::delete($uri);
 	}
 
 	/**
-	 * 负责文件
-	 * @method copy
-	 * @param  [type] $file      [description]
-	 * @param  [type] $copyeName [description]
-	 * @return [type]            [description]
-	 * @author NewFuture
+	 * 分享文件
+	 * @param  [type] $uri
+	 * @return [type]           [分享后的uri]
 	 */
-	public static function copy($file, $copyName)
+	public static function share($uri)
 	{
-		return self::handler()->copy($file, $copyName);
+		$bucket    = Config::getSecret('share', 'bucket');
+		$share_uri = $bucket . strchr($uri, ':');
+		return Qiniu::copy($uri, $share_uri) ? $share_uri : false;
 	}
 
 	/**
@@ -65,10 +72,34 @@ class File
 	 * @return [string]       [token]
 	 * @author NewFuture
 	 */
-	public static function token($key)
+	public static function token($bucket, $key)
 	{
 		$timeout = 600;
-		return self::handler()->getToken($key, $timeout);
+		$maxsize = Config::get('upload.max');
+		return Qiniu::getToken($bucket, $key, $maxsize, $timeout);
+	}
+
+	/**
+	 * 添加打印任务
+	 * @param  [type] $key [description]
+	 * @return [type]      [description]
+	 */
+	public static function addTask($uri)
+	{
+		$bucket = Config::get('task', 'bucket');
+		$saveas = $bucket . strchr($uri, ':');
+		$ext    = strrchr($uri, '.');
+		if (in_array($ext, ['.doc', '.docx', '.odt', '.rtf', '.wps', '.ppt', '.pptx', '.odp', '.dps', '.xls', '.xlsx', '.ods', '.csv', '.et']))
+		{
+			/*office系列 转pdf*/
+			$saveas .= '.pdf';
+			return (Qiniu::has($bucket, $saveas) || Qiniu::toPdf($uri, $saveas)) ? $saveas : false;
+		}
+		else
+		{
+			/*其他文件直接复制*/
+			return (Qiniu::has($bucket, $saveas) || Qiniu::copy($uri, $saveas)) ? $saveas : false;
+		}
 	}
 
 	/**
@@ -106,21 +137,5 @@ class File
 			'base' => mb_substr($name, 0, $end),
 			'ext' => substr($ext, 1),
 		);
-	}
-
-	/**
-	 * 获取操作
-	 * @method handler
-	 * @author NewFuture
-	 */
-	private static function handler()
-	{
-		if (!self::$_handler)
-		{
-			$type           = Config::get('upload.type');
-			$uploader       = 'Service\\' . ucfirst($type);
-			self::$_handler = new $uploader(Config::getSecret($type));
-		}
-		return self::$_handler;
 	}
 }

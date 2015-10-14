@@ -31,7 +31,7 @@ class FileController extends Rest
 	public function POST_indexAction()
 	{
 
-		if (!Input::post('key', $key, 'char_num'))
+		if (!Input::post('key', $key, 'filename'))
 		{
 			$this->response(0, '未收到数据');
 			return;
@@ -48,17 +48,22 @@ class FileController extends Rest
 		{
 
 			Cache::del($key);
-			/*文件名由 temp_xxxx,重命名为 file_xxxx*/
-			$newfile        = strtr($key, 'temp', 'file') . '_' . $_SERVER['REQUEST_TIME'];
+			/*文件名由 t_xxxx,重命名为 f_xxxx*/
+			$bucket         = Config::getSecret('qiniu', 'file');
+			$uri            = $bucket . ':f_' . substr($key, 2);
 			$file['name']   = $name;
-			$file['url']    = $newfile;
+			$file['url']    = $uri;
 			$file['use_id'] = $userid;
 
-			if (!File::set($key, $newfile)) //修改文件名
+			if (!File::set($bucket . ':' . $key, $uri)) //修改文件名
 			{
 				$response['info'] = '文件校验失败';
 			}
-			elseif (!$fid = FileModel::add($file));
+			elseif (!$fid = FileModel::add($file))
+			{
+				$response['info'] = '文件保存失败';
+			}
+			else
 			{
 				$response['status'] = 1;
 				$response['info']   = ['msg' => '保存成功', 'id' => $fid];
@@ -78,15 +83,16 @@ class FileController extends Rest
 		$userid = $this->auth();
 		if (Input::post('name', $name, 'title') && $name = File::filterName($name))
 		{
-			$key   = uniqid('temp_' . $userid . '_');
-			$token = File::token($key);
+			$key    = uniqid('t_' . $userid . '_') . strrchr($name, '.');
+			$bucket = Config::getSecret('qiniu', 'file');
+			$token  = File::token($bucket, $key);
 			if ($token)
 			{
-				header('Access-Control-Allow-Origin:http://upload.qiniu.com');
+				// header('Access-Control-Allow-Origin:http://upload.qiniu.com');
 				Cache::set($key, $name, 1200);
 				$response['token'] = $token;
-				$response['key']   = $key;
-				$response['name']  = $name;
+				// $response['key']   = $key;
+				$response['name'] = $name;
 				$this->response(1, $response);
 			}
 			else
@@ -102,7 +108,7 @@ class FileController extends Rest
 
 	/**
 	 * 删除上传token，放弃上传
-	 * DELETE /file/token/temp_ae1233
+	 * DELETE /file/token/tmp_ae1233
 	 * @method POST_token
 	 * @param name 文件名
 	 */
@@ -114,7 +120,8 @@ class FileController extends Rest
 
 			$userid = $this->auth($userid);
 			Cache::del($key);
-			File::del($key);
+			$bucket = Config::getSecret('qiniu', 'file');
+			File::del($bucket . ':' . $key);
 			$this->response(1, '已经成功删除' . $name);
 		}
 		else
@@ -181,11 +188,11 @@ class FileController extends Rest
 		$userid             = $this->auth();
 		$File               = FileModel::where('use_id', '=', $userid)->field('url')->find($id);
 		$response['status'] = 0;
-		if (!$path = $File['url'])
+		if (!$uri = $File['url'])
 		{
 			$response['info'] = '没有找这个文件';
 		}
-		elseif (!File::del($path))
+		elseif (!File::del($uri))
 		{
 			$response['info'] = '删除出错';
 		}
@@ -197,6 +204,50 @@ class FileController extends Rest
 		else
 		{
 			$response['info'] = '文件状态更新失败';
+		}
+		$this->response = $response;
+	}
+
+	/**
+	 * 打印文件
+	 * POST /file/print
+	 * @method
+	 */
+	public function POST_printAction()
+	{
+		$userid             = $this->auth();
+		$response['status'] = 0;
+
+		if (!Input::post('id', $id, 'int'))
+		{
+			$response['info'] = '未选择文件';
+		}
+		elseif (!Input::post('pid', $pid, 'int'))
+		{
+			$response['info'] = '未选择打印店';
+		}
+		elseif (!$file = FileModel::where('use_id', $userid)->where('status', '>', 0)->field('url,name,status')->find($id))
+		{
+			$response['info'] = '没有该文件或者此文件已经删除';
+		}
+		else
+		{
+			$task           = TaskModel::create('post');
+			$task['name']   = $file['name'];
+			$task['url']    = File::addTask($file['url']);
+			$task['use_id'] = $userid;
+			$task['pri_id'] = $pid;
+
+			if (!$tid = TaskModel::insert($task))
+			{
+				$response['info'] = '任务添加失败';
+			}
+			else
+			{
+
+				$response['status'] = 1;
+				$response['info']   = ['msg' => '打印任务添加成功', 'id' => $tid];
+			}
 		}
 		$this->response = $response;
 	}

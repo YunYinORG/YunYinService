@@ -68,6 +68,13 @@ class Validate
 		return ctype_alnum(strtr($str, '_', 'A'));
 	}
 
+
+	/*验证字符串是否仅由字母，_，数字线组成*/
+	public static function fileName($str)
+	{
+		return ctype_alnum(strtr($str,'_.','AA'));
+	}
+
 	/*md5后的字符串*/
 	public static function isMD5($md5pwd)
 	{

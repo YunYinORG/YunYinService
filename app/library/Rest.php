@@ -20,21 +20,19 @@ abstract class Rest extends Yaf_Controller_Abstract
 	{
 
 		Yaf_Dispatcher::getInstance()->disableView(); //关闭视图模板引擎
-		$requset=& $this->_request;
+		$request = &$this->_request;
 
 		//对应REST_Action
-		$method      =$requset->getMethod();
-		if($method=='OPTIONS')
+		$method = $request->getMethod();
+		if ($method == 'OPTIONS')
 		{
-			header(Config::get('cors_header'));
 			exit();
 		}
-		elseif($method == 'PUT') 
+		elseif ($method == 'PUT')
 		{
 			//put请求写入GOLBAL中和post get一样
 			parse_str(file_get_contents('php://input'), $GLOBALS['_PUT']);
 		}
-
 
 		$action = $request->getActionName();
 		//数字id映射带info控制器

@@ -48,7 +48,7 @@ class TaskController extends Rest
 		{
 			$task           = TaskModel::create('post');
 			$task['name']   = $file['name'];
-			$task['url']    = $file['url'];
+			$task['url']    = File::addTask($file['url']);
 			$task['use_id'] = $userid;
 			$task['pri_id'] = $pid;
 

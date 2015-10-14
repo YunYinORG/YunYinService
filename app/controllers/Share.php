@@ -49,7 +49,7 @@ class ShareController extends Rest
 
 			$url             = $File->url;
 			$url             = substr_replace($url, 'share', 0, 4);
-			$share['url']    = $url;
+			$share['url']    = File::share($url);
 			$share['fil_id'] = $fid;
 			$share['use_id'] = $userid;
 			$share['name']   = Input::post('name', $name, 'title') ? $name : $File->name;
@@ -178,7 +178,7 @@ class ShareController extends Rest
 			$task           = TaskModel::create('post');
 			$task['use_id'] = $userid;
 			$task['pid']    = $pid;
-			$task['url']    = $share['url'];
+			$task['url']    = File::addTask($share['url']);
 			$task['name']   = $share['name'];
 
 			if (!$tid = TaskModel::insert($task))

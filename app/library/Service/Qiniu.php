@@ -7,27 +7,21 @@ namespace Service;
 class Qiniu
 {
 	const QINIU_RS  = 'http://rs.qbox.me';
-	const QINIU_API = 'http://api.qiniu.com';
-
-	private $_config = null;
-
-	public function __construct($config)
-	{
-		$this->_config = $config;
-	}
+	static $_config = null;
 
 	/**
 	 * 获取文件
 	 * @method download
+	 * @param  string $domain 域名
 	 * @param  string $name  [文件名]
 	 * @param  string $param [附加参数]
 	 * @return string        url
 	 * @author NewFuture
 	 */
-	public function download($name, $param = [])
+	public static function download($domain, $name, $param = [])
 	{
-		$url   = $this->_config['domain'] . '/' . $name . '?' . http_build_query($param);
-		$token = $this->sign($url);
+		$url   = $domain . $name . '?' . http_build_query($param);
+		$token = self::sign($url);
 		return $url . '&token=' . $token;
 	}
 
@@ -38,11 +32,11 @@ class Qiniu
 	 * @param  [type] $to [description]
 	 * @author NewFuture
 	 */
-	public function move($from, $to)
+	public static function move($from, $to)
 	{
-		$bucket = $this->_config['bucket'];
-		$op     = '/move/' . self::qiniuEncode($bucket . ':' . $from) . '/' . self::qiniuEncode($bucket . ':' . $to);
-		return $this->opration($op);
+		// $bucket = $this->_config['bucket'];
+		$op = '/move/' . self::qiniuEncode($from) . '/' . self::qiniuEncode($to);
+		return self::opration($op);
 	}
 
 	/**
@@ -53,30 +47,31 @@ class Qiniu
 	 * @return [type]           [description]
 	 * @author NewFuture
 	 */
-	public function copy($file, $copyName)
+	public static function copy($from, $saveas)
 	{
-		$bucket = $this->_config['bucket'];
-		$op     = '/copy/' . self::qiniuEncode($bucket . ':' . $file) . '/' . self::qiniuEncode($bucket . ':' . $copyName);
-		return $this->opration($op);
+		// $bucket = $this->_config['bucket'];
+		$op = '/copy/' . self::qiniuEncode($from) . '/' . self::qiniuEncode($saveas);
+		return self::opration($op);
 	}
 
 	/**
 	 * 获取token
 	 * @method getToken
-	 * @param  [type]   $key     [description]
+	 * @param  [type]   $uri     [description]
 	 * @param  integer  $timeout [description]
 	 * @return [type]            [description]
 	 * @author NewFuture
 	 */
-	public function getToken($key, $timeout = 600)
+	public static function getToken($bucket, $key, $max = 10485760, $timeout = 600)
 	{
 		$setting = array(
-			'scope' => $this->_config['bucket'] . ':' . $key,
+			'scope' => $bucket,
+			'saveKey' => $key,
 			'deadline' => $timeout + $_SERVER['REQUEST_TIME'],
-			'fsizeLimit' => intval(\Config::get('upload.max')),
+			'fsizeLimit' => intval($max),
 		);
 		$setting = self::qiniuEncode(json_encode($setting));
-		return $this->sign($setting) . ':' . $setting;
+		return self::sign($setting) . ':' . $setting;
 	}
 
 	/**
@@ -86,18 +81,36 @@ class Qiniu
 	 * @return bool      [description]
 	 * @author NewFuture
 	 */
-	public function delete($file)
+	public static function delete($bucket, $file)
 	{
-		$file = self::qiniuEncode($this->_config['bucket'] . ':' . trim($file));
-		return $this->opration('/delete/' . $file);
+		$file = self::qiniuEncode($bucket . ':' . trim($file));
+		return self::opration('/delete/' . $file);
 	}
 
-	public function toPdf($file, $saveName)
+	/**
+	 * 判断文件是否存在
+	 * @param  [type]  $bucket [description]
+	 * @param  [type]  $key    [description]
+	 * @return boolean         [description]
+	 */
+	public static function has($bucket, $key)
 	{
+		$op = '/stat/' . self::qiniuEncode($bucket . ':' . $key);
+		return self::opration($op);
+	}
+
+	/**
+	 * 转pdf
+	 * @param  [type] $file     [description]
+	 * @param  [type] $saveName [description]
+	 * @return [type]           [description]
+	 */
+	public static function toPdf($bucket, $key, $saveas)
+	{
+		$API  = 'http://api.qiniu.com';
 		$op   = '/pfop/';
-		$data = 'bucket=' . $this->_config['bucket'] . '&key=' . $file . '&fops=yifangyun_preview&saveKey=' . $saveName;
-		return $this->opration($op, $data, self::QINIU_API);
-		// ;'bucket=ztest&key=preview_test.docx&fops=yifangyun_preview&notifyURL=http%3A%2F%2Ffake.com%2Fqiniu%2Fnotify'
+		$data = 'bucket=' . $bucket . '&key=' . $key . '&fops=yifangyun_preview|saveas/' . self::qiniuEncode($saveas);
+		return self::opration($op, $data, $API);
 	}
 
 	/**
@@ -107,9 +120,9 @@ class Qiniu
 	 * @return bool     	[操作结果]
 	 * @author NewFuture
 	 */
-	private function opration($op, $data = null, $host = self::QINIU_RS)
+	private static function opration($op, $data = null, $host = self::QINIU_RS)
 	{
-		$token  = $this->sign(is_string($data) ? $op . "\n" . $data : $op . "\n");
+		$token  = self::sign(is_string($data) ? $op . "\n" . $data : $op . "\n");
 		$url    = $host . $op;
 		$header = array('Authorization: QBox ' . $token);
 
@@ -148,29 +161,13 @@ class Qiniu
 	 * @return [type]      [description]
 	 * @author NewFuture
 	 */
-	private function sign($url)
+	private static function sign($url)
 	{
-		$sign = hash_hmac('sha1', $url, $this->_config['secretkey'], true);
-		$ak   = $this->_config['accesskey'];
+		$config = self::$_config ?: (self::$_config = \Config::getSecret('qiniu'));
+		$sign   = hash_hmac('sha1', $url, $config['secretkey'], true);
+		$ak     = $config['accesskey'];
 		return $ak . ':' . self::qiniuEncode($sign);
 	}
-
-	// *
-	//  * 请求签名验证
-	//  * @param  [type] $urlString   [description]
-	//  * @param  [type] $body        [description]
-	//  * @param  [type] $contentType [description]
-	//  * @return [type]              [description]
-
-	// 	private function signRequest($url, $body)
-	//    {
-	//         $data =$url. "\n";
-	//        if ($body != null &&
-
-	//            $data .= $body;
-	//        }
-	//        return $this->sign($data);
-	//    }
 
 	/**
 	 * 七牛安全编码

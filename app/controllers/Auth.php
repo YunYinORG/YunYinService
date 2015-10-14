@@ -5,6 +5,10 @@ class AuthController extends Yaf_Controller_Abstract
 
 	public function init()
 	{
+		if ($this->_request->getMethod() == 'OPTIONS')
+		{
+			exit();
+		}
 		Yaf_Dispatcher::getInstance()->disableView(); //关闭视图模板引擎
 	}
 
