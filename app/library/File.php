@@ -16,15 +16,18 @@ class File
 	 */
 	public static function get($uri, $alias = null)
 	{
-
+		if (!$uri)
+		{
+			return null;
+		}
 		list($bucket, $key) = implode(':', $uri, 2);
 		if ($bucket == 'book');
 		{
 			//店内电子书
 			return $uri;
 		}
+		$param['e'] = $_SERVER['REQUEST_TIME'] + 300; //下载过期时间
 
-		$param['e']                  = $_SERVER['REQUEST_TIME'] + 300; //下载过期时间
 		$alias AND $param['attname'] = urlencode($alias);
 		return Qiniu::download($domain, $key, $param);
 	}

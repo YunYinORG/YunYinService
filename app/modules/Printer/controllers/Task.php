@@ -18,6 +18,10 @@ class TaskController extends PrinterRest
 		$this->response(1, $tasks);
 	}
 
+	/**
+	 * 获取详情
+	 * @param [type] $id [description]
+	 */
 	public function GET_infoAction($id)
 	{
 		$pid = $this->auth();
@@ -37,13 +41,36 @@ class TaskController extends PrinterRest
 			$task['url']      = File::get($task['url']);
 			$response['info'] = $task;
 		}
+		$this->response = $response;
 	}
 
+	/**
+	 * 修改状态
+	 * @param [type] $id [description]
+	 */
 	public function PUT_infoAction($id)
 	{
-		$pid    = $this->auth();
-		$status = I('status');
-		$this->where();
+		$pid                = $this->auth();
+		$response['status'] = 0;
+		if (!Input::get('status', $status, 'int'))
+		{
+			$response['info'] = '无效状态';
+		}
+		elseif ($status < 0 || $status > 5)
+		{
+			$response['info'] = '此状态不允许设置';
+		}
+		elseif (TaskModel::where('id', $id)->where('pri_id', $pid)->update(['status' => $status]))
+		{
+			$response['status'] = 0;
+			$response['info']   = '修改成功';
+		}
+		else
+		{
+			$response['info'] = '状态设置失败';
+		}
+		$this->response = $response;
 	}
+
 }
 ?>
