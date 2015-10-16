@@ -53,7 +53,7 @@ class File
 	 */
 	public static function del($uri)
 	{
-		return Qiniu::delete($uri);
+		return (substr_compare($uri, 'book:', 0, 5) == 0) || Qiniu::delete($uri);
 	}
 
 	/**

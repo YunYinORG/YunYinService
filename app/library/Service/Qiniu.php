@@ -81,9 +81,9 @@ class Qiniu
 	 * @return bool      [description]
 	 * @author NewFuture
 	 */
-	public static function delete($bucket, $file)
+	public static function delete($uri)
 	{
-		$file = self::qiniuEncode($bucket . ':' . trim($file));
+		$file = self::qiniuEncode($uri);
 		return self::opration('/delete/' . $file);
 	}
 
