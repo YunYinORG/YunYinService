@@ -19,13 +19,13 @@ class TaskModel extends FacadeModel
 		{
 			$task['copies'] = $copies;
 		}
-		if (Input::I($method . 'color', $color, FILTER_VALIDATE_BOOLEAN))
+		if (Input::I($method . 'color', $color, 'int'))
 		{
-			$task['color'] = $color;
+			$task['color'] = $color ? 1 : 0;
 		}
-		if (Input::I($method . 'isdouble', $is_double, FILTER_VALIDATE_BOOLEAN))
+		if (Input::I($method . 'isdouble', $is_double, 'int'))
 		{
-			$task['isdouble'] = $is_double;
+			$task['isdouble'] = $is_double ? 1 : 0;
 		}
 		if (Input::I($method . 'ppt', $ppt, 'int'))
 		{
