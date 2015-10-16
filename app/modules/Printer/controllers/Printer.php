@@ -55,7 +55,7 @@ class PrinterController extends PrinterRest
 			$info['price'] = $price;
 		}
 
-		if ($info AND PrinterModel::where('id', $id)->update($info))
+		if (!empty($info) AND PrinterModel::where('id', $id)->update($info))
 		{
 			$this->response(1, $info);
 		}
@@ -63,13 +63,5 @@ class PrinterController extends PrinterRest
 		{
 			$this->response(0, '修改失败');
 		}
-	}
-
-	/**
-	 * 修改密码
-	 */
-	public function PUT_passwordAction()
-	{
-
 	}
 }
