@@ -19,7 +19,7 @@ class Filter
 	/*富文本过滤*/
 	public static function text($str)
 	{
-		return filter_var($str, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_ENCODE_HIGH | FILTER_FLAG_ENCODE_AMP);
+		return filter_var($str, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_ENCODE_AMP);
 	}
 
 	/*标签字符过滤*/
