@@ -37,11 +37,58 @@ class BooksController extends PrinterRest
 	public function POST_indexAction()
 	{
 		$pid = $this->auth();
+		if (Input::post('books', $books))
+		{
+			/*批量插入*/
+			$books = explode("\n", $books);
+			$books = array_map(array('\\Parse\\Filter', 'title'), $books);
+			$books = array_filter($books);
+			$data  = array();
+			foreach ($books as $key => $name)
+			{
+				$data[] = array('pri_id' => $pid, 'name' => $name);
+			}
+			/*插入*/
+			if (BookModel::addAll($data))
+			{
+				$this->response(1, $books);
+			}
+			else
+			{
+				$this->response(0, '批量插入失败');
+			}
+		}
+		elseif (Input::post('name', $name, 'title'))
+		{
+			/*单个插入*/
+			$book['name']  = $name;
+			$boo['pri_id'] = $pid;
+			if (Input::post('price', $price, 'float'))
+			{
+				$book['price'] = $price;
+			}
+			if (Input::post('detail', $detail, 'text'))
+			{
+				$book['detail'] = $detail;
+			}
 
+			if ($book['id'] = BookModel::add($book))
+			{
+				$this->response(1, $book);
+			}
+			else
+			{
+				$this->response(0, '添加失败');
+			}
+		}
+		else
+		{
+			$this->response(0, '数据无效');
+		}
 	}
 
 	/**
-	 * 获取书籍详情
+	 * 获取详情
 	 * GET /books/123
 	 * @method GET_infoAction
 	 * @param  integer        $id [资源id]
@@ -57,6 +104,66 @@ class BooksController extends PrinterRest
 		else
 		{
 			$this->response(0, '信息不存在或者无权访问');
+		}
+	}
+
+	/**
+	 * 删除
+	 * DELETE /books/123
+	 * @method GET_infoAction
+	 * @param  integer        $id [资源id]
+	 * @author NewFuture
+	 */
+	public function DELETE_infoAction($id = 0)
+	{
+		$pid = $this->auth();
+		if (BookModel::delete($id))
+		{
+			$this->response(1, '删除成功！');
+		}
+		else
+		{
+			$this->response(0, '信息不存在或者无权访问');
+		}
+	}
+
+	/**
+	 * 获取详情
+	 * PUT /books/123
+	 * @method GET_infoAction
+	 * @param  integer        $id [资源id]
+	 * @author NewFuture
+	 */
+	public function PUT_infoAction($id = 0)
+	{
+		$pid  = $this->auth();
+		$book = [];
+		if (Input::put('name', $name, 'title'))
+		{
+			$book['name'] = $name;
+		}
+
+		if (Input::put('detail', $detail, 'text'))
+		{
+			$book['detail'] = $detail;
+		}
+
+		if (Input::put('price', $price, 'float'))
+		{
+			$book['price'] = $price;
+		}
+
+		if (empty($book))
+		{
+			$this->response(0, '无修改内容');
+		}
+		elseif (BookModel::where('id', $id)->update($book))
+		{
+			$this->response(1, $book);
+		}
+		else
+		{
+			$this->response(0, '修改失败');
 		}
 	}
 }
