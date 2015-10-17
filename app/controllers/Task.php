@@ -15,7 +15,7 @@ class TaskController extends Rest
 	{
 		$userid = $this->auth();
 		Input::get('page', $page, 'int', 1);
-		$tasks = TaskModel::where('use_id', '=', $userid)->belongs('printer')->page($page)->select();
+		$tasks = TaskModel::where('use_id', '=', $userid)->belongs('printer')->page($page)->order('id','DESC')->select();
 		$this->response(1, $tasks);
 	}
 
