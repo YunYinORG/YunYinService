@@ -6,11 +6,20 @@
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteRule ^(.*)$ index.php/$1 [QSA,PT,L]
 </IfModule>
+
 <Files config.yaml>
-Order Allow,Deny 
-Deny from all
+	Order Allow,Deny 
+	Deny from all
 </Files>
+
+<IfModule mod_headers.c>
+	Header set Access-Control-Allow-Origin "http://localfront.yunyin.org"
+	Header set Access-Control-Allow-Headers X-Requested-With,Token
+	Header set Access-Control-Allow-Credentials true
+	Header set Access-Control-Allow-Methods GET,POST,PUT,DELETE
+</IfModule>
+
 <Files .git*>
-Order Allow,Deny 
-Deny from all
+ Order Allow,Deny 
+ Deny from all
 </Files>

@@ -7,7 +7,7 @@ class NKU extends Connect
 {
 	const ID = 1; //学校id
 
-	public function getName($number, $password)
+	public static function getName($number, $password)
 	{
 		$data['svpn_name']     = $number;
 		$data['svpn_password'] = $password;

@@ -1,18 +1,12 @@
-name: nkuprint
+name: yunyin
 handle:
 - rewrite: if(!is_dir() && !is_file() && path~"^(.*)$") goto "index.php/$1"
-- compress: if ( out_header["Content-type"] ~ "text/css" ) compress
-- compress: if ( out_header["Content-type"] ~ "text/javascript" ) compress
-- compress: if ( out_header["Content-type"] ~ "image/png" ) compress
-- compress: if ( out_header["Content-type"] ~ "image/jpeg" ) compress
-- compress: if ( out_header["Content-type"] ~ "text/html" ) compress
+
 - hostaccess: if(path == "/backup.php") allow "10.0.0.0/8"
 - hostaccess: if (%{REQUEST_URI} ~*"/conf/") allow "0.0"
 - hostaccess: if (%{REQUEST_URI} ~*"/app/")  allow "0.0"
-- hostaccess: if (%{REQUEST_URI} ~*"/cache/")  allow "0.0"
 - hostaccess: if (path ~*"/.htacesss")  allow "0.0"
-- expire:  if( path ~ "Public" ) time 2592000
-- expire:  if( path ~ "favicon.ico" ) time 360000
+
 cron:
 - description: backup
   url: /backup.php
