@@ -259,6 +259,35 @@ class Model implements JsonSerializable, ArrayAccess
 	}
 
 	/**
+	 * 批量插入数据
+	 * @method insertAll
+	 * @param  array    $fields       [字段]
+	 * @param  array     $values      [数据，二维数组]
+	 * @return int 插入条数
+	 * @author NewFuture
+	 */
+	public function insertAll($fields, $values = array())
+	{
+		//字段过滤
+		$quote_fields = array_map(array($this, 'backQoute'), $fields);
+
+		//插入数据
+		$sql = 'INSERT INTO' . self::backQoute($this->table);
+		$sql .= '(' . implode(',', $quote_fields) . ')VALUES';
+		$param = [];
+		foreach ($values as $i => $value)
+		{
+			$sql .= '(:' . implode($i . ',:', $fields) . $i . '),';
+			foreach ($fields as $k => $field)
+			{
+				$param[$field . $i] = $value[$k];
+			}
+		}
+		$sql = rtrim($sql, ',');
+		return $this->execute($sql, $param);
+	}
+
+	/**
 	 * 删除数据
 	 * @method delete
 	 * @param  [string] $id [description]

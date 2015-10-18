@@ -46,10 +46,10 @@ class BooksController extends PrinterRest
 			$data  = array();
 			foreach ($books as $key => $name)
 			{
-				$data[] = array('pri_id' => $pid, 'name' => $name);
+				$data[] = [$pid, $name];
 			}
-			/*插入*/
-			if (BookModel::addAll($data))
+			/*全部插入*/
+			if (BookModel::insertAll(['pri_id', 'name'], $data))
 			{
 				$this->response(1, $books);
 			}
