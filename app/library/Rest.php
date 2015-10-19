@@ -10,6 +10,7 @@ abstract class Rest extends Yaf_Controller_Abstract
 	private $response_type = 'json'; //返回数据格式
 	protected $response    = false;  //返回数据
 	const AUTH_FAIL        = -1;
+	const AUTH_BAN         = -2;
 	/**
 	 * 初始化 REST 路由
 	 * 修改操作 和 绑定参数
@@ -84,7 +85,7 @@ abstract class Rest extends Yaf_Controller_Abstract
 		elseif ($user_id !== false && $user_id != $uid)
 		{
 			/*资源所有权验证*/
-			$this->response(self::AUTH_FAIL, '账号验证失败无权访问！');
+			$this->response(self::AUTH_BAN, '账号验证失败无权访问！');
 			exit();
 		}
 		else

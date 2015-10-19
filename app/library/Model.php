@@ -841,7 +841,7 @@ class Model implements JsonSerializable, ArrayAccess
 					list($key, $exp, $value) = $c;
 					$name                    = 'w_and_' . $key; //字段名带上表前缀
 					$field                   = strpos($key, '.') ? $key . ' ' : $pre . self::backQoute($key);
-					$conidition[]            = $field . $exp . ':' . $name;
+					$conidition[]            = $field . $exp . ' :' . $name;
 					$this->param[$name]      = $value;
 				}
 			}
@@ -865,7 +865,7 @@ class Model implements JsonSerializable, ArrayAccess
 					list($key, $exp, $value) = $c;
 					$name                    = 'w_or_' . $key;
 					$field                   = strpos($key, '.') ? $key . ' ' : $pre . self::backQoute($key);
-					$conidition[]            = $field . $exp . ':' . $name;
+					$conidition[]            = $field . $exp . ' :' . $name;
 					$this->param[$name]      = $value;
 				}
 			}

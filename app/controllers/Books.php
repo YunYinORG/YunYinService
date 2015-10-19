@@ -13,15 +13,14 @@ class BooksController extends Rest
 	public function GET_indexAction()
 	{
 		Input::get('page', $page, 'int', 1);
+		$Book = BookModel::order('count', 'DESC')->page($page);
 		if (Input::get('key', $key, 'tag')) //关键字
 		{
-			$key   = '%' . strtr($key, ' ', '%') . '%';
-			$books = BookModel::where('name', 'LIKE', $key)->orWhere('detail', 'LIKE', $key)->order('count', 'DESC')->page($page)->select('id,name,pri_id');
+			$key = '%' . strtr($key, ' ', '%') . '%';
+			$Book->where('name', 'LIKE', $key)->orWhere('detail', 'LIKE', $key);
 		}
-		else
-		{
-			$books = BookModel::order('count', 'DESC')->page($page)->select('id,name,pri_id');
-		}
+
+		$books = $Book->select('id,name,detail,pri_id');
 		$this->response(1, $books);
 	}
 
@@ -33,7 +32,7 @@ class BooksController extends Rest
 	 */
 	public function GET_infoAction($id = 0)
 	{
-		$uid = $this->auth();
+		// $uid = $this->auth();
 		if ($book = BookModel::belongs('printer')->find($id))
 		{
 			$this->response(1, $book);
@@ -47,6 +46,7 @@ class BooksController extends Rest
 	/**
 	 * 打印书籍
 	 * @method POST_printAction
+	 * @todo 计价
 	 * @param  integer          $id [description]
 	 * @author NewFuture
 	 */

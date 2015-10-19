@@ -20,13 +20,13 @@ class File
 		{
 			return null;
 		}
-		list($bucket, $key) = implode(':', $uri, 2);
-		if ($bucket == 'book');
+		elseif (substr_compare($uri, 'book/', 0, 5) === 0);
 		{
 			//店内电子书
 			return $uri;
 		}
-		$param['e'] = $_SERVER['REQUEST_TIME'] + 300; //下载过期时间
+		list($bucket, $key) = implode(':', $uri, 2);
+		$param['e']         = $_SERVER['REQUEST_TIME'] + 300; //下载过期时间
 
 		$alias AND $param['attname'] = urlencode($alias);
 		return Qiniu::download($domain, $key, $param);
