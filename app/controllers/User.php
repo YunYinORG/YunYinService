@@ -154,9 +154,9 @@ class UserController extends Rest
 		{
 			$response['info'] = '已经绑定过用户';
 		}
-		elseif (($try_times = Cache::get('snd_code_t' . $id)) > 5)
+		elseif (!Safe::checkTry('bind_phone_' . $id))
 		{
-			$response['info'] = '发送此数过多,12小时之后重试';
+			$response['info'] = '发送此数过多,稍后重试';
 		}
 		else
 		{
@@ -166,12 +166,11 @@ class UserController extends Rest
 			if (Sms::bind($phone, $code))
 			{
 				$response['status'] = 1;
-				$response['info']   = '发送成功[最多还可重发' . (5 - $try_times) . '次]';
-				Cache::set('snd_code_t' . $id, $try_times + 1, 12 * 3600);
+				$response['info']   = '发送成功[最多可重发5次]';
 			}
 			else
 			{
-				$response['info'] = '短信发送出错[最多还可重发' . (5 - $try_times) . '次]';
+				$response['info'] = '短信发送出错[最多可重发5次]';
 			}
 		}
 		$this->response = $response;
@@ -197,7 +196,7 @@ class UserController extends Rest
 		{
 			$response['info'] = '验证码已过期,请重新生成';
 		}
-		elseif ($try_times = Cache::get('try_code_t' . $id) > 3)
+		elseif (!Safe::checkTry('phone_code_' . $id))
 		{
 			$response['info'] = '此验证码尝试次数过多,请重新发送短信';
 			Session::del('code_phone');
@@ -205,12 +204,11 @@ class UserController extends Rest
 		elseif (key($verify) != strtoupper($code))
 		{
 			$response['info'] = '验证码错误';
-			Cache::set('try_code_t' . $id, $try_times + 1);
 		}
 		else
 		{
-			Cache::del('try_code_t' . $id);
 			session::del('code_phone');
+			Safe::del('phone_code_' . $id);
 			$phone = $verify[strtoupper($code)]; //读取号码
 			if (UserModel::SavePhone($phone))
 			{
@@ -260,7 +258,7 @@ class UserController extends Rest
 		{
 			$response['info'] = '已经绑定过用户';
 		}
-		elseif ($try_times = Cache::get('snd_mail_t' . $id) > 8)
+		elseif (!Safe::checkTry('bind_email_' . $id))
 		{
 			$response['info'] = '发送此数过多,12小时之后重试';
 		}
@@ -274,16 +272,60 @@ class UserController extends Rest
 			$code['code']    = $id . '_' . Random::word(16);
 			$code['content'] = $email;
 			/*发送邮件*/
-			if ($Code->insert($code) && Mail::sendVerify($email, $name, $code['code']))
+			if ($Code->insert($code) && Mail::sendVerify($email, $code['code'], $name))
 			{
 				$response['status'] = 1;
-				$response['info']   = '验证邮件成功发送至：' . $email . ($try_times ? '[最多还可重发' . (8 - $try_times) . '次]' : '');
-				Cache::set('snd_mail_t' . $id, $try_times + 1, 12 * 3600);
+				$response['info']   = '验证邮件成功发送至：' . $email;
 			}
 			else
 			{
-				$response['info'] = '邮件发送出错[最多还可重发' . (5 - $try_times) . '次]';
+				$response['info'] = '邮件发送出错[最多还可重发' . Config::get('try.times') . '次]';
 			}
+		}
+		$this->response = $response;
+	}
+
+	/**
+	 * 修改用户邮箱
+	 * PUT /user/1/phone {code:"C09Eaf"}
+	 * @method GET_infoAction
+	 * @param  integer        $id [description]
+	 * @author NewFuture
+	 */
+	public function PUT_emailAction($id = 0)
+	{
+		$id = $this->auth($id);
+
+		$response['status'] = 0;
+		$Code               = new Model('code');
+		if (!Input::put('code', $code, 'ctype_alnum')) //数字或者字母
+		{
+			$response['info'] = '验证码格式不对';
+		}
+		elseif (!$Code->where('use_id', $id)->where('type', 1)->field('id,email,time,content')->find())
+		{
+			$response['info'] = '验证信息不存在';
+		}
+		elseif (!Safe::checkTry('email_code_' . $id))
+		{
+			$Code->delete();
+			Safe::del('email_code_' . $id);
+			$response['info'] = '尝试次数过多,请重新验证';
+		}
+		elseif (strtoupper($code) != strtoupper(substr($Code['content'], 2, 8)))
+		{
+			$response['info'] = '验证码不匹配';
+		}
+		elseif (!UserModel::saveEmail($Code['content'], $Code['use_id']))
+		{
+			$response['info'] = '邮箱绑定失败';
+		}
+		else
+		{
+			$Code->delete();
+			Safe::del('email_code_' . $id);
+			$response['info']   = $Code['content'];
+			$response['status'] = 1;
 		}
 		$this->response = $response;
 	}

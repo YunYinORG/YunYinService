@@ -12,34 +12,34 @@ class PasswordController extends REST
 	 */
 	public function POST_phoneAction()
 	{
-		$respone['status'] = 0;
+		$response['status'] = 0;
 		if (!Input::post('phone', $phone, Config::get('regex.phone')))
 		{
-			$respone['info'] = '手机号格式有误或者不支持！';
+			$response['info'] = '手机号格式有误或者不支持！';
 		}
 		elseif (!Input::post('number', $number, 'card'))
 		{
-			$respone['info'] = '学号格式有误！';
+			$response['info'] = '学号格式有误！';
 		}
 		elseif (!Safe::checkTry('pwd_phone_' . $number))
 		{
-			$respone['info'] = '尝试次数过多，临时封禁！';
+			$response['info'] = '尝试次数过多，临时封禁！';
 		}
 		elseif (!$user = UserModel::where('number', $number)->field('id,phone')->find())
 		{
-			$respone['info'] = '尚未注册,或者学号错误';
+			$response['info'] = '尚未注册,或者学号错误';
 		}
 		elseif (empty($user['phone']))
 		{
-			$respone['info'] = '未绑定手机号,或者学号错误';
+			$response['info'] = '未绑定手机号,或者学号错误';
 		}
 		elseif (Encrypt::encryptPhone($phone, $number, $user['id']) != $user['phone'])
 		{
-			$respone['info'] = '绑定手机不一致,或者手机号错误';
+			$response['info'] = '绑定手机不一致,或者手机号错误';
 		}
 		elseif (!Sms::findPwd($phone, $code = Random::code(6)))
 		{
-			$respone['info'] = '短信发送出错,请联系我们！';
+			$response['info'] = '短信发送出错,请联系我们！';
 		}
 		else
 		{
@@ -47,10 +47,10 @@ class PasswordController extends REST
 			$findPwd = ['id' => $user['id'], 'number' => $number, 'code' => strtoupper($code)];
 			Session::set('find_info', $find);
 			Safe::del('pwd_phone_' . $number);
-			$respone['status'] = 1;
-			$respone['info']   = '短信已发送';
+			$response['status'] = 1;
+			$response['info']   = '短信已发送';
 		}
-		$this->respone = $respone;
+		$this->response = $response;
 	}
 
 	/**
@@ -61,45 +61,45 @@ class PasswordController extends REST
 	public function POST_emailAction()
 	{
 
-		$respone['status'] = 0;
+		$response['status'] = 0;
 		if (!Input::post('email', $email, 'email'))
 		{
-			$respone['info'] = '邮箱格式有误或者不支持！';
+			$response['info'] = '邮箱格式有误或者不支持！';
 		}
 		elseif (!Input::post('number', $number, 'card'))
 		{
-			$respone['info'] = '学号格式有误！';
+			$response['info'] = '学号格式有误！';
 		}
 		elseif (!Safe::checkTry('pwd_email_' . $number))
 		{
-			$respone['info'] = '尝试次数过多，临时封禁！';
+			$response['info'] = '尝试次数过多，临时封禁！';
 		}
-		elseif (!$user = UserModel::where('number', $number)->field('id,email')->find())
+		elseif (!$user = UserModel::where('number', $number)->field('id,name,email')->find())
 		{
-			$respone['info'] = '尚未注册,或者学号错误';
+			$response['info'] = '尚未注册,或者学号错误';
 		}
 		elseif (empty($user['email']))
 		{
-			$respone['info'] = '未绑定邮箱,或者学号错误';
+			$response['info'] = '未绑定邮箱,或者学号错误';
 		}
 		elseif (Encrypt::encryptEmail($email) != $user['email'])
 		{
-			$respone['info'] = '绑定邮箱不一致,或者邮箱错误';
+			$response['info'] = '绑定邮箱不一致,或者邮箱错误';
 		}
-		elseif (!Mail::findPwd($email, $code = Random::code(6)))
+		elseif (!Mail::findPwd($email, $code = Random::code(6), $user['name']))
 		{
-			$respone['info'] = '邮件发送出错,请联系我们！';
+			$response['info'] = '邮件发送出错,请联系我们！';
 		}
 		else
 		{
 			/*发送成功*/
 			$findPwd = ['id' => $user['id'], 'number' => $number, 'code' => strtoupper($code)];
-			Session::set('find_info', $find);
+			Session::set('find_info', $findPwd);
 			Safe::del('pwd_email_' . $number);
-			$respone['status'] = 1;
-			$respone['info']   = '邮件已发送';
+			$response['status'] = 1;
+			$response['info']   = '找回验证码已发送到' . $email;
 		}
-		$this->respone = $respone;
+		$this->response = $response;
 	}
 
 	/**
@@ -109,19 +109,19 @@ class PasswordController extends REST
 	 */
 	public function POST_codeAction()
 	{
-		$respone['status'] = 0;
+		$response['status'] = 0;
 		if (!Input::post('code', $code, 'char_num'))
 		{
-			$respone['info'] = '验证码无效';
+			$response['info'] = '验证码无效';
 		}
 		elseif (!$info = Session::get('find_info'))
 		{
-			$respone['info'] = '验证信息已失效,请重新发送验证码';
+			$response['info'] = '验证信息已失效,请重新发送验证码';
 		}
 		elseif ($info['code'] != strtoupper($code))
 		{
-			$respone['info'] = '验证码错误';
-			$times           = isset($info['t']) ? $info['t'] + 1 : 1;
+			$response['info'] = '验证码错误';
+			$times            = isset($info['t']) ? $info['t'] + 1 : 1;
 			if ($times > 3)
 			{
 				/*一个验证码尝试超过三次强制过期*/
@@ -137,10 +137,10 @@ class PasswordController extends REST
 		{
 			Session::del('find_info');
 			Session::set('find_user', ['id' => $info['id'], 'number' => $info['number']]);
-			$respone['status'] = 1;
-			$respone['info']   = '验证成功,请重置密码';
+			$response['status'] = 1;
+			$response['info']   = '验证成功,请重置密码';
 		}
-		$this->respone = $respone;
+		$this->response = $response;
 	}
 
 	/**
@@ -150,29 +150,29 @@ class PasswordController extends REST
 	 */
 	public function POST_indexAction()
 	{
-		$respone['status'] = 0;
+		$response['status'] = 0;
 		if (!Input::post('password', $password, 'isMd5'))
 		{
-			$respone['info'] = '密码无效';
+			$response['info'] = '密码无效';
 		}
 		elseif (!$user = Session::get('find_user'))
 		{
-			$respone['info'] = '未验证或者验证信息过期';
+			$response['info'] = '未验证或者验证信息过期';
 		}
 		else
 		{
 			$user['password'] = Encrypt::encryptPwd($password, $user['number']);
 			if (UserModel::update($user) >= 0)
 			{
-				$respone['status'] = 1;
-				$respone['info']   = '重置成功';
+				$response['status'] = 1;
+				$response['info']   = '重置成功';
 			}
 			else
 			{
-				$respone['info'] = '新密码保存失败';
+				$response['info'] = '新密码保存失败';
 			}
 		}
-		$this->respone = $respone;
+		$this->response = $response;
 	}
 
 	/**
@@ -221,21 +221,21 @@ class PasswordController extends REST
 	 */
 	public function POST_verifyAction()
 	{
-		$respone['status'] = 0;
+		$response['status'] = 0;
 		if (!Input::post('number', $number, 'card'))
 		{
-			$respone['info'] = '学号格式有误';
+			$response['info'] = '学号格式有误';
 		}if (!Input::post('password', $password, 'trim'))
 		{
-			$respone['info'] = '密码无效';
+			$response['info'] = '密码无效';
 		}
 		elseif (!Input::post('sch_id', $sch_id, 'int'))
 		{
-			$respone['info'] = '学校ID无效';
+			$response['info'] = '学校ID无效';
 		}
 		elseif (!$id = UserModel::where('number', $number)->get('id'))
 		{
-			$respone['info'] = '学号错误或者尚未注册过';
+			$response['info'] = '学号错误或者尚未注册过';
 		}
 		else
 		{
@@ -253,15 +253,15 @@ class PasswordController extends REST
 				$user['id']     = $id;
 				$user['number'] = $number;
 				Session::set('find_user', $user);
-				$respone['status'] = 1;
-				$respone['info']   = '验证成功';
+				$response['status'] = 1;
+				$response['info']   = '验证成功，请重置密码';
 			}
 			else
 			{
-				$respone['info'] = '验证失败';
+				$response['info'] = '验证失败';
 			}
 		}
-		$this->respone = $respone;
+		$this->response = $response;
 	}
 }
 ?>

@@ -27,7 +27,7 @@ Class Safe
 		}
 		else
 		{
-			Cache::set($name,++$times,Config::get('try.expire'))
+			Cache::set($name, ++$times, Config::get('try.expire'));
 			return self::$_key[$key] = $times;
 		}
 	}

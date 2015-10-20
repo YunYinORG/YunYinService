@@ -210,15 +210,15 @@ class FileController extends Rest
 
 	/**
 	 * 打印文件
-	 * POST /file/print
+	 * POST /file/:id/print
 	 * @method
 	 */
-	public function POST_printAction()
+	public function POST_printAction($id)
 	{
 		$userid             = $this->auth();
 		$response['status'] = 0;
 
-		if (!Input::post('id', $id, 'int'))
+		if (!$id = intval($id))
 		{
 			$response['info'] = '未选择文件';
 		}
@@ -237,10 +237,11 @@ class FileController extends Rest
 			$task['use_id'] = $userid;
 			$task['pri_id'] = $pid;
 
-			if(!$task['url']    = File::addTask($file['url']))
+			if (!$task['url'] = File::addTask($file['url']))
 			{
 				$response['info'] = '文件转换出错';
-			}elseif (!$tid = TaskModel::insert($task))
+			}
+			elseif (!$tid = TaskModel::insert($task))
 			{
 				$response['info'] = '任务添加失败';
 			}
@@ -248,7 +249,11 @@ class FileController extends Rest
 			{
 
 				$response['status'] = 1;
-				$response['info']   = ['msg' => '打印任务添加成功', 'id' => $tid];
+				$response['info']   = [
+					'msg' => '打印任务添加成功',
+					'id' => $tid,
+					'name' => $file['name'],
+				];
 			}
 		}
 		$this->response = $response;

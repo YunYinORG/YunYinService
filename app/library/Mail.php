@@ -23,17 +23,42 @@ Class Mail
 	 * @return [type]        	[发送结果]
 	 * @author NewFuture
 	 */
-	public static function sendVerify($email, $name, $link)
+	public static function sendVerify($email, $code, $name = '云印南天用户')
 	{
 		$instance = self::getInstance();
 		$from     = $instance->_config['verify'];
 		$to       = ['email' => $email, 'name' => $name ?: $email];
-		$url      = $instance->_config['verify']['baseuri'] . $link;
+		$url      = $instance->_config['verify']['baseuri'] . $code;
 
 		$msg['title'] = '云印验证邮件';
 		$msg['body']  = $instance->getView()
 		                         ->assign('name', $name)
 		                         ->assign('url', $url)
+		                         ->assign('code', substr($code, 2, 8))
+		                         ->assign('email', $email)
+		                         ->render('verify.tpl');
+		return $instance->send($from, $to, $msg);
+	}
+
+	/**
+	 * 发送验证邮件
+	 * @method sendVerify
+	 * @param  [string] $email 	[邮箱]
+	 * @param  [string] $name   [姓名]
+	 * @param  [string] $link 	[验证链接]
+	 * @return [type]        	[发送结果]
+	 * @author NewFuture
+	 */
+	public static function findPwd($email, $code, $name = '云印南天用户')
+	{
+		$instance     = self::getInstance();
+		$from         = $instance->_config['verify'];
+		$to           = ['email' => $email, 'name' => $name ?: $email];
+		$url          = $instance->_config['verify']['baseuri'] . $link;
+		$msg['title'] = '云印验证邮件';
+		$msg['body']  = $instance->getView()
+		                         ->assign('name', $name)
+		                         ->assign('code', $code)
 		                         ->render('verify.tpl');
 		return $instance->send($from, $to, $msg);
 	}
