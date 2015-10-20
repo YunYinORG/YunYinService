@@ -28,15 +28,16 @@ class SchoolModel
 	 * @return [type]          [description]
 	 * @author NewFuture
 	 */
-	public static function all($cached = true)
+	public static function all($field = null, $cached = true)
 	{
-		if ($cached && $schools = Cache::get('school_all'))
+		$t = md5($field);
+		if ($cached && $schools = Cache::get('sch_all'.$t))
 		{
 			return $schools;
 		}
 		else
 		{
-			if ($schools = (new Model('school', 'id'))->select())
+			if ($schools = (new Model('school', 'id'))->select($field))
 			{
 				$school_array = [];
 				foreach ($schools as $school)
@@ -47,7 +48,7 @@ class SchoolModel
 						$school_array[$id] = $school;
 					}
 				}
-				Cache::set('school_all', $school_array, 259200);
+				Cache::set('sch_all'.$t, $school_array, 259200);
 				return $school_array;
 			}
 			else

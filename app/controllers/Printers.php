@@ -31,6 +31,10 @@ class PrintersController extends Rest
 		$this->auth();
 		if ($printer = PrinterModel::field('name,sch_id,address,phone,email,qq,profile,image,open,price,other')->find($id))
 		{
+			if (isset($printer['price']))
+			{
+				$printer['price'] = json_decode($printer['price']);
+			}
 			$this->response(1, $printer);
 		}
 		else
@@ -51,8 +55,8 @@ class PrintersController extends Rest
 		$this->auth();
 		if ($printer = PrinterModel::field('price,other')->find($id))
 		{
-			$price          = json_decode($printer['price']);
-			$price['other'] = $printer['other'];
+			$price        = json_decode($printer['price']);
+			$price->other = $printer['other'];
 			$this->response(1, $price);
 		}
 		else

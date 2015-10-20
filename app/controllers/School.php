@@ -10,13 +10,14 @@ class SchoolController extends Rest
 	 */
 	public function GET_indexAction()
 	{
+		$fileds='id,name,abbr,verify,verifyurl';
 		if (Input::get('key', $key))
 		{
 			$key     = '%' . strtr($key, ' ', '%') . '%';
-			$schools = SchoolModel::where('name', 'LIKE', $key)->select();
+			$schools = SchoolModel::where('name', 'LIKE', $key)->select($fileds);
 			$this->response(1, $schools);
 		}
-		elseif ($schools = SchoolModel::all())
+		elseif ($schools = SchoolModel::all($fileds))
 		{
 			$this->response(1, $schools);
 		}
