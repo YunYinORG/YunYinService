@@ -54,17 +54,18 @@ class BooksController extends Rest
 	{
 		$uid                = $this->auth();
 		$response['status'] = 0;
-		if (!$book = BookModel::find($id))
+		if (!$Book = BookModel::find($id))
 		{
 			$response['info'] = '无效书籍';
 		}
 		else
 		{
 			$task           = ['use_id' => $uid, 'url' => 'book/' . $id];
-			$task['pri_id'] = $book['pri_id'];
-			$task['name']   = $book['name'];
+			$task['pri_id'] = $Book['pri_id'];
+			$task['name']   = $Book['name'];
 			if ($tid = TaskModel::insert($task))
 			{
+				$Book->inc('count');
 				$response['info'] = ['id' => $tid, 'msg' => '保存成功'];
 			}
 			else

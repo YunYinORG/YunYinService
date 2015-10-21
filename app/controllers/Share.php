@@ -88,13 +88,20 @@ class ShareController extends Rest
 	 */
 	public function GET_infoAction($id = 0)
 	{
+		$uid = $this->auth();
 		if ($share = ShareModel::find($id))
 		{
+			$share['user'] = $share['anonymous'] ? '不愿透露姓名的同学' : UserModel::where('id', $share['use_id'])->get('name');
+			if ($uid != $share['use_id'])
+			{
+				unset($share['use_id']);
+				unset($share['fil_id']);
+			}
 			$this->response(1, $share);
 		}
 		else
 		{
-			$this->response(0, '不存在');
+			$this->response(0, '该分享不存在');
 		}
 	}
 
@@ -124,11 +131,11 @@ class ShareController extends Rest
 		/*保存*/
 		if (empty($share))
 		{
-			$this->response(0, '没有提交任何内容');
+			$this->response(0, '没有任何有效的修改内容');
 		}
 		elseif (ShareModel::where('id', $id)->where('use_id', $use_id)->update($share))
 		{
-			$this->response(1, '保存成功');
+			$this->response(1, $share);
 		}
 		else
 		{
@@ -145,8 +152,17 @@ class ShareController extends Rest
 	public function DELETE_infoAction($id = 0)
 	{
 		$userid = $this->auth();
-		if (ShareModel::where('use_id', $userid)->set('url', '')->set('status', 0)->save($id))
+		if ($share = ShareModel::where('use_id', $userid)->field('url')->find(intval($id)))
 		{
+			$this->response(0, '您无此分享文件');
+		}
+		elseif (!$url = ($share['url']))
+		{
+			$this->response(0, '此共享已经删除');
+		}
+		elseif ($share->set('url', '')->save())
+		{
+			File::del($url);
 			$this->response(1, '删除成功');
 		}
 		else
@@ -197,20 +213,24 @@ class ShareController extends Rest
 	/**
 	 * 搜索
 	 * @method GET_searchAction
+	 * @todo 标签
 	 * @author NewFuture
 	 */
 	public function GET_searchAction()
 	{
 		Input::get('page', $page, 'int', 1);
+		$Share = ShareModel::page($page)->field('id,name,time');
 		if (Input::get('key', $key))
 		{
-			$key    = '%' . strtr($key, ' ', '%') . '%';
-			$shares = ShareModel::where('name', 'LIKE', $key)->orWhere('detail', 'LIKE', $key)->page($page)->select('id,name');
+			$key   = '%' . strtr($key, ' ', '%') . '%';
+			$Share = where('name', 'LIKE', $key)->orWhere('detail', 'LIKE', $key);
 		}
-		else
+
+		if (Input::get('key', $tag, 'int'))
 		{
-			$shares = ShareModel::page($page)->select('id,name');
+			//标签筛选
 		}
+		$shares = $Share->select();
 		$this->response(1, $shares);
 	}
 

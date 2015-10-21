@@ -15,7 +15,7 @@ class TaskController extends Rest
 	{
 		$userid = $this->auth();
 		Input::get('page', $page, 'int', 1);
-		$tasks = TaskModel::where('use_id', '=', $userid)->belongs('printer')->page($page)->order('id','DESC')->select();
+		$tasks = TaskModel::where('use_id', '=', $userid)->belongs('printer')->page($page)->order('id', 'DESC')->select();
 		$this->response(1, $tasks);
 	}
 
@@ -78,8 +78,9 @@ class TaskController extends Rest
 	public function GET_infoAction($id)
 	{
 		$userid = $this->auth();
-		if ($task = TaskModel::where('use_id', '=', $userid)->find($id))
+		if ($task = TaskModel::where('use_id', '=', $userid)->belongs('printer')->find($id))
 		{
+			$task['url'] = File::get($task['url']);
 			$this->response(1, $task);
 		}
 		else

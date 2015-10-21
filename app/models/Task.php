@@ -27,9 +27,9 @@ class TaskModel extends FacadeModel
 		{
 			$task['isdouble'] = $is_double ? 1 : 0;
 		}
-		if (Input::I($method . 'ppt', $ppt, 'int'))
+		if (Input::I($method . 'format', $ppt, 'int'))
 		{
-			$task['ppt'] = $ppt;
+			$task['format'] = $ppt;
 		}
 		if (Input::I($method . 'requirements', $requirements, 'text'))
 		{

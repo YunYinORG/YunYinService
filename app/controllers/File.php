@@ -15,10 +15,16 @@ class FileController extends Rest
 	{
 		$userid = $this->auth();
 		Input::get('page', $page, 'int', 1);
-		$files = FileModel::where('use_id', '=', $userid)
+		$File = FileModel::where('use_id', '=', $userid)
 			->where('status', '>', 0)
 			->page($page)
-			->select('id,name,time');
+			->field('id,name,time');
+		if (Input::get('key', $key, 'tag')) //关键字
+		{
+			$key = '%' . strtr($key, ' ', '%') . '%';
+			$File->where('name', 'LIKE', $key);
+		}
+		$files = $File->select('id,name,time');
 		$this->response(1, $files);
 	}
 

@@ -14,7 +14,7 @@ class TaskController extends PrinterRest
 	{
 		$pid = $this->auth();
 		Input::get('page', $page, 'int', 1);
-		$tasks = TaskModel::where('pri_id', '=', $pid)->where('status', '>', 0)->belongs('user')->page($page)->select('name,id,color,ppt,double,copies,status,name,time,requirements');
+		$tasks = TaskModel::where('pri_id', '=', $pid)->where('status', '>', 0)->belongs('user')->page($page)->select('name,id,color,format,double,copies,status,name,time,requirements');
 		$this->response(1, $tasks);
 	}
 

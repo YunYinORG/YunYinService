@@ -63,7 +63,7 @@ class TagsController extends Rest
 	public function GET_infoAction($id = 0)
 	{
 		$uid = $this->auth();
-		if ($tag = TagModel::find($id))
+		if ($tag = TagModel::belongs('user')->find($id))
 		{
 			$this->response(1, $tag);
 		}
