@@ -57,8 +57,7 @@ class SchoolController extends Rest
 	{
 		if ($code = School::code($id))
 		{
-			$code['img']           = 'data:image/png;base64,' . base64_encode($code['img']);
-			$code['verify_cookie'] = Cookie::encode($code['verify_cookie']);
+			$code['img'] = 'data:image/png;base64,' . base64_encode($code['img']);
 			$this->response(1, $code);
 		}
 		elseif ($code === false)

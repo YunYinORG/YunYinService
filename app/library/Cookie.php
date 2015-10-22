@@ -16,7 +16,7 @@ class Cookie
 	 * @param  [int] $expire 有效时间
 	 * @author NewFuture
 	 */
-	public static function set($name, $value, $path = '', $expire = null)
+	public static function set($name, $value, $path = '', $expire = null, $domain = null)
 	{
 		if (self::$_disabled)
 		{
@@ -24,9 +24,17 @@ class Cookie
 		}
 		elseif ($value = self::encode($value))
 		{
-			$path   = $path ?: self::config('path');
-			$expire = $expire ? ($_SERVER['REQUEST_TIME'] + $expire) : null;
-			return setcookie($name, $value, $expire, $path, self::config('domain'), self::config('secure'), self::config('httponly'));
+			$path = $path ?: self::config('path');
+			if ($expire === 0)
+			{
+				$expire = null;
+			}
+			else
+			{
+				$expire = $_SERVER['REQUEST_TIME'] + $expire ?: self::config('expire');
+			}
+			$domain = $domain === null ? self::config('domain') : $domain;
+			return setcookie($name, $value, $expire, $path, $domain, self::config('secure'), self::config('httponly'));
 		}
 	}
 
@@ -51,15 +59,16 @@ class Cookie
 	 * @param  [string] $name [cookie名称]
 	 * @author NewFuture
 	 */
-	public static function del($name, $path = null)
+	public static function del($name, $path = null, $domain = null)
 	{
 		if (isset($_COOKIE[$name]))
 		{
 			unset($_COOKIE[$name]);
 			if (!self::$_disabled)
 			{
-				$path = $path ?: self::config('path');
-				setcookie($name, '', 100, $path, self::config('domain'), self::config('secure'), self::config('httponly'));
+				$path   = $path ?: self::config('path');
+				$domain = $domain === null ? self::config('domain') : $domain;
+				setcookie($name, '', 100, $path, $domain, self::config('secure'), self::config('httponly'));
 			}
 		}
 	}
@@ -147,15 +156,27 @@ class Cookie
 		if (!$config = self::$_config)
 		{
 			$config = Config::get('cookie');
-			if (!$key = Kv::get('COOKIE_aes_key'))
-			{
-				/*重新生成加密密钥*/
-				$key = Random::word(32);
-				Kv::set('COOKIE_aes_key', $key);
-			}
-			$config['key'] = $key;
+
+			$config['key'] = self::key();
 			self::$_config = $config;
 		}
 		return isset($config[$name]) ? $config[$name] : null;
+	}
+
+	/**
+	 * 获取加密密钥
+	 * @method key
+	 * @return [type] [description]
+	 * @author NewFuture
+	 */
+	public static function key()
+	{
+		if (!$key = Kv::get('COOKIE_aes_key'))
+		{
+			/*重新生成加密密钥*/
+			$key = Random::word(32);
+			Kv::set('COOKIE_aes_key', $key);
+		}
+		return $key;
 	}
 }

@@ -42,21 +42,20 @@ class Auth
 			/*session中的信息*/
 			return $user;
 		}
-		elseif ($tokenInfo = Cookie::get('token'))
+		elseif ($token = Cookie::get('token') || Input::I('SERVER.HTTP_TOKEN', $token, 'token'))
 		{
 			/*解析cookie*/
-			$uid = key($tokenInfo);
-			if ($user = self::checkToken($uid, $tokenInfo[$uid]))
+			if ($token = Encrypt::aesDecode($token, Cookie::key(), true))
 			{
-				/*token有效*/
-				Session::set('user', $user);
-				return $user;
+				list($uid, $token, $time) = explode(':', $token);
+				if ($time + Config::get('cookie.expire') > $_SERVER['REQUEST_TIME']
+					&& $user = self::checkToken($uid, $token))
+				{
+					/*token有效*/
+					Session::set('user', $user);
+					return $user;
+				}
 			}
-		}
-		elseif (Input::I('SERVER.HTTP_TOKEN', $token, 'token'))
-		{
-			/*http头中的请求*/
-
 		}
 	}
 
@@ -77,7 +76,8 @@ class Auth
 				&& isset($user['password']) && $data['password'] = $user['password']
 				&& isset($user['sch_id']) && $data['sch_id'] = $user['sch_id']))
 		{
-			return self::createBaseToken($data);
+			$token = $data['id'] . ':' . self::createBaseToken($data) . ':' . $_SERVER['REQUEST_TIME'];
+			return Encrypt::aesEncode($token, Cookie::key(), true);
 		}
 	}
 
@@ -111,21 +111,20 @@ class Auth
 			/*session中的信息*/
 			return $printer;
 		}
-		elseif ($tokenInfo = Cookie::get('token'))
+		elseif ($token = Cookie::get('token') || Input::I('SERVER.HTTP_TOKEN', $token, 'token'))
 		{
 			/*解析cookie*/
-			$id = key($tokenInfo);
-			if ($printer = self::checkPritnerToken($id, $tokenInfo[$id]))
+			if ($token = Encrypt::aesDecode($token, Cookie::key(), true))
 			{
-				/*token有效*/
-				Session::set('printer', $printer);
-				return $printer;
+				list($pid, $token, $time) = explode(':', $token);
+				if ($time + Config::get('cookie.expire') > $_SERVER['REQUEST_TIME']
+					&& $printer = self::checkToken($pid, $token))
+				{
+					/*token有效*/
+					Session::set('printer', $printer);
+					return $printer;
+				}
 			}
-		}
-		elseif (Input::I('SERVER.HTTP_TOKEN', $token, 'token'))
-		{
-			/*http头中的请求*/
-
 		}
 	}
 
@@ -186,34 +185,4 @@ class Auth
 		$token = hash_hmac('md5', implode('|', $user), $user['password'], true);
 		return Encrypt::base64Encode($token);
 	}
-
-	///**
-	//  * @method code
-	//  * @param  [type] $uid [description]
-	//  * @return [type]      [description]
-	//  * @author NewFuture
-	//  */
-	// public static function createCode($session)
-	// {
-	// 	$code = $session['id'] . 'C' . Random::word(10);
-	// 	Cache::set('auth_' . $code, $session, 300); //5分钟有效
-	// 	return $code;
-	// }
-
-	// /**
-	//  * 验证code码
-	//  * @method checkCode
-	//  * @param  [type]    $code [description]
-	//  * @return [type]          [description]
-	//  * @author NewFuture
-	//  */
-	// public static function checkCode($code)
-	// {
-	// 	$key = 'auth_' . $code;
-	// 	if ($session = Cache::get($key))
-	// 	{
-	// 		Cache::del($key);
-	// 		return $session;
-	// 	}
-	// }
 }

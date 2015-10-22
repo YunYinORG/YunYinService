@@ -53,7 +53,7 @@ class UserController extends Rest
 				$msg .= '(如果下次忘记密码后可以通过 手机,邮箱或者再次认证找回密码)';
 				$regInfo['id'] = $id;
 				$token         = Auth::token($regInfo);
-				// Cookie::set('token', [$id => $token]);
+				Cookie::set('token', $token);
 				unset($regInfo['password']);
 				Session::del('reg');
 				Session::set('user', $regInfo);

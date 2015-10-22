@@ -12,11 +12,11 @@ class Session
 	 * @return string [session id]
 	 * @author NewFuture
 	 */
-	public static function start()
+	public static function start($id = null)
 	{
 		if (!$sid = self::$_id)
 		{
-			if (Input::I('SERVER.HTTP_Last-Event-ID', $sid, 'ctype_alnum'))
+			if ($sid = $id || Input::I('SERVER.HTTP_SESSION_ID', $sid, 'ctype_alnum'))
 			{
 				session_id($sid);
 				session_start();

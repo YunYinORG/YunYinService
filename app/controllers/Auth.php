@@ -35,7 +35,7 @@ class AuthController extends Rest
 			elseif (!$this->verify($number, $password, $sch_id)) //尝试验证
 			{
 				/*注册验证失败*/
-				$this->response('-1', '验证出错,请重新验证校园账号!');
+				$this->response(-1, '验证出错,请重新验证校园账号!');
 			}
 		}
 		else
@@ -51,7 +51,6 @@ class AuthController extends Rest
 	 */
 	public function logoutAction()
 	{
-		Input::I('url', $url, FILTER_VALIDATE_URL, '/');
 		Cookie::flush();
 		Session::flush();
 		$this->response(1, '注销成功!');
@@ -92,6 +91,7 @@ class AuthController extends Rest
 					$token          = Auth::token($user);
 					$sessionid      = Session::start();
 					Session::set('user', $user);
+					Cookie::set('token', $token);
 					$result = ['sid' => $sessionid, 'user' => $user, 'msg' => '登录成功！', 'token' => $token];
 					$this->response(1, $result);
 					return true;
@@ -122,18 +122,7 @@ class AuthController extends Rest
 			'password' => $password,
 			'sch_id' => $sch_id,
 		);
-
-		if ($code)
-		{
-			/*验证码*/
-			$info['code'] = $code;
-			if (Input::I('verify_cookie', $cookie))
-			{
-				Cookie::disable();
-				$cookie = Cookie::decode($cookie);
-				Cookie::set('verify_cookie', $cookie);
-			}
-		}
+		$code AND $info['code'] = $code; //验证码
 
 		/*黑名单*/
 		$black = isset($this->reg_schools) ? $this->reg_schools : [];

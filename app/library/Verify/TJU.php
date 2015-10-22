@@ -34,8 +34,20 @@ class TJU extends Connect
 		$data['uid']      = $number;
 		$data['password'] = $pwd;
 		$data['captchas'] = $code;
-		parent::$_cookie  = Cookie::get('verify_cookie');
-		Cookie::del('verify_cookie');
+
+		if ($cookie = Cookie::get('verify_cookie'))
+		{
+			Cookie::del('verify_cookie', null, $_SERVER['HTTP_HOST']);
+		}
+		else
+		{
+			if (\Input::I('verify_cookie', $cookie, 'trim'))
+			{
+				$cookie = @base64_decode($cookie);
+			}
+		}
+		parent::$_cookie = $cookie;
+
 		$result = parent::getHtml(self::LOGIN_URL, $data, 'GBK');
 		if ($result)
 		{
@@ -55,8 +67,8 @@ class TJU extends Connect
 		$img = parent::request(self::CODE_URL);
 		if ($img)
 		{
-			\Cookie::set('verify_cookie', self::$_cookie);
+			Cookie::set('verify_cookie', self::$_cookie, null, null, $_SERVER['HTTP_HOST']);
 		}
-		return ['img' => $img, 'verify_cookie' => self::$_cookie];
+		return ['img' => $img, 'verify_cookie' => base64_encode(self::$_cookie)];
 	}
 }

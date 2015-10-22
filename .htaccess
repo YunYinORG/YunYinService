@@ -14,9 +14,9 @@
 
 <IfModule mod_headers.c>
 	Header set Access-Control-Allow-Origin "http://localfront.yunyin.org"
-	Header set Access-Control-Allow-Headers X-Requested-With,Token
+	Header set Access-Control-Allow-Headers Token
 	Header set Access-Control-Allow-Credentials true
-	Header set Access-Control-Allow-Methods GET,POST,PUT,DELETE
+	Header set Access-Control-Allow-Methods GET,POST,PUT,DELETE 
 </IfModule>
 
 <Files .git*>
