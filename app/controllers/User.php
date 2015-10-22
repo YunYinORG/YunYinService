@@ -316,7 +316,7 @@ class UserController extends Rest
 			Safe::del('email_code_' . $id);
 			$response['info'] = '尝试次数过多,请重新验证';
 		}
-		elseif (strtoupper($code) != strtoupper(substr($Code['content'], 2, 8)))
+		elseif (strtoupper($code) != strtoupper(substr($Code['content'], 2, 6)))
 		{
 			$response['info'] = '验证码不匹配';
 		}

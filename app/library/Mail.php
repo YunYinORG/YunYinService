@@ -34,7 +34,7 @@ Class Mail
 		$msg['body']  = $instance->getView()
 		                         ->assign('name', $name)
 		                         ->assign('url', $url)
-		                         ->assign('code', substr($code, 2, 8))
+		                         ->assign('code', substr($code, 2,6))
 		                         ->assign('email', $email)
 		                         ->render('verify.tpl');
 		return $instance->send($from, $to, $msg);

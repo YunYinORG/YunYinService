@@ -5,8 +5,7 @@
  */
 class Cookie
 {
-	private static $_config   = null;  //配置
-	private static $_disabled = false; //是否禁用写入
+	private static $_config = null; //配置
 	/**
 	 * 设置cookie
 	 * @method set
@@ -18,11 +17,7 @@ class Cookie
 	 */
 	public static function set($name, $value, $path = '', $expire = null, $domain = null)
 	{
-		if (self::$_disabled)
-		{
-			$_COOKIE[$name] = $value;
-		}
-		elseif ($value = self::encode($value))
+		if ($value = self::encode($value))
 		{
 			$path = $path ?: self::config('path');
 			if ($expire === 0)
@@ -49,7 +44,7 @@ class Cookie
 	{
 		if (isset($_COOKIE[$name]) && $data = $_COOKIE[$name])
 		{
-			return self::$_disabled ? $data : self::decode($data);
+			return self::decode($data);
 		}
 	}
 
@@ -64,12 +59,9 @@ class Cookie
 		if (isset($_COOKIE[$name]))
 		{
 			unset($_COOKIE[$name]);
-			if (!self::$_disabled)
-			{
-				$path   = $path ?: self::config('path');
-				$domain = $domain === null ? self::config('domain') : $domain;
-				setcookie($name, '', 100, $path, $domain, self::config('secure'), self::config('httponly'));
-			}
+			$path   = $path ?: self::config('path');
+			$domain = $domain === null ? self::config('domain') : $domain;
+			setcookie($name, '', 100, $path, $domain, self::config('secure'), self::config('httponly'));
 		}
 	}
 
@@ -81,10 +73,6 @@ class Cookie
 		if (empty($_COOKIE))
 		{
 			return null;
-		}
-		elseif (self::$_disabled)
-		{
-			unset($_COOKIE);
 		}
 		else
 		{
@@ -98,33 +86,13 @@ class Cookie
 	}
 
 	/**
-	 * 禁用cookie，不回读取和写入客户端
-	 * @method disable
-	 * @author NewFuture
-	 */
-	public static function disable()
-	{
-		self::$_disabled = true;
-	}
-
-	/**
-	 * 启用Cookie
-	 * @method enable
-	 * @author NewFuture
-	 */
-	public static function enable()
-	{
-		self::$_disabled = false;
-	}
-
-	/**
 	 * Cookie数据加密编码
 	 * @method encode
 	 * @param  [type] $data         [description]
 	 * @return [type] [description]
 	 * @author NewFuture
 	 */
-	public static function encode($data)
+	private static function encode($data)
 	{
 		return Encrypt::aesEncode(json_encode($data), self::config('key'), true);
 	}
@@ -136,7 +104,7 @@ class Cookie
 	 * @return [type] [description]
 	 * @author NewFuture
 	 */
-	public static function decode($data)
+	private static function decode($data)
 	{
 		if ($data = Encrypt::aesDecode($data, self::config('key'), true))
 		{
