@@ -27,39 +27,43 @@ class UserController extends Rest
 	 */
 	public function POST_indexAction()
 	{
-		$response['status'] = 0;
 		if (!$regInfo = Session::get('reg'))
 		{
-			$response['info'] = '注册信息失效';
-		}
-		elseif (Input::post('password', $password, 'isMD5') === false)
-		{
-			/*密码未md5*/
-			$response['info'] = '前端密码未加密处理';
+			$this->response(0, '注册信息失效');
 		}
 		else
 		{
-			$password = $password ?: $regInfo['password'];
-
-			$regInfo['password'] = Encrypt::encryptPwd($password, $regInfo['number']);
-			if (!$id = UserModel::insert($regInfo))
+			/*检查密码*/
+			if (Input::post('password', $password, 'isMD5'))
 			{
-				$response['info'] = '注册失败';
+				$msg = '成功设置了新的密码作为云印密码！';
 			}
 			else
 			{
+				$msg      = '使用刚才的验证密码作为运用登陆密码！';
+				$password = $regInfo['password'];
+			}
+
+			/*开始注册*/
+			$regInfo['password'] = Encrypt::encryptPwd($password, $regInfo['number']);
+
+			if ($id = UserModel::insert($regInfo))
+			{
 				/*注册成功*/
+				$msg .= '(如果下次忘记密码后可以通过 手机,邮箱或者再次认证找回密码)';
 				$regInfo['id'] = $id;
 				$token         = Auth::token($regInfo);
-				Cookie::set('token', [$id => $token]);
+				// Cookie::set('token', [$id => $token]);
 				unset($regInfo['password']);
 				Session::del('reg');
 				Session::set('user', $regInfo);
-				$response['status'] = 1;
-				$response['info']   = $regInfo;
+				$this->response(1, ['user' => $regInfo, 'token' => $token, 'msg' => $msg]);
+			}
+			else
+			{
+				$this->response(0, '注册失败');
 			}
 		}
-		$this->response = $response;
 	}
 
 	/**

@@ -2,7 +2,7 @@
 /**
  * 打印店验证
  */
-class AuthController extends Rest
+class AuthController extends PrinterRest
 {
 	/**
 	 * 打印店登录
@@ -37,8 +37,9 @@ class AuthController extends Rest
 		{
 			Safe::del('printer_auth_' . $account);
 			unset($Printer['password']);
+			$sid                = Session::start();
 			$response['status'] = 1;
-			$response['info']   = $Printer;
+			$response['info']   = ['sid' => $sid, 'printer' => $Printer];
 		}
 		$this->response = $response;
 	}

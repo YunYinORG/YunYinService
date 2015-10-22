@@ -57,6 +57,6 @@ class TJU extends Connect
 		{
 			\Cookie::set('verify_cookie', self::$_cookie);
 		}
-		return $img;
+		return ['img' => $img, 'verify_cookie' => self::$_cookie];
 	}
 }

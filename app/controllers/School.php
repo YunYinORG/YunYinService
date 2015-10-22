@@ -10,7 +10,7 @@ class SchoolController extends Rest
 	 */
 	public function GET_indexAction()
 	{
-		$fileds='id,name,abbr,verify,verifyurl';
+		$fileds = 'id,name,abbr,verify,verifyurl';
 		if (Input::get('key', $key))
 		{
 			$key     = '%' . strtr($key, ' ', '%') . '%';
@@ -55,11 +55,13 @@ class SchoolController extends Rest
 	 */
 	public function GET_codeAction($id = 0)
 	{
-		if ($img = School::code($id))
+		if ($code = School::code($id))
 		{
-			$this->response(1, 'data:image/png;base64,' . base64_encode($img));
+			$code['img']           = 'data:image/png;base64,' . base64_encode($code['img']);
+			$code['verify_cookie'] = Cookie::encode($code['verify_cookie']);
+			$this->response(1, $code);
 		}
-		elseif ($img === false)
+		elseif ($code === false)
 		{
 			$this->response(0, '无需验证码');
 		}
