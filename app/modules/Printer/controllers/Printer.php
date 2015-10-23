@@ -1,6 +1,6 @@
 <?php
 
-class PrinterController extends PrinterRest
+class PrinterController extends Rest
 {
 
 	/**
@@ -9,7 +9,7 @@ class PrinterController extends PrinterRest
 	 */
 	public function GET_infoAction($id)
 	{
-		$this->auth($id);
+		$this->authPrinter($id);
 		$field = 'id,name,sch_id,account,address,email,phone,qq,wechat,profile,image,open,status,price,other';
 		if ($printer = PrinterModel::field($field)->find($id))
 		{
@@ -29,7 +29,7 @@ class PrinterController extends PrinterRest
 	 */
 	public function PUT_infoAction($id)
 	{
-		$this->auth($id);
+		$this->authPrinter($id);
 		$info = [];
 		/*店名*/
 		Input::put('name', $name, 'title') AND $info['name'] = $name;

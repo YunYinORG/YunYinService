@@ -8,18 +8,11 @@
 </IfModule>
 
 <Files config.yaml>
-	Order Allow,Deny 
+	Order Allow,Deny
 	Deny from all
 </Files>
 
-<IfModule mod_headers.c>
-	Header set Access-Control-Allow-Origin "http://localfront.yunyin.org"
-	Header set Access-Control-Allow-Headers Token
-	Header set Access-Control-Allow-Credentials true
-	Header set Access-Control-Allow-Methods GET,POST,PUT,DELETE 
-</IfModule>
-
 <Files .git*>
- Order Allow,Deny 
+ Order Allow,Deny
  Deny from all
 </Files>

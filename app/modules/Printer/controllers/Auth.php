@@ -2,7 +2,7 @@
 /**
  * 打印店验证
  */
-class AuthController extends PrinterRest
+class AuthController extends Rest
 {
 	/**
 	 * 打印店登录

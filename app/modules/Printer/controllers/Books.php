@@ -1,6 +1,6 @@
 <?php
 
-class BooksController extends PrinterRest
+class BooksController extends Rest
 {
 
 	/**
@@ -10,7 +10,7 @@ class BooksController extends PrinterRest
 	 */
 	public function GET_indexAction()
 	{
-		$pid = $this->auth();
+		$pid = $this->authPrinter();
 		Input::get('page', $page, 'int', 1);
 		$Book = BookModel::where('pri_id', '=', $pid)->page($page);
 		if (Input::get('key', $key))
@@ -36,7 +36,7 @@ class BooksController extends PrinterRest
 	 */
 	public function POST_indexAction()
 	{
-		$pid = $this->auth();
+		$pid = $this->authPrinter();
 		if (Input::post('books', $books))
 		{
 			/*批量插入*/
@@ -96,7 +96,7 @@ class BooksController extends PrinterRest
 	 */
 	public function GET_infoAction($id = 0)
 	{
-		$pid = $this->auth();
+		$pid = $this->authPrinter();
 		if ($book = BookModel::where('pri_id', '=', $pid)->find($id))
 		{
 			$this->response(1, $book);
@@ -116,7 +116,7 @@ class BooksController extends PrinterRest
 	 */
 	public function DELETE_infoAction($id = 0)
 	{
-		$pid = $this->auth();
+		$pid = $this->authPrinter();
 		if (BookModel::delete($id))
 		{
 			$this->response(1, '删除成功！');
@@ -136,7 +136,7 @@ class BooksController extends PrinterRest
 	 */
 	public function PUT_infoAction($id = 0)
 	{
-		$pid  = $this->auth();
+		$pid  = $this->authPrinter();
 		$book = [];
 		if (Input::put('name', $name, 'title'))
 		{

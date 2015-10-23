@@ -19,14 +19,25 @@ abstract class Rest extends Yaf_Controller_Abstract
 	 */
 	protected function init()
 	{
+		Yaf_Dispatcher::getInstance()->flushInstantly(true)->disableView(); //立即输出响应，并关闭视图模板引擎
+		if (isset($_SERVER['HTTP_REFERER']))
+		{
+			/*跨站请求*/
+			$from = @parse_url($_SERVER['HTTP_REFERER']);
+			if (isset($from['host']) && substr($from['host'], -11) == '.yunyin.org')
+			{
+				/*允许来自cors跨站响应头*/
+				$cors                                = Config::get('cors');
+				$cors['Access-Control-Allow-Origin'] = $from['scheme'] . '://' . $from['host'];
+				$this->_response->setAllHeaders($cors);
+			}
+		}
 
-		Yaf_Dispatcher::getInstance()->disableView(); //关闭视图模板引擎
 		$request = &$this->_request;
-
-		//对应REST_Action
-		$method = $request->getMethod();
+		$method  = $request->getMethod();
 		if ($method == 'OPTIONS')
 		{
+			/*cors应答*/
 			exit();
 		}
 		elseif ($method == 'PUT')
@@ -36,15 +47,15 @@ abstract class Rest extends Yaf_Controller_Abstract
 		}
 
 		$action = $request->getActionName();
-		//数字id映射带info控制器
 		if (is_numeric($action))
 		{
+			/*数字id映射带infoAction*/
 			$request->setParam('id', intval($action));
 			$path   = substr(strstr($_SERVER['PATH_INFO'], $action), strlen($action) + 1);
 			$action = $path ? strstr($path . '/', '/', true) : 'info';
 		}
 
-		$rest_action = $method . '_' . $action;
+		$rest_action = $method . '_' . $action; //对应REST_Action
 
 		/*检查该action操作是否存在，存在则修改为REST接口*/
 		if (method_exists($this, $rest_action . 'Action'))
@@ -95,6 +106,35 @@ abstract class Rest extends Yaf_Controller_Abstract
 	}
 
 	/**
+	 * 验证打印店登陆信息
+	 * 验证用户是否登录或者是否为当前用户
+	 * 如果验证实现，立即返回错误信息并终止执行
+	 * @method auth
+	 * @param  int $pid [有则验证是否为当前用户，否则只验证是否登录]
+	 * @return [type]           [description]
+	 * @author NewFuture
+	 */
+	protected function authPrinter($pid = false)
+	{
+		if (!$id = Auth::priId())
+		{
+			/*验证是否有效*/
+			$this->response(self::AUTH_FAIL, '登陆信息验证失效，请重新登录！');
+			exit();
+		}
+		elseif ($pid && $pid != $id)
+		{
+			/*资源所有权验证*/
+			$this->response(self::AUTH_BAN, '账号验证失败或者无权访问！');
+			exit();
+		}
+		else
+		{
+			return $id;
+		}
+	}
+
+	/**
 	 * 设置返回信息
 	 * @method response
 	 * @param  [type]   $status [请求结果]
@@ -117,20 +157,10 @@ abstract class Rest extends Yaf_Controller_Abstract
 	{
 		if ($this->response !== false)
 		{
-			switch ($this->response_type)
-			{
-				case 'xml':
-					header('Content-type: application/xml');
-					echo Parse\Xml::encode($this->response);
-					break;
-
-				case 'json':
-				default:
-					header('Content-type: application/json');
-					echo json_encode($this->response, JSON_UNESCAPED_UNICODE); 	//unicode不转码
-					break;
-			}
+			$this->_response->setHeader('Content-type', 'application/json;charset=utf-8');
+			$this->_response
+			     ->setBody(json_encode($this->response, JSON_UNESCAPED_UNICODE)) //unicode不转码
+			     ->response();
 		}
 	}
-
 }

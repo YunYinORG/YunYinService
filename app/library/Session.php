@@ -72,6 +72,6 @@ class Session
 		unset($_SESSION);
 		session_unset();
 		session_destroy();
-		unset(self::$_id);
+		self::$_id = null;
 	}
 }

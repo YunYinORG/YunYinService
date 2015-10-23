@@ -2,19 +2,29 @@
 /**
  * 打印店任务管理
  */
-class TaskController extends PrinterRest
+class TaskController extends Rest
 {
 	/**
-	 * 打印店登录
-	 * @method loginAction
+	 * 获取任务列表
+	 * @method indexAction
 	 * @return [type]      [description]
 	 * @author NewFuture
 	 */
-	public function GET_newAction()
+	public function GET_indexAction()
 	{
-		$pid = $this->auth();
+		$pid = $this->authPrinter();
 		Input::get('page', $page, 'int', 1);
-		$tasks = TaskModel::where('pri_id', '=', $pid)->where('status', '>', 0)->belongs('user')->page($page)->select('name,id,color,format,double,copies,status,name,time,requirements');
+		$Task = TaskModel::where('pri_id', '=', $pid)->belongs('user')->page($page);
+		if (Input::get('status', $status, 'int'))
+		{
+			$Task->where('status', '=', $status);
+		}
+		else
+		{
+			//所有未完成订单
+			$Task->where('status', '>', 0);
+		}
+		$tasks = $Task->select('name,id,color,format,double,copies,status,name,time,requirements');
 		$this->response(1, $tasks);
 	}
 
@@ -24,7 +34,7 @@ class TaskController extends PrinterRest
 	 */
 	public function GET_infoAction($id)
 	{
-		$pid = $this->auth();
+		$pid = $this->authPrinter();
 
 		$response['status'] = 0;
 
@@ -50,7 +60,7 @@ class TaskController extends PrinterRest
 	 */
 	public function PUT_infoAction($id)
 	{
-		$pid                = $this->auth();
+		$pid                = $this->authPrinter();
 		$response['status'] = 0;
 		if (!Input::get('status', $status, 'int'))
 		{

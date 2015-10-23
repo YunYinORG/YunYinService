@@ -1,6 +1,6 @@
 name: yunyin
 handle:
-- rewrite: if(!is_dir() && !is_file() && path~"^(.*)$") goto "api.php/$1"
+- rewrite: if(!is_file() && path~"^(.*)$") goto "index.php/$1"
 
 - hostaccess: if(path == "/backup.php") allow "10.0.0.0/8"
 - hostaccess: if (%{REQUEST_URI} ~*"/conf/") allow "0.0"
