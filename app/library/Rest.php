@@ -19,21 +19,25 @@ abstract class Rest extends Yaf_Controller_Abstract
 	 */
 	protected function init()
 	{
-		Yaf_Dispatcher::getInstance()->flushInstantly(true)->disableView(); //立即输出响应，并关闭视图模板引擎
+		Yaf_Dispatcher::getInstance()->disableView(); //立即输出响应，并关闭视图模板引擎
 		if (isset($_SERVER['HTTP_REFERER']))
 		{
 			/*跨站请求*/
-			$from = @parse_url($_SERVER['HTTP_REFERER']);
+			$from = parse_url($_SERVER['HTTP_REFERER']);
 			if (isset($from['host']) && substr($from['host'], -11) == '.yunyin.org')
 			{
+				$cors = Config::get('cors');
+				foreach ($cors as $key => $value)
+				{
+					header($key . ':' . $value);
+				}
 				/*允许来自cors跨站响应头*/
-				$cors                                = Config::get('cors');
-				$cors['Access-Control-Allow-Origin'] = $from['scheme'] . '://' . $from['host'];
-				$this->_response->setAllHeaders($cors);
+				header('Access-Control-Allow-Origin:' . $from['scheme'] . '://' . $from['host']);
 			}
 		}
 
-		$request = &$this->_request;
+		/*请求操作判断*/
+		$request = $this->_request;
 		$method  = $request->getMethod();
 		if ($method == 'OPTIONS')
 		{
@@ -46,6 +50,7 @@ abstract class Rest extends Yaf_Controller_Abstract
 			parse_str(file_get_contents('php://input'), $GLOBALS['_PUT']);
 		}
 
+		/*Action路由*/
 		$action = $request->getActionName();
 		if (is_numeric($action))
 		{
@@ -71,6 +76,7 @@ abstract class Rest extends Yaf_Controller_Abstract
 				'method' => $method,
 				'action' => $action,
 				'controller' => $request->getControllerName(),
+				'module' => $request->getmoduleName(),
 			);
 			exit;
 		}
@@ -157,10 +163,8 @@ abstract class Rest extends Yaf_Controller_Abstract
 	{
 		if ($this->response !== false)
 		{
-			$this->_response->setHeader('Content-type', 'application/json;charset=utf-8');
-			$this->_response
-			     ->setBody(json_encode($this->response, JSON_UNESCAPED_UNICODE)) //unicode不转码
-			     ->response();
+			header('Content-type: application/json;charset=utf-8');
+			echo (json_encode($this->response, JSON_UNESCAPED_UNICODE)); //unicode不转码
 		}
 	}
 }
