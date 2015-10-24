@@ -35,23 +35,16 @@ class TaskController extends Rest
 	public function GET_infoAction($id)
 	{
 		$pid = $this->authPrinter();
-
-		$response['status'] = 0;
-
-		if (!$id)
+		if (!$task = TaskModel::where('pri_id', '=', $pid)->find($id))
 		{
-			$response['info'] = 'id错误';
-		}
-		elseif (!$task = TaskModel::where('pri_id', '=', $pid)->find($id))
-		{
-			$response['info'] = '无此文件';
+			$this->response(0, '无此文件');
 		}
 		else
 		{
-			$task['url']      = File::get($task['url']);
-			$response['info'] = $task;
+			$task['url'] = File::get($task['url']);
+			$this->response(1, $task);
 		}
-		$this->response = $response;
+
 	}
 
 	/**
@@ -82,5 +75,30 @@ class TaskController extends Rest
 		$this->response = $response;
 	}
 
+	/**
+	 * 获取源文件
+	 * @param [type] $id [description]
+	 */
+	public function GET_fileAction($id)
+	{
+		$pid = $this->authPrinter();
+
+		$response['status'] = 0;
+
+		if (!$id)
+		{
+			$response['info'] = 'id错误';
+		}
+		elseif (!$task = TaskModel::where('pri_id', '=', $pid)->find($id))
+		{
+			$response['info'] = '无此文件';
+		}
+		else
+		{
+			$task['url']      = File::get($task['url']);
+			$response['info'] = $task;
+		}
+		$this->response = $response;
+	}
 }
 ?>

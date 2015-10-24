@@ -11,6 +11,7 @@ class Model implements JsonSerializable, ArrayAccess
 	 * @var string
 	 */
 	protected $pk = 'id';
+	// protected $id = ;
 
 	protected $has_tables        = array();
 	protected $belongs_to_tables = array();
@@ -104,7 +105,10 @@ class Model implements JsonSerializable, ArrayAccess
 		$this->limit = 1;
 		$result      = $this->select();
 		$this->data  = isset($result[0]) ? $result[0] : $result;
-		$this->id    = $id;
+		if ($id)
+		{
+			$this->data[$pk] = $id;
+		}
 		return $result ? $this : null;
 	}
 
