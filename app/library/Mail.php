@@ -34,7 +34,7 @@ Class Mail
 		$msg['body']  = $instance->getView()
 		                         ->assign('name', $name)
 		                         ->assign('url', $url)
-		                         ->assign('code', substr($code, 2,6))
+		                         ->assign('code', substr($code, 2, 6))
 		                         ->assign('email', $email)
 		                         ->render('verify.tpl');
 		return $instance->send($from, $to, $msg);
@@ -54,12 +54,11 @@ Class Mail
 		$instance     = self::getInstance();
 		$from         = $instance->_config['verify'];
 		$to           = ['email' => $email, 'name' => $name ?: $email];
-		$url          = $instance->_config['verify']['baseuri'] . $link;
 		$msg['title'] = '云印验证邮件';
 		$msg['body']  = $instance->getView()
 		                         ->assign('name', $name)
 		                         ->assign('code', $code)
-		                         ->render('verify.tpl');
+		                         ->render('pwd.tpl');
 		return $instance->send($from, $to, $msg);
 	}
 

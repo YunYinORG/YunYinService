@@ -82,7 +82,7 @@ class PasswordController extends REST
 		{
 			$response['info'] = '未绑定邮箱,或者学号错误';
 		}
-		elseif (Encrypt::encryptEmail($email) != $user['email'])
+		elseif (Encrypt::decryptEmail($email) != $email)
 		{
 			$response['info'] = '绑定邮箱不一致,或者邮箱错误';
 		}
