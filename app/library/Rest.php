@@ -85,7 +85,7 @@ abstract class Rest extends Yaf_Controller_Abstract
 	/**
 	 * 验证用户信息
 	 * 验证用户是否登录或者是否为当前用户
-	 * 如果验证实现，立即返回错误信息并终止执行
+	 * 如果验证失败，立即返回错误信息并终止执行
 	 * @method auth
 	 * @param  int $user_id [有则验证是否为当前用户，否则只验证是否登录]
 	 * @return [type]           [description]
@@ -112,9 +112,8 @@ abstract class Rest extends Yaf_Controller_Abstract
 	}
 
 	/**
-	 * 验证打印店登陆信息
-	 * 验证用户是否登录或者是否为当前用户
-	 * 如果验证实现，立即返回错误信息并终止执行
+	 * 验证打印店登录信息
+	 * 如果验证失败，立即返回错误信息并终止执行
 	 * @method auth
 	 * @param  int $pid [有则验证是否为当前用户，否则只验证是否登录]
 	 * @return [type]           [description]

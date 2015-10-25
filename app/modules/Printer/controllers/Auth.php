@@ -37,7 +37,8 @@ class AuthController extends Rest
 		{
 			Safe::del('printer_auth_' . $account);
 			unset($Printer['password']);
-			$sid                = Session::start();
+			$sid = Session::start();
+			Session::set('printer', ['id' => $Printer['id'], 'sch_id' => $Printer['sch_id']]);
 			$response['status'] = 1;
 			$response['info']   = ['sid' => $sid, 'printer' => $Printer];
 		}
@@ -50,9 +51,9 @@ class AuthController extends Rest
 	 */
 	public function logoutAction()
 	{
-		Cookie::flush();
 		Session::flush();
-		$this->response(1, '注销成功!');
+		Cookie::flush();
+		$this->response(1, '登录信息已注销!');
 	}
 }
 ?>

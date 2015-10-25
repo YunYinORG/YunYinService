@@ -18,15 +18,8 @@ class BooksController extends Rest
 			$key = '%' . strtr($key, ' ', '%') . '%';
 			$Book->where('name', 'LIKE', $key)->orWhere('detail', 'LIKE', $key);
 		}
-
-		if ($books = $Book->select('id,name,price,image'))
-		{
-			$this->response(1, $books);
-		}
-		else
-		{
-			$this->response(0, '还有没有添加资源');
-		}
+		$books = $Book->select('id,name,price,image');
+		$this->response(1, $books);
 	}
 
 	/**
@@ -61,8 +54,8 @@ class BooksController extends Rest
 		elseif (Input::post('name', $name, 'title'))
 		{
 			/*单个插入*/
-			$book['name']  = $name;
-			$boo['pri_id'] = $pid;
+			$book['name']   = $name;
+			$book['pri_id'] = $pid;
 			if (Input::post('price', $price, 'float'))
 			{
 				$book['price'] = $price;
@@ -72,7 +65,7 @@ class BooksController extends Rest
 				$book['detail'] = $detail;
 			}
 
-			if ($book['id'] = BookModel::add($book))
+			if ($book['id'] = BookModel::insert($book))
 			{
 				$this->response(1, $book);
 			}
@@ -157,7 +150,7 @@ class BooksController extends Rest
 		{
 			$this->response(0, '无修改内容');
 		}
-		elseif (BookModel::where('id', $id)->update($book))
+		elseif (BookModel::where('id', $id)->where('pri_id', $pid)->update($book))
 		{
 			$this->response(1, $book);
 		}

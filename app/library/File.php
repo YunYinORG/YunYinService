@@ -83,6 +83,23 @@ class File
 	}
 
 	/**
+	 * 获取原文件
+	 * @method source
+	 * @param  [type] $bucket       [description]
+	 * @param  [type] $key          [description]
+	 * @return [type] [description]
+	 * @author NewFuture
+	 */
+	public static function source($uri)
+	{
+		$uri        = substr(strchr($uri, ':'), 1);
+		$bucket     = strchr($uri, '/', true);
+		$key        = strchr($uri, '/');
+		$param['e'] = $_SERVER['REQUEST_TIME'] + 300; //下载过期时间
+		return Qiniu::download($domain, $key, $param);
+	}
+
+	/**
 	 * 添加打印任务
 	 * @param  [type] $key [description]
 	 * @return [type]      [description]
@@ -90,13 +107,12 @@ class File
 	public static function addTask($uri)
 	{
 		list($bucket, $key) = explode(':', $uri, 2);
-		$saveas             = Config::getSecret('qiniu', 'task') . ':' . $key;
+		$saveas             = Config::getSecret('qiniu', 'task') . ':' . $bucket . '/' . $key;
 		$ext                = strrchr($uri, '.');
 
 		if (in_array($ext, ['.doc', '.docx', '.odt', '.rtf', '.wps', '.ppt', '.pptx', '.odp', '.dps', '.xls', '.xlsx', '.ods', '.csv', '.et']))
 		{
 			/*office系列 转pdf*/
-			$saveas .= '.pdf';
 			return (Qiniu::has($saveas) || Qiniu::toPdf($bucket, $key, $saveas)) ? $saveas : false;
 		}
 		else

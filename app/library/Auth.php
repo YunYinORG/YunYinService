@@ -111,21 +111,21 @@ class Auth
 			/*session中的信息*/
 			return $printer;
 		}
-		elseif ($token = Cookie::get('token') || Input::I('SERVER.HTTP_TOKEN', $token, 'token'))
-		{
-			/*解析cookie*/
-			if ($token = Encrypt::aesDecode($token, Cookie::key(), true))
-			{
-				list($pid, $token, $time) = explode(':', $token);
-				if ($time + Config::get('cookie.expire') > $_SERVER['REQUEST_TIME']
-					&& $printer = self::checkToken($pid, $token))
-				{
-					/*token有效*/
-					Session::set('printer', $printer);
-					return $printer;
-				}
-			}
-		}
+		// elseif ($token = Cookie::get('token') || Input::I('SERVER.HTTP_TOKEN', $token, 'token'))
+		// {
+		// 	/*解析cookie*/
+		// 	if ($token = Encrypt::aesDecode($token, Cookie::key(), true))
+		// 	{
+		// 		list($pid, $token, $time) = explode(':', $token);
+		// 		if ($time + Config::get('cookie.expire') > $_SERVER['REQUEST_TIME']
+		// 			&& $printer = self::checkToken($pid, $token))
+		// 		{
+		// 			/*token有效*/
+		// 			Session::set('printer', $printer);
+		// 			return $printer;
+		// 		}
+		// 	}
+		// }
 	}
 
 	/**

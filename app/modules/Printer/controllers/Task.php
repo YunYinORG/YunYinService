@@ -77,28 +77,20 @@ class TaskController extends Rest
 
 	/**
 	 * 获取源文件
+	 * 在转码出问题可用此接口
 	 * @param [type] $id [description]
 	 */
 	public function GET_fileAction($id)
 	{
 		$pid = $this->authPrinter();
-
-		$response['status'] = 0;
-
-		if (!$id)
+		if ($url = TaskModel::where('id', $id)->where('pri_id', '=', $pid)->get('url'))
 		{
-			$response['info'] = 'id错误';
-		}
-		elseif (!$task = TaskModel::where('pri_id', '=', $pid)->find($id))
-		{
-			$response['info'] = '无此文件';
+			$this->response(1, File::source($url));
 		}
 		else
 		{
-			$task['url']      = File::get($task['url']);
-			$response['info'] = $task;
+			$this->response(0, '无此文件');
 		}
-		$this->response = $response;
 	}
 }
 ?>

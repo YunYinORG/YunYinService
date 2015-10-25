@@ -13,7 +13,7 @@ class PrinterController extends Rest
 		$field = 'id,name,sch_id,account,address,email,phone,qq,wechat,profile,image,open,status,price,other';
 		if ($printer = PrinterModel::field($field)->find($id))
 		{
-			// $printer['price'] = PrinterModel::pasrePrice($printer['price']);
+			$printer['price'] = json_decode($printer['price']);
 			$this->response(1, $printer);
 		}
 		else

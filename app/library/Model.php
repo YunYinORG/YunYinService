@@ -105,9 +105,9 @@ class Model implements JsonSerializable, ArrayAccess
 		$this->limit = 1;
 		$result      = $this->select();
 		$this->data  = isset($result[0]) ? $result[0] : $result;
-		if ($id)
+		if (is_numeric($id))
 		{
-			$this->data[$pk] = $id;
+			$this->data[$this->pk] = $id;
 		}
 		return $result ? $this : null;
 	}
