@@ -175,7 +175,7 @@ class UserModel extends FacadeModel
 		if (strrpos($email, '@') == 1)
 		{
 			/*单字母邮箱*/
-			return self::where('email', 'LIKE', substr_replace($email, '%', 0))
+			return self::where('email', 'LIKE', substr_replace($email, '%', 0, 1))
 				->where('length(`email`)<' . (strlen($email) + 23))
 				->find();
 		}

@@ -306,7 +306,7 @@ class UserController extends Rest
 		{
 			$response['info'] = '验证码格式不对';
 		}
-		elseif (!$Code->where('use_id', $id)->where('type', 1)->field('id,time,content')->find())
+		elseif (!$Code->where('use_id', $id)->where('type', 1)->field('id,time,code,content')->find())
 		{
 			$response['info'] = '验证信息不存在';
 		}
@@ -316,7 +316,7 @@ class UserController extends Rest
 			Safe::del('email_code_' . $id);
 			$response['info'] = '尝试次数过多,请重新验证';
 		}
-		elseif (strtoupper($code) != strtoupper(substr($Code['content'], 2, 6)))
+		elseif (strtoupper($code) != strtoupper(substr($Code['code'], 2, 6)))
 		{
 			$response['info'] = '验证码不匹配';
 		}
