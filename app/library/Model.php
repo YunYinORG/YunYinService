@@ -206,6 +206,12 @@ class Model implements JsonSerializable, ArrayAccess
 
 		$sql = 'UPDATE' . self::backQoute($this->table);
 		$sql .= 'SET' . $update_string;
+
+		if (empty($this->where) && empty($this->data) && isset($data[$this->pk]))
+		{
+			/*默认使用data主键作为更新值*/
+			$this->data[$this->pk] = $data[$this->pk];
+		}
 		$sql .= $this->buildWhereSql();
 
 		return $this->execute($sql, $this->param);

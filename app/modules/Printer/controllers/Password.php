@@ -158,7 +158,7 @@ class PasswordController extends REST
 		else
 		{
 			$printer['password'] = Encrypt::encryptPwd($password, $printer['account']);
-			if (PrinterModel::update($printer) >= 0)
+			if (PrinterModel::where('id', $printer['id'])->update($printer) >= 0)
 			{
 				$response['status'] = 1;
 				$response['info']   = '重置成功';
