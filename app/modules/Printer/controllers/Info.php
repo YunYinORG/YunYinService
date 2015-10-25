@@ -1,6 +1,8 @@
 <?php
-
-class PrinterController extends Rest
+/**
+ * 打印店信息管理
+ */
+class InfoController extends Rest
 {
 
 	/**
@@ -49,9 +51,16 @@ class PrinterController extends Rest
 		Input::put('other', $other, 'text') AND $info['other'] = $other;
 
 		/*价格*/
-		/*to 验证和编码*/
-		if (Input::put('price', $price))
+		$price = [];
+		if (Input::put('price.s', $price['s'], 'float')
+			|| Input::put('price.d', $price['d'], 'float')
+			|| Input::put('price.c_s', $price['c_s'], 'float')
+			|| Input::put('price.c_d', $price['c_d'], 'float'))
 		{
+			if ($oldprice = PrinterModel::where('id', $id)->get('price'))
+			{
+				$price = array_merge($oldprice, array_filter($price));
+			}
 			$info['price'] = $price;
 		}
 

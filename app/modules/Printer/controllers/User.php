@@ -16,7 +16,7 @@ class UserController extends Rest
 	public function GET_infoAction($id = 0)
 	{
 		$pid = $this->authPrinter();
-		if (FileModel::where('use_id', $id)->where('pri_id', $pid)->find())
+		if (TaskModel::where('use_id', $id)->where('pri_id', $pid)->find())
 		{
 			$user = UserModel::field('name,number,phone,email,sch_id')->find($id);
 			$user = UserModel::mask($user);
@@ -26,7 +26,6 @@ class UserController extends Rest
 		{
 			$this->response(0, '此同学未在此打印过');
 		}
-
 	}
 
 	/**
@@ -39,7 +38,7 @@ class UserController extends Rest
 	public function GET_phoneAction($id = 0)
 	{
 		$pid = $this->authPrinter();
-		if (FileModel::where('use_id', $id)->where('pri_id', $pid)->find())
+		if (TaskModel::where('use_id', $id)->where('pri_id', $pid)->get('id'))
 		{
 			$user  = UserModel::field('number,phone')->find($id);
 			$phone = $user ? Encrypt::decryptPhone($user['phone'], $user['number'], $id) : null;
@@ -62,7 +61,7 @@ class UserController extends Rest
 	public function GET_emailAction($id = 0)
 	{
 		$pid = $this->authPrinter();
-		if (FileModel::where('use_id', $id)->where('pri_id', $pid)->find())
+		if (TaskModel::where('use_id', $id)->where('pri_id', $pid)->get('id'))
 		{
 			$email = UserModel::where('id', '=', $id)->get('email');
 			$email = $email ? Encrypt::decryptEmail($email) : null;

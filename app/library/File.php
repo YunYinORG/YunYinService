@@ -16,20 +16,24 @@ class File
 	 */
 	public static function get($uri, $alias = null)
 	{
+
 		if (!$uri)
 		{
 			return null;
 		}
-		elseif (substr_compare($uri, 'book/', 0, 5) === 0);
+		elseif (substr_compare($uri, 'book/', 0, 5) === 0)
 		{
 			//店内电子书
 			return $uri;
 		}
-		list($bucket, $key) = implode(':', $uri, 2);
-		$param['e']         = $_SERVER['REQUEST_TIME'] + 300; //下载过期时间
 
+		list($bucket, $key)          = explode(':', $uri, 2);
 		$alias AND $param['attname'] = urlencode($alias);
-		return Qiniu::download($domain, $key, $param);
+
+		$param['e'] = $_SERVER['REQUEST_TIME'] + 300; //下载过期时间
+		$domain     = Config::getSecret('qiniu', 'domain')[$bucket];
+
+		return $t = Qiniu::download($domain, $key, $param);
 	}
 
 	/**
@@ -94,8 +98,9 @@ class File
 	{
 		$uri        = substr(strchr($uri, ':'), 1);
 		$bucket     = strchr($uri, '/', true);
-		$key        = strchr($uri, '/');
+		$key        = substr(strchr($uri, '/'), 1);
 		$param['e'] = $_SERVER['REQUEST_TIME'] + 300; //下载过期时间
+		$domain     = Config::getSecret('qiniu', 'domain')[$bucket];
 		return Qiniu::download($domain, $key, $param);
 	}
 

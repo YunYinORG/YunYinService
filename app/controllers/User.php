@@ -160,7 +160,7 @@ class UserController extends Rest
 		}
 		elseif (!Safe::checkTry('bind_phone_' . $id))
 		{
-			$response['info'] = '发送此数过多,稍后重试';
+			$response['info'] = '发送次数过多,稍后重试';
 		}
 		else
 		{
@@ -264,7 +264,7 @@ class UserController extends Rest
 		}
 		elseif (!Safe::checkTry('bind_email_' . $id))
 		{
-			$response['info'] = '发送此数过多,12小时之后重试';
+			$response['info'] = '发送次数过多,12小时之后重试';
 		}
 		else
 		{
