@@ -306,7 +306,7 @@ class UserController extends Rest
 		{
 			$response['info'] = '验证码格式不对';
 		}
-		elseif (!$Code->where('use_id', $id)->where('type', 1)->field('id,email,time,content')->find())
+		elseif (!$Code->where('use_id', $id)->where('type', 1)->field('id,time,content')->find())
 		{
 			$response['info'] = '验证信息不存在';
 		}

@@ -44,7 +44,7 @@ class PasswordController extends REST
 			Session::set('find_info_p', $find);
 			Safe::del('pwd_phone_' . $account);
 			$response['status'] = 1;
-			$response['info']   = '短信已发送';
+			$response['info']   = '验证短信已发送';
 		}
 		$this->response = $response;
 	}
@@ -93,7 +93,7 @@ class PasswordController extends REST
 			Session::set('find_info_p', $find);
 			Safe::del('pwd_email_' . $account);
 			$response['status'] = 1;
-			$response['info']   = '邮件已发送';
+			$response['info']   = '验证邮件已发送!';
 		}
 		$this->response = $response;
 	}
@@ -117,7 +117,7 @@ class PasswordController extends REST
 		elseif ($info['code'] != strtoupper($code))
 		{
 			$response['info'] = '验证码错误';
-			$times           = isset($info['t']) ? $info['t'] + 1 : 1;
+			$times            = isset($info['t']) ? $info['t'] + 1 : 1;
 			if ($times > 3)
 			{
 				/*一个验证码尝试超过三次强制过期*/
