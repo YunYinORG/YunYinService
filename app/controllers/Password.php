@@ -44,7 +44,7 @@ class PasswordController extends REST
 		else
 		{
 			/*发送成功*/
-			$findPwd = ['id' => $user['id'], 'number' => $number, 'code' => strtoupper($code)];
+			$find = ['id' => $user['id'], 'number' => $number, 'code' => strtoupper($code)];
 			Session::set('find_info', $find);
 			Safe::del('pwd_phone_' . $number);
 			$response['status'] = 1;
