@@ -64,7 +64,11 @@ class InfoController extends Rest
 			$info['price'] = $price;
 		}
 
-		if (!empty($info) AND PrinterModel::where('id', $id)->update($info))
+		if (empty($info))
+		{
+			$this->response(0, '无有效参数');
+		}
+		elseif (PrinterModel::where('id', $id)->update($info))
 		{
 			$this->response(1, $info);
 		}
