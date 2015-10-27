@@ -2,7 +2,7 @@
 /**
  * 密码管理
  */
-class PasswordController extends REST
+class PasswordController extends Rest
 {
 
 	/**
