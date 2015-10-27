@@ -34,41 +34,45 @@ class InfoController extends Rest
 		$this->authPrinter($id);
 		$info = [];
 		/*店名*/
-		Input::put('name', $name, 'title') AND $info['name'] = $name;
+		Input::put('name', $var, 'title') AND $info['name'] = $var;
 		/*邮箱*/
-		Input::put('email', $email, 'email') AND $info['email'] = $email;
+		Input::put('email', $var, 'email') AND $info['email'] = $var;
 		/*手机*/
-		Input::put('phone', $phone, 'phone') AND $info['phone'] = $phone;
+		Input::put('phone', $var, 'phone') AND $info['phone'] = $var;
 		/*qq号*/
-		Input::put('qq', $qq, 'int') AND $info['qq'] = $qq;
+		Input::put('qq', $var, 'int') AND $info['qq'] = $var;
 		/*微信号*/
-		Input::put('wechat', $wechat, 'char_num') AND $info['wechat'] = $wechat;
+		Input::put('wechat', $var, 'char_num') AND $info['wechat'] = $var;
+		/*地址*/
+		Input::put('address', $var, 'text') AND $info['address'] = $var;
 		/*简介*/
-		Input::put('profile', $profile, 'text') AND $info['profile'] = $profile;
+		Input::put('profile', $var, 'text') AND $info['profile'] = $var;
 		/*营业时间*/
-		Input::put('open', $open, 'text') AND $info['open'] = $open;
+		Input::put('open', $var, 'text') AND $info['open'] = $var;
 		/*营业时间*/
-		Input::put('other', $other, 'text') AND $info['other'] = $other;
-
+		Input::put('other', $var, 'text') AND $info['other'] = $var;
 		/*价格*/
 		$price = [];
-		if (Input::put('price.s', $price['s'], 'float')
-			|| Input::put('price.d', $price['d'], 'float')
-			|| Input::put('price.c_s', $price['c_s'], 'float')
-			|| Input::put('price.c_d', $price['c_d'], 'float'))
+		Input::put('price_s', $price['s'], 'float');
+		Input::put('price_d', $price['d'], 'float');
+		Input::put('price_c_s', $price['c_s'], 'float');
+		Input::put('price_c_d', $price['c_d'], 'float');
+		if (!empty(array_filter($price)))
 		{
 			if ($oldprice = PrinterModel::where('id', $id)->get('price'))
 			{
-				$price = array_merge($oldprice, array_filter($price));
+				if ($oldprice = @json_decode($oldprice, true))
+				{
+					$price = array_merge($oldprice, array_filter($price));
+				}
 			}
-			$info['price'] = $price;
+			$info['price'] = json_encode($price);
 		}
-
 		if (empty($info))
 		{
 			$this->response(0, '无有效参数');
 		}
-		elseif (PrinterModel::where('id', $id)->update($info))
+		elseif (PrinterModel::where('id', $id)->update($info) !== false)
 		{
 			$this->response(1, $info);
 		}
