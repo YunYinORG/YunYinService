@@ -16,7 +16,7 @@ class Session
 	{
 		if (!$sid = self::$_id)
 		{
-			if ($sid = $id || Input::I('SERVER.HTTP_SESSION_ID', $sid, 'ctype_alnum'))
+			if (($sid = $id) || Input::I('SERVER.HTTP_SESSION_ID', $sid, 'ctype_alnum'))
 			{
 				session_id($sid);
 				session_start();
