@@ -16,9 +16,9 @@ Class Safe
 	 */
 	public static function checkTry($key, $timesLimit = 0)
 	{
-		$name       = 'Safe_try_' . $key;
-		$times      = Cache::get($name);
-		$timesLimit = $timesLimit ?: Config::get('try.times');
+		$name       = 's_t_' . $key;
+		$times      = intval(Cache::get($name));
+		$timesLimit = $timesLimit ?: intval(Config::get('try.times'));
 		if ($times >= $timesLimit)
 		{
 			$msg = '多次尝试警告:' . $key . 'IP信息:' . self::ip();
@@ -34,7 +34,7 @@ Class Safe
 
 	public static function del($key)
 	{
-		Cache::del('Safe_try_' . $key);
+		Cache::del('s_t_' . $key);
 	}
 
 	public static function ip()

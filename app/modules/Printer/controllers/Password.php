@@ -17,23 +17,23 @@ class PasswordController extends Rest
 		{
 			$response['info'] = '手机号格式有误或者不支持！';
 		}
-		elseif (!Input::post('account', $account, 'regex.account'))
+		elseif (!Input::post('account', $account, Config::get('regex.account')))
 		{
 			$response['info'] = '账号有误，如果账号忘记请联系云印工作人员';
+		}
+		elseif (!$Printer = PrinterModel::where('account', $account)->field('id,phone')->find())
+		{
+			$response['info'] = '尚未注册';
 		}
 		elseif (!Safe::checkTry('pwd_phone_' . $account))
 		{
 			$response['info'] = '尝试次数过多，临时封禁！';
 		}
-		elseif (!$Printer = PrinterModel::where('account', $account)->filed('id,phone')->find())
-		{
-			$response['info'] = '尚未注册';
-		}
-		elseif (!$Printer['phone'] || $Printer['phone'] != $phone)
+		elseif (!$Printer['phone'] || ($Printer['phone'] != $phone))
 		{
 			$response['info'] = '绑定手机不一致,或者手机号错误';
 		}
-		elseif (!Sms::findPwd($phone, $code = Random::code(6)))
+		elseif (!Sms::findPwd($phone, $code = Random::number(6)))
 		{
 			$response['info'] = '短信发送出错,请联系我们！';
 		}
@@ -62,7 +62,7 @@ class PasswordController extends Rest
 		{
 			$response['info'] = '邮箱格式有误或者不支持！';
 		}
-		elseif (!Input::post('account', $account, 'regex.account'))
+		elseif (!Input::post('account', $account, Config::get('regex.account')))
 		{
 			$response['info'] = '学号格式有误！';
 		}
@@ -89,7 +89,7 @@ class PasswordController extends Rest
 		else
 		{
 			/*发送成功*/
-			$findPwd = ['id' => $user['id'], 'account' => $account, 'code' => strtoupper($code)];
+			$find = ['id' => $user['id'], 'account' => $account, 'code' => strtoupper($code)];
 			Session::set('find_info_p', $find);
 			Safe::del('pwd_email_' . $account);
 			$response['status'] = 1;

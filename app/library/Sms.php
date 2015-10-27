@@ -11,7 +11,7 @@ class Sms
 	 * 绑定手机
 	 * @param $code验证码
 	 */
-	public function bind($phone, $code)
+	public static function bind($phone, $code)
 	{
 		$msg = $code . ',5';
 		return self::send($phone, $msg, 'bind');
@@ -21,7 +21,7 @@ class Sms
 	 * 找回密码
 	 * @param $code 验证码
 	 */
-	public function findPwd($phone, $code)
+	public static function findPwd($phone, $code)
 	{
 		$msg = $code . ',5';
 		return self::send($phone, $msg, 'pwd');
@@ -35,7 +35,7 @@ class Sms
 	 * @param  string $finder       [拾到卡者姓名]
 	 * @param  string $connectPhone [联系方式]
 	 */
-	public function card($phone, $receiver, $finder, $connectPhone)
+	public static function card($phone, $receiver, $finder, $connectPhone)
 	{
 		$msg = $receiver . ',' . $finder . ',' . $connectPhone;
 		return self::send($phone, $msg, 'card');
@@ -49,7 +49,7 @@ class Sms
 	 * @param  string  $taskid   [订单号]
 	 * @param  string  $filename [文件名]
 	 */
-	public function printed($phone, $printer, $taskid, $filename)
+	public static function printed($phone, $printer, $taskid, $filename)
 	{
 		$msg = $printer . ',' . $taskid . ',' . $filename;
 		return self::send($phone, $msg, 'printed');
