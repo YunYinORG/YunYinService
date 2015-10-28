@@ -131,11 +131,12 @@ class Qiniu
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-			curl_setopt($ch, CURLOPT_POST, true);
-			$data AND curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+			if($data)
+			{
+				curl_setopt($ch, CURLOPT_POST, true);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+			}
 			curl_setopt($ch, CURLOPT_HEADER, 1);
-			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 			$response = curl_exec($ch);
 			$status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 			curl_close($ch);
