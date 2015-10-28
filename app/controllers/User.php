@@ -165,7 +165,7 @@ class UserController extends Rest
 		else
 		{
 			/*手机有效，发送验证码*/
-			$code = strtoupper(Random::code(6));
+			$code = Random::number(6);
 			Session::set('code_phone', [$code => $phone]);
 			if (Sms::bind($phone, $code))
 			{

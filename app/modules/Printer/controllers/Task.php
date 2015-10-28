@@ -24,7 +24,7 @@ class TaskController extends Rest
 			//所有未完成订单
 			$Task->where('status', '>', 0);
 		}
-		$tasks = $Task->select('name,id,color,format,double,copies,status,name,time,requirements');
+		$tasks = $Task->select('name,id,color,format,double,copies,status,name,time,requirements,payed');
 		$this->response(1, $tasks);
 	}
 
