@@ -55,7 +55,7 @@ class TaskController extends Rest
 	{
 		$pid                = $this->authPrinter();
 		$response['status'] = 0;
-		if (!Input::get('status', $status, 'int'))
+		if (!Input::put('status', $status, 'int'))
 		{
 			$response['info'] = '无效状态';
 		}
@@ -65,7 +65,7 @@ class TaskController extends Rest
 		}
 		elseif (TaskModel::where('id', $id)->where('pri_id', $pid)->update(['status' => $status]))
 		{
-			$response['status'] = 0;
+			$response['status'] = 1;
 			$response['info']   = '修改成功';
 		}
 		else
@@ -73,6 +73,25 @@ class TaskController extends Rest
 			$response['info'] = '状态设置失败';
 		}
 		$this->response = $response;
+	}
+
+	/**
+	 * 确认支付
+	 * @method POST_payAction
+	 * @param  [type]         $id [description]
+	 * @author NewFuture
+	 */
+	public function POST_payAction($id)
+	{
+		$pid = $this->authPrinter();
+		if (TaskModel::where('id', $id)->where('pri_id', $pid)->update(['payed' => 1]))
+		{
+			$this->response(1, '已确认支付！');
+		}
+		else
+		{
+			$this->response(0, '状态修改失败');
+		}
 	}
 
 	/**
