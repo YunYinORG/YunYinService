@@ -24,11 +24,11 @@ class NKU extends Connect
 		$content = curl_exec($ch);
 		if (preg_match('/Set-Cookie:(.*);/iU', $content, $matchs))
 		{
-			$cookie = $matchs[1];
+			self::$_cookie = $matchs[1];
 		}
 
 #设置cookie
-		curl_setopt($ch, CURLOPT_COOKIE, $cookie);
+		curl_setopt($ch, CURLOPT_COOKIE, self::$_cookie);
 
 #登录VPN
 		curl_setopt($ch, CURLOPT_URL, $url);

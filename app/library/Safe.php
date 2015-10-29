@@ -18,7 +18,7 @@ Class Safe
 	{
 		$name       = 's_t_' . $key;
 		$times      = intval(Cache::get($name));
-		$timesLimit = $timesLimit ?: intval(Config::get('try.times'));
+		$timesLimit = intval($timesLimit) ?: intval(Config::get('try.times'));
 		if ($times >= $timesLimit)
 		{
 			$msg = '多次尝试警告:' . $key . 'IP信息:' . self::ip();

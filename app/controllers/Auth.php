@@ -43,7 +43,7 @@ class AuthController extends Rest
 				/*指定学校后登录失败*/
 				$this->response(-1, '登录失败！请检查学号和密码或者找回！');
 			}
-			elseif (!$this->verify($number, $password, $sch_id)) //尝试验证
+			elseif ($this->verify($number, $password, $sch_id)) //尝试验证
 			{
 				/*验证成功*/
 				Safe::del($safekey);
