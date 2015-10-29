@@ -1,6 +1,6 @@
 <?php
 /**
- *登录和验证 
+ *登录和验证
  */
 class AuthController extends Rest
 {
@@ -18,15 +18,19 @@ class AuthController extends Rest
 			$safekey = $sch_id . 'auth_' . $number;
 			if (!Safe::checkTry($safekey, 5))
 			{
-				$this->response(-3, '尝试次过度,账号临时封禁');
+				$this->response(0, '尝试次过度,账号临时封禁');
 			}
 			elseif (Input::post('code', $code, 'ctype_alnum'))
 			{
 				/*输入验证码直接验证*/
-				if (!$this->verify($number, $password, $sch_id, $code))
+				if ($this->verify($number, $password, $sch_id, $code))
 				{
+					/*验证通过*/
 					Safe::del($safekey);
-					$this->response('-1', '学校账号验证失败,请检查密码是否正确,您也可尝试登录该系统!');
+				}
+				else
+				{
+					$this->response(-1, '学校账号验证失败,请检查密码是否正确,您也可尝试登录该系统!');
 				}
 			}
 			elseif ($result = $this->login($number, md5($password), $sch_id))
