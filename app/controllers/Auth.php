@@ -1,6 +1,6 @@
 <?php
 /**
- *登陆和验证 
+ *登录和验证 
  */
 class AuthController extends Rest
 {
