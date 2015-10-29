@@ -86,7 +86,7 @@ class AuthController extends Rest
 		//指定学校
 		$sch_id AND $conditon['sch_id'] = $sch_id;
 
-		$users = UserModel::where($conditon)->select('id,password,sch_id');
+		$users = UserModel::where($conditon)->select('id,password,sch_id,name');
 		if (empty($users))
 		{
 			/*未注册*/
