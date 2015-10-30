@@ -35,7 +35,7 @@ class TaskController extends Rest
 	public function GET_infoAction($id)
 	{
 		$pid = $this->authPrinter();
-		if (!$task = TaskModel::where('pri_id', '=', $pid)->find($id))
+		if (!$task = TaskModel::where('pri_id', '=', $pid)->find(intval($id)))
 		{
 			$this->response(0, '无此文件');
 		}
@@ -63,7 +63,7 @@ class TaskController extends Rest
 		{
 			$response['info'] = '此状态不允许设置';
 		}
-		elseif (TaskModel::where('id', $id)->where('pri_id', $pid)->update(['status' => $status]))
+		elseif (TaskModel::where('id', intval($id))->where('pri_id', $pid)->update(['status' => $status]))
 		{
 			$response['status'] = 1;
 			$response['info']   = '修改成功';
@@ -84,7 +84,7 @@ class TaskController extends Rest
 	public function POST_payAction($id)
 	{
 		$pid = $this->authPrinter();
-		if (TaskModel::where('id', $id)->where('pri_id', $pid)->update(['payed' => 1]))
+		if (TaskModel::where('id', intval($id))->where('pri_id', $pid)->update(['payed' => 1]))
 		{
 			$this->response(1, '已确认支付！');
 		}
@@ -102,7 +102,7 @@ class TaskController extends Rest
 	public function GET_fileAction($id)
 	{
 		$pid = $this->authPrinter();
-		if ($url = TaskModel::where('id', $id)->where('pri_id', '=', $pid)->get('url'))
+		if ($url = TaskModel::where('id', intval($id))->where('pri_id', '=', $pid)->get('url'))
 		{
 			$this->response(1, File::source($url));
 		}

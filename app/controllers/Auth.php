@@ -41,7 +41,7 @@ class AuthController extends Rest
 			elseif ($sch_id && false === $result)
 			{
 				/*指定学校后登录失败*/
-				$this->response(-1, '登录失败！请检查学号和密码或者找回！');
+				$this->response(-1, '登录失败！请检查学号和密码是否正确，或者找回密码！');
 			}
 			elseif ($this->verify($number, $password, $sch_id)) //尝试验证
 			{
@@ -51,7 +51,7 @@ class AuthController extends Rest
 			else
 			{
 				/*注册验证失败*/
-				$this->response(-1, '验证出错,请重新验证校园账号!');
+				$this->response(-1, '验证出错,请检查学号或者密码是否正确!');
 			}
 		}
 		else
@@ -158,7 +158,7 @@ class AuthController extends Rest
 			$sid = Session::start();
 			Session::set('reg', $reg);
 			unset($reg['password']);
-			$this->response(2, ['sid' => $sid, 'user' => $reg, 'msg' => '验证成功', 'url' => '/User/']);
+			$this->response(2, ['sid' => $sid, 'user' => $reg, 'msg' => '验证成功', 'url' => '/user/']);
 			return true;
 		}
 	}
