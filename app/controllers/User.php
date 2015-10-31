@@ -3,18 +3,17 @@ class UserController extends Rest
 {
 
 	/*欢迎信息*/
-	public function indexAction($name = '')
+	public function indexAction()
 	{
 		if ($id = Auth::id())
 		{
-			$name OR $name = UserModel::where('id', '=', $id)->get('name');
-
-			$info = ['msg' => '亲爱的' . $name . ',您已经成功登录', 'name' => $name, 'id' => $id];
+			$user = UserModel::field('name,sch_id')->find($id);
+			$info = ['msg' => '亲爱的' . $user['name'] . ',您已经成功登录', 'user' => $user];
 			$this->response(1, $info);
 		}
 		else
 		{
-			$this->response = ['status' => self::AUTH_FAIL, 'info' => '尚未登录', 'url' => '/Auth/'];
+			$this->response(0, ['info' => '尚未登录', 'url' => '/auth/']);
 		}
 	}
 
