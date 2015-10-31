@@ -14,7 +14,7 @@ class TaskController extends Rest
 	{
 		$pid = $this->authPrinter();
 		Input::get('page', $page, 'int', 1);
-		$Task = TaskModel::where('pri_id', '=', $pid)->belongs('user')->page($page);
+		$Task = TaskModel::where('pri_id', '=', $pid)->belongs('user')->page($page)->order('id', true);
 		if (Input::get('status', $status, 'int'))
 		{
 			$Task->where('status', '=', $status);

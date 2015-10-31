@@ -18,7 +18,7 @@ class FileController extends Rest
 		$File = FileModel::where('use_id', '=', $userid)
 			->where('status', '>', 0)
 			->page($page)
-			->field('id,name,time');
+			->field('id,name,time')->order('id', true);
 		if (Input::get('key', $key, 'tag')) //关键字
 		{
 			$key = '%' . strtr($key, ' ', '%') . '%';
