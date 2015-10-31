@@ -102,12 +102,15 @@ class AuthController extends Rest
 				if ($user['password'] == $password)
 				{
 					/*登录成功*/
-					unset($user['password']);
+
 					$user['number'] = $number;
 					$token          = Auth::token($user);
 					$sessionid      = Session::start();
+					unset($user['password']);
 					Session::set('user', $user);
 					Cookie::set('token', $token);
+
+					// $user['school'] = SchoolModel::getName($user['sch_id']);
 					$result = ['sid' => $sessionid, 'user' => $user, 'msg' => '登录成功！', 'token' => $token];
 					$this->response(1, $result);
 					return true;
@@ -154,10 +157,13 @@ class AuthController extends Rest
 				'number' => $info['number'],
 				'password' => md5($info['password']),
 				'name' => current($result),
-				'sch_id' => key($result));
+				'sch_id' => key($result),
+			);
 			$sid = Session::start();
 			Session::set('reg', $reg);
+
 			unset($reg['password']);
+			$reg['school'] = SchoolModel::getName($reg['sch_id']);
 			$this->response(2, ['sid' => $sid, 'user' => $reg, 'msg' => '验证成功', 'url' => '/user/']);
 			return true;
 		}
