@@ -9,8 +9,8 @@ class File
 	/**
 	 * 获取文件
 	 * @method get
-	 * @param  [type] $key  [description]
-	 * @param  array  $param [description]
+	 * @param  [type] $uri  [description]
+	 * @param  array  $alias [description]
 	 * @return [url]        [下载链接]
 	 * @author NewFuture
 	 */
@@ -96,9 +96,14 @@ class File
 	 */
 	public static function source($uri)
 	{
-		$uri        = substr(strchr($uri, ':'), 1);
-		$bucket     = strchr($uri, '/', true);
-		$key        = substr(strchr($uri, '/'), 1);
+		$uri    = substr(strchr($uri, ':'), 1);
+		$bucket = strchr($uri, '/', true);
+		$key    = substr(strchr($uri, '/'), 1);
+		$file   = self::parseName($key);
+		if ($file['ext'] == 'pdf' && strpos($file['base'], '.'))
+		{
+			$key = $file['base'];
+		}
 		$param['e'] = $_SERVER['REQUEST_TIME'] + 300; //下载过期时间
 		$domain     = Config::getSecret('qiniu', 'domain')[$bucket];
 		return Qiniu::download($domain, $key, $param);
@@ -118,6 +123,7 @@ class File
 		if (in_array($ext, ['.doc', '.docx', '.odt', '.rtf', '.wps', '.ppt', '.pptx', '.odp', '.dps', '.xls', '.xlsx', '.ods', '.csv', '.et']))
 		{
 			/*office系列 转pdf*/
+			$saveas .= '.pdf';
 			return (Qiniu::has($saveas) || Qiniu::toPdf($bucket, $key, $saveas)) ? $saveas : false;
 		}
 		else

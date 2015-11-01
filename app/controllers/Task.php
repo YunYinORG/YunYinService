@@ -15,7 +15,12 @@ class TaskController extends Rest
 	{
 		$userid = $this->auth();
 		Input::get('page', $page, 'int', 1);
-		$tasks = TaskModel::where('use_id', '=', $userid)->belongs('printer')->page($page)->order('id', 'DESC')->select();
+		$tasks = TaskModel::where('use_id', '=', $userid)
+			->where('status', '>', 0)
+			->belongs('printer')
+			->page($page)
+			->order('id', 'DESC')
+			->select('id,color,copies,double,format,name,payed,pri_id,status,time');
 		$this->response(1, $tasks);
 	}
 
@@ -78,7 +83,7 @@ class TaskController extends Rest
 	public function GET_infoAction($id)
 	{
 		$userid = $this->auth();
-		if ($task = TaskModel::where('use_id', '=', $userid)->belongs('printer')->find($id))
+		if ($task = TaskModel::where('use_id', '=', $userid)->belongs('printer')->find(intval($id)))
 		{
 			$task['url'] = File::get($task['url']);
 			$this->response(1, $task);
@@ -98,7 +103,7 @@ class TaskController extends Rest
 	public function PUT_infoAction($id = 0)
 	{
 		$userid = $this->auth();
-		if ($Task = TaskModel::where('use_id', $userid)->where('status', 1)->find($id))
+		if ($Task = TaskModel::where('use_id', $userid)->where('status', 1)->find(intval($id)))
 		{
 			$task = TaskModel::create('put');
 			if ($Task->update($task))
@@ -126,13 +131,18 @@ class TaskController extends Rest
 	{
 		$userid             = $this->auth();
 		$response['status'] = 0;
-		if (!($Task = TaskModel::where('use_id', $userid)->where('status', '>', 0)->find($id)))
+		$Task               = TaskModel::where('use_id', $userid)->where('status', '>', 0)->field('status,payed,url')->find(intval($id));
+		if (!$Task)
 		{
 			$response['info'] = '该任务不存在';
 		}
-		elseif ($Task->status > 1 && $Task->status < 5)
+		elseif ($Task['status'] > 1 && $Task['status'] < 3)
 		{
-			$response['info'] = '改任务目前状态不允许删除';
+			$response['info'] = '打印店已经在处理，不可删除，请联系打印店取消订单任务';
+		}
+		elseif ($Task['status'] == 4 && !$Task['payed'])
+		{
+			$response['info'] = '打印店尚未确认付款';
 		}
 		elseif ($Task->set('status', 0)->save($id))
 		{
@@ -141,8 +151,29 @@ class TaskController extends Rest
 		}
 		else
 		{
-			$response['info'] = '删除成功';
+			$response['info'] = '删除失败';
 		}
 		$this->response = $response;
+	}
+
+	/**
+	 *  获取下载url   
+	 * @method GET_urlAction
+	 * @param     $id [description]
+	 * @author NewFuture
+	 */
+	public function GET_urlAction($id = 0)
+	{
+		$userid = $this->auth();
+		$url    = TaskModel::where('id', '=', $id)->where('use_id', '=', $userid)->get($url);
+		Input::get('alias', $alias, 'title');
+		if ($url && $url = File::get($url, $alias))
+		{
+			$this->response(1, $url);
+		}
+		else
+		{
+			$this->response(0, '你没有设定此任务');
+		}
 	}
 }
