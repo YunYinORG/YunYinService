@@ -313,6 +313,7 @@ class ApiController extends Yaf_Controller_Abstract
 	 */
 	protected function jump($url, $msg = null, $time = 1)
 	{
+		Yaf_Dispatcher::getInstance()->autoRender(true);
 		if ($msg)
 		{
 			$this->_view->assign('time', $time)->assign('url', $url)->assign('msg', $msg)->display('jump.phtml');
