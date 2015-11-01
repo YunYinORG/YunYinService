@@ -10,13 +10,13 @@ class PrintersController extends Rest
 	 */
 	public function GET_indexAction()
 	{
-		$Printer = new Model('printer');
+		$Printer = (new Model('printer'))->where('status','>',0)->order('rank', 'DESC')->page($page);
 		if (Input::get('sch_id', $sch_id, 'is_numeric'))
 		{
 			$Printer->where('sch_id', $sch_id);
 		}
 		Input::get('page', $page, 'int', 1);
-		$printers = $Printer->order('rank', 'DESC')->page($page)->select('id,name,sch_id,address');
+		$printers = $Printer->select('id,name,sch_id,address');
 		$this->response(1, $printers);
 	}
 
