@@ -20,14 +20,12 @@ class Cookie
 		if ($value = self::encode($value))
 		{
 			$path = $path ?: self::config('path');
-			if ($expire === 0)
+
+			if (!$expire)
 			{
-				$expire = null;
+				$expire = ($expire === 0) ? null : self::config('expire');
 			}
-			else
-			{
-				$expire = $_SERVER['REQUEST_TIME'] + $expire ?: self::config('expire');
-			}
+			$expire = $expire ? $_SERVER['REQUEST_TIME'] + $expire : null;
 			$domain = $domain === null ? self::config('domain') : $domain;
 			return setcookie($name, $value, $expire, $path, $domain, self::config('secure'), self::config('httponly'));
 		}
