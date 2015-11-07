@@ -88,6 +88,9 @@ a {
    <?=isset($msg) ? $msg : ''?>
   </div> 
   <form id="authform" method="post" onsubmit="return checkform();"> 
+  	<p>
+  		<a href="http://print.yunyin.org/#/forget">忘记密码？</a>
+  	</p>
    <input name="name" type="text" class="input" placeholder="学号" id="number" onchange="checknumber()" required="" /> 
    <input name="password" type="password" class="input" placeholder="密码" id="password" required="" /> 
    <div id="codeArea"> 
@@ -166,7 +169,7 @@ function checknumber() {
 }
 function enable() {
 	$('#authform').removeAttr('disabled');
-	$('#password').removeAttr('disabled');
+	$('#number').removeAttr('disabled');
 	$('#password').removeAttr('disabled');
 	$('#code').removeAttr('disabled');
 	$('#submit').text('验证').removeAttr('disabled');
@@ -198,6 +201,7 @@ function checkform() {
 		case 1:
 			//登录成功
 			showtips('');
+			location.reload();
 			break;
 
 		case 2:
