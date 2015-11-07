@@ -92,6 +92,27 @@ class UserModel extends FacadeModel
 	}
 
 	/**
+	 * 用户数据解码
+	 * @method mask
+	 * @param  [type] &$user [description]
+	 * @return [type]        [description]
+	 * @author NewFuture
+	 */
+	public static function decrypt(&$user)
+	{
+		if (isset($user['phone']) && $user['phone'] && $user['number'] && $user['id'])
+		{
+			$user['phone'] = Encrypt::decryptPhone($user['phone'], $user['number'], $user['id']);
+		}
+		
+		if (isset($user['email']) && $email = $user['email'])
+		{
+			$user['email'] = Encrypt::decryptEmail($email);
+		}
+		return $user;
+	}
+
+	/**
 	 * 保存手机
 	 * @method savePhone
 	 * @param  [type]    $id     [description]
