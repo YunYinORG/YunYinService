@@ -20,10 +20,12 @@ abstract class Rest extends Yaf_Controller_Abstract
 	protected function init()
 	{
 		Yaf_Dispatcher::getInstance()->disableView(); //立即输出响应，并关闭视图模板引擎
-		if (isset($_SERVER['HTTP_REFERER']))
+		/*请求来源，跨站响应*/
+		$from=isset($_SERVER['HTTP_REFERER'])?$_SERVER['HTTP_REFERER']:(isset($_SERVER['HTTP_ORIGIN'])?$_SERVER['HTTP_ORIGIN']:false);
+		if ($from)
 		{
 			/*跨站请求*/
-			$from = parse_url($_SERVER['HTTP_REFERER']);
+			$from = parse_url($from);
 			if (isset($from['host']) && substr($from['host'], -11) == '.yunyin.org')
 			{
 				$cors = Config::get('cors');
