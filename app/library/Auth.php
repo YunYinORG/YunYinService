@@ -42,7 +42,7 @@ class Auth
 			/*session中的信息*/
 			return $user;
 		}
-		elseif ($token = Cookie::get('token') || Input::I('SERVER.HTTP_TOKEN', $token, 'token'))
+		elseif (($token = Cookie::get('token')) || Input::I('SERVER.HTTP_TOKEN', $token, 'token'))
 		{
 			/*解析cookie*/
 			if ($token = Encrypt::aesDecode($token, Cookie::key(), true))
@@ -69,16 +69,27 @@ class Auth
 	public static function token($user)
 	{
 
-		if ($user &&
-			(is_numeric($user) && $data = UserModel::field('id,number,password,sch_id')->find($user))
-			|| (isset($user['id']) && $data['id'] = $user['id']
-				&& isset($user['number']) && $data['number'] = $user['number']
-				&& isset($user['password']) && $data['password'] = $user['password']
-				&& isset($user['sch_id']) && $data['sch_id'] = $user['sch_id']))
+		if (!$user)
 		{
-			$token = $data['id'] . ':' . self::createBaseToken($data) . ':' . $_SERVER['REQUEST_TIME'];
-			return Encrypt::aesEncode($token, Cookie::key(), true);
+			return false;
 		}
+		elseif (is_numeric($user) && $data = UserModel::field('id,number,password,sch_id')->find($user)->get())
+		{
+			$token = self::createBaseToken($data);
+		}
+		elseif (isset($user['id']) && ($data['id'] = $user['id'])
+			&& isset($user['number']) && ($data['number'] = $user['number'])
+			&& isset($user['password']) && ($data['password'] = $user['password'])
+			&& isset($user['sch_id']) && ($data['sch_id'] = $user['sch_id']))
+		{
+			$token = self::createBaseToken($data);
+		}
+		else
+		{
+			return false;
+		}
+		$token = $data['id'] . ':' . $token . ':' . $_SERVER['REQUEST_TIME'];
+		return Encrypt::aesEncode($token, Cookie::key(), true);
 	}
 
 	/**
@@ -91,7 +102,7 @@ class Auth
 	 */
 	public static function checkToken($uid, $token)
 	{
-		if ($user = UserModel::field('id,number,password,sch_id')->find(intval($uid)))
+		if ($user = UserModel::field('id,number,password,sch_id')->find(intval($uid))->get())
 		{
 			$base_token = self::createBaseToken($user);
 			return $token == $base_token ? $user : null;
@@ -162,22 +173,22 @@ class Auth
 		}
 	}
 
-	/**
-	 * checkPrinterToken description
-	 * @method checkPrinterToken
-	 * @param  [type]            $id    [description]
-	 * @param  [type]            $token [description]
-	 * @return [type]                   [description]
-	 * @author NewFuture
-	 */
-	public static function checkPrinterToken($id, $token)
-	{
-		if ($p = UserModel::field('id,name,password,sch_id')->find(intval($uid)))
-		{
-			$base_token = self::createBaseToken($p);
-			return $token == $base_token ? $p : null;
-		}
-	}
+	// /**
+	//  * checkPrinterToken description
+	//  * @method checkPrinterToken
+	//  * @param  [type]            $id    [description]
+	//  * @param  [type]            $token [description]
+	//  * @return [type]                   [description]
+	//  * @author NewFuture
+	//  */
+	// public static function checkPrinterToken($id, $token)
+	// {
+	// 	if ($p = printerModel::field('id,name,password,sch_id')->find(intval($id)))
+	// 	{
+	// 		$base_token = self::createBaseToken($p);
+	// 		return $token == $base_token ? $p : null;
+	// 	}
+	// }
 
 	/*根据用户信息生成基础token*/
 	private static function createBaseToken(&$user)
