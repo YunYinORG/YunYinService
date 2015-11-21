@@ -42,7 +42,7 @@ class Auth
 			/*session中的信息*/
 			return $user;
 		}
-		elseif (($token = Cookie::get('token')) || Input::I('SERVER.HTTP_TOKEN', $token, 'token'))
+		elseif (($token = Cookie::get('token')) || Input::I('SERVER.HTTP_TOKEN', $token))
 		{
 			/*解析cookie*/
 			if ($token = Encrypt::aesDecode($token, Cookie::key(), true))
