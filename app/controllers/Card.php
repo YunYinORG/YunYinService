@@ -1,15 +1,18 @@
 <?php
-class CardController extends rest
+class CardController extends Rest
 {
 
 	protected function init()
 	{
-		if (!Input::post('key', $apikey, 'string'))
+		if (Input::post('key', $apikey, 'string') && ($apikey == Config::getSecret('api', 'card')))
+		{
+			parent::init();
+		}
+		else
 		{
 			$this->response(-3, 'API key无效');
 			exit();
 		}
-		parent::init();
 	}
 
 	/**
@@ -17,39 +20,40 @@ class CardController extends rest
 	 */
 	public function indexAction()
 	{
-		$uid = $this->auth();
-
 		if (!Input::post('name', $name, 'name'))
 		{
+			//姓名输入过滤
 			$this->response(0, '姓名无效');
 		}
 		elseif (!Input::post('number', $number, 'card'))
 		{
+			//学号输入过滤
 			$this->response(0, '学号无效');
 		}
 		else
 		{
 			$User = UserModel::where('number', $number)->field('id,name,sch_id,number,phone,email');
-			if (Input::post('school', $sch_id, 'int'))
+			if (Input::post('school', $sch_id, 'int') && $User->where('sch_id', $sch_id)->find())
 			{
-				//限制学校则直接查询学校
-				$User->where('sch_id', $sch_id);
+				if ($User['name'] != $name)
+				{
+					$this->response(parent::AUTH_BAN, '姓名不匹配');
+				}
+				else
+				{
+					$user = UserModel::decrypt($User);
+					$this->response(1, $user);
+				}
 			}
-
-			if (!$User->find())
-			{
-				$this->response(0, '未找到此人信息');
-			}
-			elseif (!$User['name'] != $name)
-			{
-				$this->response(parent::AUTH_BAN, '姓名不匹配');
-			}
-			else
+			elseif ($User->where('name', $name)->find())
 			{
 				$user = UserModel::decrypt($User);
 				$this->response(1, $user);
 			}
-
+			else
+			{
+				$this->response(0, '未找到此人信息');
+			}
 		}
 	}
 
