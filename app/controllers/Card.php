@@ -70,11 +70,11 @@ class CardController extends Rest
 		{
 			$this->response(0, '无效手机号');
 		}
-		elseif (UserModel::getByPhone($phone))
+		elseif(UserModel::where('id','=',$uid)->get('phone'))
 		{
-			$this->response(0, '此手机已经绑定过用户');
+			$this->response(0, '此接口不允许修改手机号');
 		}
-		elseif (UserModel::where('id', $uid)->savePhone($phone))
+		elseif (UserModel::savePhone($phone))
 		{
 			$this->response(1, '修改成功');
 		}
