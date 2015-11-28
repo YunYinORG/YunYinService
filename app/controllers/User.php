@@ -7,7 +7,7 @@ class UserController extends Rest
 	{
 		if ($id = Auth::id())
 		{
-			$user = UserModel::field('name,sch_id,id')->find($id);
+			$user = UserModel::field('name,sch_id,id,number')->find($id);
 			$info = ['msg' => '您已经成功登录', 'user' => $user];
 			$this->response(1, $info);
 		}
