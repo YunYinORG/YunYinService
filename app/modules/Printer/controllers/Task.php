@@ -59,9 +59,14 @@ class TaskController extends Rest
 		{
 			$response['info'] = '无效状态';
 		}
-		elseif ($status < 0 || $status > 5)
+		elseif ($status < -1 || $status > 5)
 		{
 			$response['info'] = '此状态不允许设置';
+		}
+		elseif($status==-1&&TaskModel::where('id',intval($id))->where('pri_id',$pri_id)->get('payed'))
+		{//取消订单
+			
+			$response['info']='已支付暂不支持线上取消';
 		}
 		elseif (TaskModel::where('id', intval($id))->where('pri_id', $pid)->update(['status' => $status]))
 		{
