@@ -35,7 +35,7 @@ class ShareController extends Rest
 		{
 			$this->response['info'] = '未选择文件';
 		}
-		elseif (!$File = FileModel::filed('name,url')
+		elseif (!$File = FileModel::field('name,url')
 				->where('use_id', '=', $userid)
 				->where('status', '>', 0)
 				->find($id))
