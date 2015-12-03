@@ -38,7 +38,7 @@ class ShareController extends Rest
 		elseif (!$File = FileModel::field('name,url')
 				->where('use_id', '=', $userid)
 				->where('status', '>', 0)
-				->find($id))
+				->find($fid))
 		{
 			/*数据库中查询的文件*/
 			$this->response['info'] = '文件无效';
@@ -69,7 +69,7 @@ class ShareController extends Rest
 				//TODO
 				//分享文件预处理
 				$response['status'] = 1;
-				$response['info']   = ['msg' => '分享成功', 'id' => $id];
+				$response['info']   = ['msg' => '分享成功', 'id' => $fid];
 			}
 			else
 			{
