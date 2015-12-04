@@ -7,6 +7,7 @@
 
 class ShareController extends Rest
 {
+	const SHARED_FLAG=2
 	/**
 	 * 文件列表
 	 * GET /share/
@@ -43,6 +44,11 @@ class ShareController extends Rest
 			/*数据库中查询的文件*/
 			$this->response['info'] = '文件无效';
 		}
+		elseif ($File['status']&self::SHARED_FLAG)//位标记
+		{
+			/*是否已经共享*/
+			$this->response['info'] = '文件已分享';
+		}
 		else
 		{
 			/*验证完成，开始插入*/
@@ -66,6 +72,8 @@ class ShareController extends Rest
 			if ($sid = ShareModel::Insert($share))
 			{
 				//插入成功
+				//文件状态,更新为已分享
+				$File->save(['status' => $File['status']|self::SHARED_FLAG]);
 				//TODO
 				//分享文件预处理
 				$response['status'] = 1;
