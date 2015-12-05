@@ -7,7 +7,7 @@
 
 class ShareController extends Rest
 {
-	const SHARED_FLAG=2
+	const SHARED_FLAG=2;
 	/**
 	 * 文件列表
 	 * GET /share/
