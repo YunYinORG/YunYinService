@@ -36,18 +36,18 @@ class ShareController extends Rest
 		{
 			$this->response['info'] = '未选择文件';
 		}
-		elseif (!$File = FileModel::field('name,url')
+		elseif (!$File = FileModel::field('name,url,status')
 				->where('use_id', '=', $userid)
 				->where('status', '>', 0)
 				->find($fid))
 		{
 			/*数据库中查询的文件*/
-			$this->response['info'] = '文件无效';
+			$response['info'] = '文件无效';
 		}
 		elseif ($File['status']&self::SHARED_FLAG)//位标记
 		{
 			/*是否已经共享*/
-			$this->response['info'] = '文件已分享';
+			$response['info'] = '文件已分享';
 		}
 		else
 		{
@@ -77,7 +77,7 @@ class ShareController extends Rest
 				//TODO
 				//分享文件预处理
 				$response['status'] = 1;
-				$response['info']   = ['msg' => '分享成功', 'id' => $fid];
+				$response['info']   = ['msg' => '分享成功', 'id' => $sid];
 			}
 			else
 			{
