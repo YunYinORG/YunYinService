@@ -12,11 +12,13 @@ class TestController extends Rest
 	 */
 	public function indexAction()
 	{
+		Input::I('SERVER.HTTP_TOKEN',$token);
+		Input::I('SERVER.HTTP_USER_AGENT',$agent);
 		$method  = $_SERVER['REQUEST_METHOD'];
 		$reponse = [
 			'method' => $method,
-			'agent' => $_SERVER['HTTP_USER_AGENT'],
-			'token'=> $_SERVER['HTTP_TOKEN'],
+			'agent' => $agent,
+			'token'=> $token,
 			'data' => $_REQUEST,
 			'param' => $GLOBALS['_' . $method],
 		];

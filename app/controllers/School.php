@@ -67,7 +67,7 @@ class SchoolController extends Rest
 		else
 		{
 			Log::write('验证码获取失败' . $id, 'ERROR');
-			$this->response(-3, '验证码获取失败');
+			$this->response(-3, $id.'验证码获取失败');
 		}
 	}
 
