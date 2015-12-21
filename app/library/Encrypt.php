@@ -51,7 +51,7 @@ class Encrypt
 	 */
 	public static function base64Encode($str)
 	{
-		return strtr(base64_encode($str), array('+' => '_', '=' => '.', '/' => '-'));
+		return strtr(base64_encode($str), array('+' => '-', '=' => '_', '/' => '.'));
 	}
 
 	/**
@@ -63,7 +63,7 @@ class Encrypt
 	 */
 	public static function base64Decode($str)
 	{
-		return base64_decode(strtr($str, array('_' => '+', '.' => '=', '-' => '/')));
+		return base64_decode(strtr($str, array('-' => '+', '_' => '=', '.' => '/')));
 	}
 
 	/**
