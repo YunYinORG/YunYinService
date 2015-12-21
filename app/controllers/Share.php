@@ -34,7 +34,7 @@ class ShareController extends Rest
 		$response['status'] = 0;
 		if (!Input::post('fid', $fid, 'int'))
 		{
-			$this->response['info'] = '未选择文件';
+			$response['info'] = '未选择文件';
 		}
 		elseif (!$File = FileModel::field('name,url,status')
 				->where('use_id', '=', $userid)
@@ -49,13 +49,13 @@ class ShareController extends Rest
 			/*是否已经共享*/
 			$response['info'] = '文件已分享';
 		}
-		else
+		elseif(!$share['url']    = File::share($File->url))
+		{
+			/*发布到共享空间*/
+			$response['info'] = '文件转移出错';
+		}else
 		{
 			/*验证完成，开始插入*/
-
-			$url             = $File->url;
-			$url             = substr_replace($url, 'share', 0, 4);
-			$share['url']    = File::share($url);
 			$share['fil_id'] = $fid;
 			$share['use_id'] = $userid;
 			$share['name']   = Input::post('name', $name, 'title') ? $name : $File->name;
