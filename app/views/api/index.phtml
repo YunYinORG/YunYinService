@@ -54,8 +54,9 @@ a {
 	transition:border .25s linear,color .25s linear,background-color .25s linear
 }
 #img,.code {
-	width:38%;
+	width:36%;
 	padding:1px;
+	max-height: 2.5em;
 	vertical-align:middle;
 	display:inline-block
 }
@@ -112,7 +113,7 @@ function showtips(msg) {
 	$('#tip').html(msg).show();
 }
 
-var reg = /^(\d{7})|(\d{10})$/;
+var reg = /^(\d{6,7})|(\d{10})$/;
 function checknumber() {
 	var number = $('#number').val();
 	name = number.trim();
