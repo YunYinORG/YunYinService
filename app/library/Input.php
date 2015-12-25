@@ -92,8 +92,11 @@ class Input
 					return $r ? ($export = $r) : false;
 
 				case 'string':	//字符串
-
-					if ($filter[0] == '/')
+					if(strlen($filter)<1)
+					{
+						return $export;
+					}
+					elseif ($filter[0] == '/')
 					{
 					/*正则表达式验证*/
 						return preg_match($filter, $export);
@@ -129,7 +132,7 @@ class Input
 				default:
 					if (Config::get('isdebug'))
 					{
-						throw new Exception('未知过方法' . $filter);
+						throw new Exception('未知过滤方法' . $filter);
 					}
 					return false;
 			}

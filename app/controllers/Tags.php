@@ -34,7 +34,7 @@ class TagsController extends Rest
 	public function POST_indexAction()
 	{
 		$uid = $this->auth();
-		if (Input::post('name', $name, ''))
+		if (Input::post('name', $name, 'tag'))
 		{
 			$tag = ['name' => $name, 'use_id' => $uid];
 			if ($tid = TagModel::insert($tag))
