@@ -87,7 +87,7 @@ class TagsController extends Rest
 		{
 			$Hastag = new Model('hastag');
 			$hastag = ['tag_id' => $id, 'sha_id' => $sid];
-			if ($Hastag->update($hastag))
+			if ($Hastag->insert($hastag))
 			{
 				$this->response(1, '添加成功');
 			}
