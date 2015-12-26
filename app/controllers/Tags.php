@@ -87,11 +87,12 @@ class TagsController extends Rest
 		{
 			$Hastag = new Model('hastag');
 			$hastag = ['tag_id' => $id, 'sha_id' => $sid];
-			if ($Hastag->insert($hastag))
-			{
+			try{
+
+				$Hastag->insert($hastag);
 				$this->response(1, '添加成功');
 			}
-			else
+			catch (Exception $e)
 			{
 				TagModel::where('id', $id)->inc('count', '-1');
 				$this->response(0, '添加出错');
