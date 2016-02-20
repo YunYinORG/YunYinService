@@ -160,7 +160,7 @@ class ShareController extends Rest
 	public function DELETE_infoAction($id = 0)
 	{
 		$userid = $this->auth();
-		if ($share = ShareModel::where('use_id', $userid)->field('url')->find(intval($id)))
+		if (!$share = ShareModel::where('use_id', $userid)->field('url')->find(intval($id)))
 		{
 			$this->response(0, '您无此分享文件');
 		}
