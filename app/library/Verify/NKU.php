@@ -46,11 +46,17 @@ class NKU extends Connect
 		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($urp));
 		curl_exec($ch);
 
+#设置默认主题
+		curl_setopt($ch, CURLOPT_URL,'https://221.238.246.69:443/web/1/http/0/urp.nankai.edu.cn/themeAndSkinSave.portal?themeAndSkin=default_nankai/default');
+		$content = curl_exec($ch);
+		// echo $content;
 #获取信息
 		curl_setopt($ch, CURLOPT_URL, 'https://221.238.246.69:443/web/1/http/0/urp.nankai.edu.cn/index.portal');
 		$content = curl_exec($ch);
+		// echo $content;
 #关闭curl
 		curl_close($ch);
-		return parent::parseName($content, '您好，', '欢迎来到南开大学信息门户');
+		return parent::parseName($content, '>欢迎您：', '</li>');
+		
 	}
 }
