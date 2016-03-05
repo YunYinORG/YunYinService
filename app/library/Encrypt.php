@@ -92,13 +92,16 @@ class Encrypt
 	 */
 	public static function aesDecode($cipher, $key, $safe_view = false)
 	{
-		$cipher = $safe_view ? self::base64Decode($cipher) : trim($cipher);
-		$td     = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_ECB, '');
-		mcrypt_generic_init($td, $key, '0000000000000000');
-		$cipher = mdecrypt_generic($td, $cipher);
-		mcrypt_generic_deinit($td);
-		$cipher = trim($cipher);
-		return $cipher;
+		if ($cipher)
+		{
+			$cipher = $safe_view ? self::base64Decode($cipher) : trim($cipher);
+			$td     = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_ECB, '');
+			mcrypt_generic_init($td, $key, '0000000000000000');
+			$cipher = mdecrypt_generic($td, $cipher);
+			mcrypt_generic_deinit($td);
+			$cipher = trim($cipher);
+			return $cipher;
+		}
 	}
 
 	/**
