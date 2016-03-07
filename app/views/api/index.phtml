@@ -84,152 +84,161 @@ a {
 	</style>
 </head>
 <body>
- <h1>云印API登录</h1> 
+ <h1>云印API登录</h1>
   <div id="tip">
    <?=isset($msg) ? $msg : ''?>
-  </div> 
-  <form id="authform" method="post" onsubmit="return checkform();"> 
+  </div>
+  <form id="authform" method="post" onsubmit="return checkform();">
   	<p>
   		<a href="http://print.yunyin.org/#/forget">忘记密码？</a>
   	</p>
-   <input name="name" type="text" class="input" placeholder="学号" id="number" onchange="checknumber()" required="" /> 
-   <input name="password" type="password" class="input" placeholder="密码" id="password" required="" /> 
-   <div id="codeArea"> 
-    <img id="img" src="" /> 
-    <input name="code" type="text'" class="code input" placeholder="验证码" id="code" /> 
-   </div> 
-   <button class="input" type="submit" id="submit">验证</button> 
-  </form> 
-  <form id="regform" method="post" action="/api/register" onsubmit="return checkreg();"> 
-   <h6>第一次使用云印？我们推荐您设置独立的密码,这样更加安全！<br />如果您跳过设置,将会使用验证密码作为云印密码!</h6> 
-   <input name="password" type="password" class="input" placeholder="新的密码" id="reg_password" required="" /> 
-   <input type="password" class="input" placeholder="确认密码" id="repassword" onblur="checkreg()" required="" /> 
-   <button class="input code" type="submit" id="reg">设置密码</button> 
-   <a class="input code" href="/api/register">跳过设置</a> 
-  </form> 
-<script src="http://apps.bdimg.com/libs/jquery/1.7.2/jquery.min.js"></script>
-<script >
-function showtips(msg) {
-	$('#tip').html(msg).show();
+   <input name="name" type="text" class="input" placeholder="学号" id="number" onchange="checknumber()" required="" />
+   <input name="password" type="password" class="input" placeholder="密码" id="password" required="" />
+   <div id="codeArea">
+    <img id="img" src="" />
+    <input name="code" type="text'" class="code input" placeholder="验证码" id="code" />
+   </div>
+   <button class="input" type="submit" id="submit">验证</button>
+  </form>
+  <form id="regform" method="post" action="/api/register" onsubmit="return checkreg();">
+   <h6>第一次使用云印？我们推荐您设置独立的密码,这样更加安全！<br />如果您跳过设置,将会使用验证密码作为云印密码!</h6>
+   <input name="password" type="password" class="input" placeholder="新的密码" id="reg_password" required="" />
+   <input type="password" class="input" placeholder="确认密码" id="repassword" onblur="checkreg()" required="" />
+   <button class="input code" type="submit" id="reg">设置密码</button>
+   <a class="input code" href="/api/register">跳过设置</a>
+  </form>
+<script>
+function ajax(method, url, data, callback) {
+	var xhr = new XMLHttpRequest();
+	xhr.open(method, url, true);
+	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=utf-8');
+	xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+	xhr.send(data);
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == 4) {
+			if (xhr.status == 200) {
+				var data = JSON.parse(xhr.responseText);
+				callback(data);
+			} else {
+				showtips("网路异常");
+			}
+		}
+	};
 }
 
-var reg = /^(\d{6,7})|(\d{10})$/;
-function checknumber() {
-	var number = $('#number').val();
-	name = number.trim();
-	if (!reg.test(number)) {
-		showtips("学号格式不对哦，请检查一下学号^_^");
-		document.getElementById("number").focus();
-		return false;
+function showtips(msg) {
+	var tip = document.getElementById('tip');
+	tip.innerHTML = msg;
+	tip.style.display = '';
+}
+
+function getVerifyCode(sch_id) {
+	var img = document.querySelector('#img');
+	var verifyCodeCallback = function(data) {
+		if (data.status == 1) {
+			document.querySelector('#codeArea').style.display = 'block';
+			document.querySelector('#code').setAttribute('required', 'required');
+			img.setAttribute('src', data.info['img']);
+			img.onclick = function(){getVerifyCode(sch_id);};
+		}
 	}
-	$.post('/school/number', {
-		'number': number
-	},
-	function(data) {
-		if (data.status) {
-			var info = data.info;
-			for (var s in info) {
-				if (info[s] != 0) {
-					$.get('/school/' + s + '/code/',
-					function(data) {
-						if (data.status == 1) {
-							$('#img').attr('src', data.info['img']).click(function() {
-								$.get('/school/' + s + '/code/',
-								function(data) {
-									if (data.status == 1) {
-										$('#img').attr('src', data.info['img']);
-									}
-								});
-							});
-							$('#codeArea').show(200);
-							$('#code').attr('required', 'required');
+	img.onclick=null;
+	ajax('GET', '/school/' + sch_id + '/code', '', verifyCodeCallback);
+}
 
-							$.get('/school/' + s,
-							function(data) {
-								if (data.status == 1) {
-									var school = data.info;
-									showtips(school['name'] + ':首次登录用<a target="_blank" href="' + school['verifyurl'] + '">' + school['verify'] + '</a>密码验证')
-								}
-
-							});
-						}
-					});
-				} else {
-					$('#codeArea').hide(200);
-					$('#code').removeAttr('required');
-					showtips('');
-				}
-
-			};
-		} else {
-			showtips("学号好像不是所支持的学校，请检查一下学号^_^");
-			return false;
+function showSchoolInfo(sch_id) {
+	ajax('GET', '/school/' + sch_id, '', function(data) {
+		if (data.status == 1) {
+			var school = data.info;
+			showtips(school['name'] + ':首次登录用<a target="_blank" href="' + school['verifyurl'] + '">' + school['verify'] + '</a>密码验证');
 		}
 	});
-	showtips('');
 }
-function enable() {
-	$('#authform').removeAttr('disabled');
-	$('#number').removeAttr('disabled');
-	$('#password').removeAttr('disabled');
-	$('#code').removeAttr('disabled');
-	$('#submit').text('验证').removeAttr('disabled');
+var checknumberCallback = function(data) {
+	if (data.status) {
+		document.getElementById('codeArea').style.display = 'none';
+		document.getElementById('code').removeAttribute('required');
+		showtips('');
+		var info = data.info;
+		for (var s in info) {
+			if (info[s] != 0) {
+				getVerifyCode(s);
+				showSchoolInfo(s);
+			}
+		};
+	} else {
+		showtips("学号好像不是所支持的学校，请检查一下学号^_^");
+		return false;
+	}
 }
-function checkform() {
-	$('#authform').attr('disabled', 'disabled');
-	$('#submit').text('验证中...').attr('disabled', 'disabled');
-	var number = $('#number').attr('disabled', 'disabled').val();
-	number = number.trim();
+
+function checknumber() {
+	var number = document.getElementById('number').value.trim();
+	var reg = /^(\d{6,7})|(\d{10})$/;
 	if (!reg.test(number)) {
-		enable();
 		showtips("学号格式不对哦，请检查一下学号^_^");
 		document.getElementById("number").focus();
 		return false;
+	} else {
+		showtips('');
 	}
-	var password = $('#password').attr('disabled', 'disabled').val();
-	var code = $('#code').attr('disabled', 'disabled').val();
-	var data = {
-		'number': number,
-		'password': password.trim()
-	};
-	if (code) {
-		data['code'] = code;
-	}
-	$.post('/auth/', data,
-	function(resp) {
-
-		switch (resp.status) {
-		case 1:
-			//登录成功
+	ajax('POST', '/school/number', 'number=' + number, checknumberCallback);
+}
+var authCallback = function(data) {
+	switch (data.status) {
+		case 1: //登录成功
 			showtips('');
 			location.reload();
 			break;
-
-		case 2:
-			//注册
-			$('h1').text('设置云印密码');
-			$('#authform').hide(200);
-			$('#regform').show(400);
+		case 2: //注册
+			document.querySelectorAll('h1').textContent = '设置云印密码';
+			document.getElementById('authform').style.display = 'none';
+			document.getElementById('regform').style.display = '';
 			showtips('');
 			break;
-
 		case 0:
-		case - 1 : showtips(resp.info);
+		case -1:
+			showtips(data.info);
 			enable();
 			break;
 		default:
 			enable();
 			showtips('请求异常');
-		}
+	}
+};
 
-	});
+function enable() {
+	document.getElementById('authform').removeAttribute('disabled');
+	document.getElementById('number').removeAttribute('disabled');
+	document.getElementById('password').removeAttribute('disabled');
+	document.getElementById('code').removeAttribute('disabled');
+	var submit = document.getElementById('submit');
+	submit.textContent = '验证';
+	submit.removeAttribute('disabled');
+}
+
+function checkform() {
+	document.getElementById('authform').setAttribute('disabled', 'disabled');
+	var submit = document.getElementById('submit');
+	submit.textContent = '验证中';
+	submit.setAttribute('disabled', 'disabled');
+	checknumber();
+	var number= document.getElementById('number').value.trim();
+	var password = document.getElementById('password').value.trim();
+	var code = document.getElementById('code').value.trim();
+	var data = 'number=' + number + "&password=" + password;
+	if (code) {
+		data += "&code=" + code;
+	}
+	ajax('POST', '/auth/', data, authCallback);
 	return false;
 }
+
 function checkreg() {
-	var password = $('#reg_password').val();
-	var repassword = $('#repassword').val();
+	var password = document.getElementById('reg_password').value;
+	var repassword = document.getElementById('repassword').value;
 	if (password.trim() == repassword.trim()) {
-		$('#reg_password').val(password.trim());
+		document.getElementById('reg_password').value = password.trim();
 		showtips('');
 		return true;
 	} else {
