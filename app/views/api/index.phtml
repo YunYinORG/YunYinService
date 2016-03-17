@@ -1,251 +1,483 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<title>云印API接口</title>
-	<meta charset="utf-8">
-	<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no"/>
-	<style type="text/css">
-	html {
-	margin:0;
-	height:100%;
-	width:100%
-}
-body {
-	background-color:#57c3ea;
-	color:#EEE;
-	text-align:center;
-	position:relative;
-	overflow-x:hidden;
-	width:100%;
-	min-height:98%
-}
-h1,h2 {
-	color:#FFF;
-	white-space:nowrap
-}
-h3,h4,h5,h6 {
-	color:#fefefe
-}
-a {
-	text-decoration:none
-}
-.input:active,.input:hover,.input:focus {
-	color:#57c3ea;
-	font-weight:bolder;
-	background:#fefefe
-}
-.input[disabled] {
-	cursor:wait
-}
-#img,.input {
-	padding:10px 15px 5px 15px;
-	width:75%;
-	margin-top:1%;
-	margin-bottom:2%;
-	font-family:Lato,Helvetica,Arial,sans-serif;
-	font-size:1.5em;
-	line-height:1.8em;
-	background-color:transparent;
-	color:#FFF;
-	border:4px solid #fefefe;
-	border-radius:6px;
-	box-shadow:none;
-	-webkit-transition:border .25s linear,color .25s linear,background-color .25s linear;
-	transition:border .25s linear,color .25s linear,background-color .25s linear
-}
-#img,.code {
-	width:36%;
-	padding:1px;
-	max-height: 2.5em;
-	vertical-align:middle;
-	display:inline-block
-}
-#codeArea {
-	height:80px;
-	display:none
-}
-#img {
-	margin-right:1%;
-	border:0
-}
-.code {
-	margin-left:1%;
-	padding-left:10px
-}
-#tip {
-	color:#ec7329;
-	font-size:larger;
-	font-weight:bolder;
-	text-decoration:underline
-}
-#<?=isset($reg)?'auth':'reg'?>form {
-	display:none
-}
-	</style>
-</head>
-<body>
- <h1>云印API登录</h1>
-  <div id="tip">
-   <?=isset($msg) ? $msg : ''?>
-  </div>
-  <form id="authform" method="post" onsubmit="return checkform();">
-  	<p>
-  		<a href="http://print.yunyin.org/#/forget">忘记密码？</a>
-  	</p>
-   <input name="name" type="text" class="input" placeholder="学号" id="number" onchange="checknumber()" required="" />
-   <input name="password" type="password" class="input" placeholder="密码" id="password" required="" />
-   <div id="codeArea">
-    <img id="img" src="" />
-    <input name="code" type="text'" class="code input" placeholder="验证码" id="code" />
-   </div>
-   <button class="input" type="submit" id="submit">验证</button>
-  </form>
-  <form id="regform" method="post" action="/api/register" onsubmit="return checkreg();">
-   <h6>第一次使用云印？我们推荐您设置独立的密码,这样更加安全！<br />如果您跳过设置,将会使用验证密码作为云印密码!</h6>
-   <input name="password" type="password" class="input" placeholder="新的密码" id="reg_password" required="" />
-   <input type="password" class="input" placeholder="确认密码" id="repassword" onblur="checkreg()" required="" />
-   <button class="input code" type="submit" id="reg">设置密码</button>
-   <a class="input code" href="/api/register">跳过设置</a>
-  </form>
-<script>
-function ajax(method, url, data, callback) {
-	var xhr = new XMLHttpRequest();
-	xhr.open(method, url, true);
-	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=utf-8');
-	xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-	xhr.send(data);
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState == 4) {
-			if (xhr.status == 200) {
-				var data = JSON.parse(xhr.responseText);
-				callback(data);
-			} else {
-				showtips("网路异常");
+	<head>
+		<title>云印API接口</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no"/>
+		<!--link href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet"-->
+		<!--link href="//cdn.bootcss.com/flat-ui/2.2.2/css/flat-ui.min.css" rel="stylesheet"-->
+		<style type="text/css">
+		*{
+			box-sizing: border-box;
+		}
+		/* implement flat-ui */
+		/* body */
+		body {
+		font-family: Lato,Helvetica,Arial,sans-serif;
+		font-size: 18px;
+		line-height: 1.72222;
+		color: #34495e;
+		}
+		a {
+  		color: #16a085;
+  		text-decoration: none;
+  		-webkit-transition: .25s;
+        transition: .25s;
+		}
+		a:hover, a:focus {
+  		color: #1abc9c;
+ 		text-decoration: none;
+		}
+		a:focus {
+  		outline: none;
+		}
+		/* form-group */
+		.form-group{
+		margin-bottom: 20px;
+		position: relative;
+		}
+		/* input-group */
+		.input-group {
+		position: relative;
+		display: table;
+		border-collapse: separate;
+		}
+		/* input */
+		input{
+		margin: 0;
+		width: 100%;
+		}
+		.form-control{
+		border: 2px solid #bdc3c7;
+		color: #34495e;
+		font-family: "Lato", Helvetica, Arial, sans-serif;
+		font-size: 15px;
+		line-height: 1.467;
+		padding: 8px 12px;
+		height: 42px;
+		border-radius: 6px;
+		box-shadow: none;
+		-webkit-transition: border 0.25s linear, color 0.25s linear, background-color 0.25s linear;
+		transition: border 0.25s linear, color 0.25s linear, background-color 0.25s linear;
+		}
+		.form-group.focus .form-control,
+		.form-control:focus,
+		.form-group.focus {
+		border-color: #1abc9c;
+		outline: 0;
+		box-shadow: none;
+		}
+		.input-group .form-control {
+		position: relative;
+		z-index: 2;
+		float: left;
+		width: 100%;
+		margin-bottom: 0;
+		}
+		/* input addon */
+		/* basic */
+		.input-group-addon {
+		font-weight: 400;
+    	line-height: 1;
+		width: 1%;
+		white-space: nowrap;
+		vertical-align: middle;
+		padding: 10px 12px;
+		font-size: 15px;
+		color: #ffffff;
+		text-align: center;
+		background-color: #bdc3c7;
+		border: 2px solid #bdc3c7;
+		border-radius: 6px;
+		-webkit-transition: border 0.25s linear, color 0.25s linear, background-color 0.25s linear;
+		transition: border 0.25s linear, color 0.25s linear, background-color 0.25s linear;
+		}
+		/* display */
+		.input-group .form-control, .input-group-addon{
+		display: table-cell;
+		}
+		/* addon border fix */
+		.input-group-addon:first-child{
+		border-top-right-radius: 0;
+		border-bottom-right-radius: 0;
+		}
+		.input-group .form-control:last-child, #textpwd, #password{
+		border-top-left-radius: 0;
+		border-bottom-left-radius: 0;
+		}
+		/* btn */
+		.btn {
+			padding: 10px 15px;
+			font-size: 15px;
+			font-weight: 400;
+			line-height: 1.4;
+			border: none;
+			border-radius: 4px;
+			-webkit-transition: border .25s linear,color .25s linear,background-color .25s linear;
+			transition: border .25s linear,color .25s linear,background-color .25s linear;
+			-webkit-font-smoothing: subpixel-antialiased;
+		}
+		.btn:hover, .btn:focus {
+			outline: none;
+			color: #ffffff;
+			cursor: pointer;
+		}
+		.btn:active, .btn.active {
+			outline: none;
+			box-shadow: none;
+		}
+		.btn:focus:active {
+			outline: none;
+		}
+		.btn-primary {
+			color: #ffffff;
+			background-color: #1abc9c;
+		}
+		.btn-primary:hover,
+		.btn-primary.hover,
+		.btn-primary:focus,
+		.btn-primary:active,
+		.btn-primary.active {
+			color: #ffffff;
+			background-color: #48c9b0;
+			border-color: #48c9b0;
+		}
+		.btn-primary:active,
+		.btn-primary.active {
+			background: #16a085;
+			border-color: #16a085;
+		}
+		.btn-primary.disabled,
+		.btn-primary[disabled]{
+			background-color: #bdc3c7;
+			border-color: #1abc9c;
+		}
+		.btn-embossed.active,
+		.btn-embossed:active {
+			box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.15);
+		}
+		.btn-embossed {
+			box-shadow: inset 0 -2px 0 rgba(0,0,0,.15);
+		}
+		.btn-block{
+			width: 100%;
+		}
+
+
+		/* self css */
+
+		body{
+			background-color:#57c3ea;
+		}
+		header{
+			margin-top: 20px;
+		}
+		section{
+			position: relative;
+			border-radius: 6px;
+			background-color: #edeff1;
+			width: 450px;
+			padding: 50px 30px 30px 30px;
+			margin: 40px auto 0 auto;
+		}
+		h1, h2{
+			color: #FFF;
+		}
+		input{
+			border-bottom-right-radius: 6px !important;
+			border-top-right-radius: 6px !important;
+		}
+		hr{
+			border-top: solid 1.5px;
+		}
+		svg{
+			height: 16px;
+    		width: 16px;
+    		position: relative;
+    		top: 1px;
+		}
+		.text-center{
+			text-align: center;
+		}
+		.forget a{
+			float: right;
+			cursor: pointer;
+		}
+		/* password */
+		.showpwd{
+			z-index: 10;
+			position: absolute;
+			top: 5px;
+			right: 10px;
+			float: right;
+			height: 30px;
+			width: 20px;
+			-webkit-transition: width, .5s, linear;
+			transition: width, .5s, linear;
+		}
+		.showpwd svg:hover{
+			color: #edeff1;
+		}
+		#textpwd{
+			display: none;
+		}
+		@media screen and (max-width: 500px){
+			section{
+				width: 90%;
 			}
 		}
-	};
-}
-
-function showtips(msg) {
-	var tip = document.getElementById('tip');
-	tip.innerHTML = msg;
-	tip.style.display = '';
-}
-
-function getVerifyCode(sch_id) {
-	var img = document.querySelector('#img');
-	var verifyCodeCallback = function(data) {
-		if (data.status == 1) {
-			document.querySelector('#codeArea').style.display = 'block';
-			document.querySelector('#code').setAttribute('required', 'required');
-			img.setAttribute('src', data.info['img']);
-			img.onclick = function(){getVerifyCode(sch_id);};
+		/* verify-code*/
+		#img, .code {
+			max-height: 42px;
+			vertical-align: middle;
+			display: inline-block;
 		}
-	}
-	img.onclick=null;
-	ajax('GET', '/school/' + sch_id + '/code', '', verifyCodeCallback);
-}
-
-function showSchoolInfo(sch_id) {
-	ajax('GET', '/school/' + sch_id, '', function(data) {
-		if (data.status == 1) {
-			var school = data.info;
-			showtips(school['name'] + ':首次登录用<a target="_blank" href="' + school['verifyurl'] + '">' + school['verify'] + '</a>密码验证');
+		#img{
+			width: 37%;
+			margin-right: 3%;
+			border:0;
+			float: left;
 		}
-	});
-}
-var checknumberCallback = function(data) {
-	if (data.status) {
-		document.getElementById('codeArea').style.display = 'none';
-		document.getElementById('code').removeAttribute('required');
-		showtips('');
-		var info = data.info;
-		for (var s in info) {
-			if (info[s] != 0) {
-				getVerifyCode(s);
-				showSchoolInfo(s);
+		.code{
+			width: 60%;
+			padding-left: 10px;
+			float: right;
+		}
+		#codeArea {
+			text-align: center;
+			position: relative;
+			display: none;
+			*zoom: 1;
+		}
+		/* clear fix */
+		.code:before, .code:after, .forget:before, .forget:after, #codeArea:before, #codeArea:after{
+			content: "";
+			display: table;
+		}
+		.code:after, .forget:after, #codeArea:after{
+			clear: both;
+		}
+		/* reg or auth */
+		#<?=isset($reg)?'auth':'reg'?>form {
+			display:none;
+		}
+		</style>
+	</head>
+	<body>
+		<header>
+			<h1 class="text-center">云印API登录</h1>
+		</header>
+		<section>
+			<form id='authform' method='post' onsubmit="return checkform()">
+				<div class="form-group">
+					<div class="input-group">
+						<span class="input-group-addon">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1024px" height="1024px" viewBox="0 0 1024 1024" enable-background="new 0 0 1024 1024" xml:space="preserve">
+  <path class="svgpath" data-index="path_0" fill="#ecf0f1" d="M532.428773 958.838931" />
+<path class="svgpath" data-index="path_1" fill="#ecf0f1" d="M64.420707 957.075775 64.420707 850.402243l298.385854-191.713346 0-74.595952c-18.404162 0-35.433-18.520819-51.098795-55.574736-15.665795-37.041638-23.49818-68.255547-23.49818-93.618191L288.209586 285.707091c0-61.658292 21.877263-114.37698 65.645093-158.143787 43.75555-43.75555 96.474238-65.645093 158.143787-65.645093 61.658292 0 114.37698 21.889543 158.14481 65.645093 43.75555 43.766806 65.644069 96.485495 65.644069 158.143787l0 149.192927c0 25.362644-7.832386 56.576553-23.49818 93.618191-15.665795 37.053917-32.705889 55.574736-51.098795 55.574736l0 74.595952 298.385854 191.713346 0 106.672508L64.420707 957.074751z" />
+</svg>
+						</span>
+						<input onchange="checknumber()" type="text" class="form-control" id="number" placeholder="学号">
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="input-group">
+						<span class="input-group-addon">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1024px" height="1024px" viewBox="0 0 1024 1024" enable-background="new 0 0 1024 1024" xml:space="preserve">
+  <path class="svgpath" data-index="path_0" fill="#ffffff" d="M795.264 457.856 795.264 297.28c0-147.136-119.36-266.56-266.56-266.56-1.792 0-3.2-0.064-4.992 0-1.472 0-3.328 0.064-4.928 0.064-147.2 0-266.56 119.36-266.56 266.56l0 160.512L157.952 457.856l0 551.36 734.08 0L892.032 457.856 795.264 457.856zM385.664 297.344c0-73.472 59.776-133.184 133.12-133.184 2.112 0 6.528-0.128 6.528-0.128s2.24 0.064 3.328 0.064c73.408 0 133.184 59.776 133.184 133.12l0 160.576L385.664 457.792 385.664 297.344z" />
+</svg>
+						</span>
+						<input type="password" class="form-control" id="password" placeholder="密码">
+						<span class="showpwd" style='display: none;'>
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1024px" height="1024px" viewBox="0 0 1024 1024" enable-background="new 0 0 1024 1024" xml:space="preserve">
+  <path class="svgpath" data-index="path_0" fill="#272636" d="M0 548.864q0-19.456 11.264-39.936 79.872-131.072 215.04-209.92t285.696-79.872 285.696 79.872 215.04 209.92q11.264 20.48 11.264 39.936t-11.264 38.912q-79.872 132.096-215.04 210.944t-285.696 78.848-285.696-78.848-215.04-210.944q-11.264-19.456-11.264-38.912zM72.704 548.864q76.8 116.736 191.488 186.368t247.808 69.632 247.808-69.632 191.488-186.368q-87.04-135.168-218.112-201.728 34.816 59.392 34.816 128 0 106.496-74.752 181.248t-181.248 74.752-181.248-74.752-74.752-181.248q0-68.608 34.816-128-131.072 66.56-218.112 201.728zM337.92 475.136q0 11.264 8.192 19.456t19.456 8.192 19.456-8.192 8.192-19.456q0-49.152 34.816-83.968t83.968-34.816q11.264 0 19.456-8.192t8.192-19.456-8.192-19.456-19.456-7.168q-71.68 0-122.88 51.2t-51.2 121.856z" />
+</svg>
+						</span>
+					</div>
+				</div>
+				<div id="codeArea" class='form-group'>
+					<img id="img" src="" />
+					<input name="code" type="text" class="code form-control" placeholder="验证码" id="code" />
+				</div>
+				<div class="form-group">
+					<button type='submit' class="btn btn-embossed btn-primary btn-block">登录</button>
+				</div>
+				<div class='form-group forget'>
+					<a href="http://print.yunyin.org/#/forget"><small>忘记密码?</small></a>
+				</div>
+			<hr>
+			<div class='text-center'>
+			<small id='tip' class='text-center'><?=isset($msg) ? $msg : '南开大学学生可以直接使用信息门户(urp)账号及密码登录'?></small>
+			</div>
+			</form>
+			<form id="regform" method="post" action="/api/register" onsubmit="return checkreg();">
+				<p class='text-center' style='font-size: 15px; margin-top: -20px'>第一次使用云印？我们推荐您设置独立的密码,这样更加安全！如果您跳过设置,将会使用验证密码作为云印密码!</p>
+				<div class='form-group'>
+				<input class='form-control' name="password" type="password" placeholder="新的密码" id="reg_password" required="" />
+				</div>
+				<div class="form-group">
+					<input class='form-control' type="password" placeholder="确认密码" id="repassword" onblur="checkreg()" required="" />
+				</div>
+				<div class="form-group">
+					<button class="btn btn-block btn-embossed btn-primary" type="submit" id="reg">设置密码</button>
+				</div>
+				<div class="forget">
+					<a href="/api/register">跳过设置</a>
+				</div>
+			</form>
+		</section>
+	</body>
+	<!--page js-->
+	<script>
+	(function(){
+		var password = document.getElementById('password');
+		var showPassword = document.querySelector('.showpwd');
+		password.onkeyup = function(){
+			if(password.value != '')
+				showPassword.style.display = 'block';
+			else
+				showPassword.style.display = 'none';
+		}
+		showPassword.onclick = function(){
+			if(password.type == 'password')
+				password.type = 'text';
+			else
+				password.type = 'password';
+		}
+	})();
+	</script>
+	<!-- data js-->
+	<script>
+	function ajax(method, url, data, callback) {
+		var xhr = new XMLHttpRequest();
+		xhr.open(method, url, true);
+		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=utf-8');
+		xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+		xhr.send(data);
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == 4) {
+				if (xhr.status == 200) {
+					var data = JSON.parse(xhr.responseText);
+					callback(data);
+				} else {
+					showtips("网路异常");
+				}
 			}
 		};
-	} else {
-		showtips("学号好像不是所支持的学校，请检查一下学号^_^");
-		return false;
 	}
-}
-
-function checknumber() {
-	var number = document.getElementById('number').value.trim();
-	var reg = /^(\d{6,7})|(\d{10})$/;
-	if (!reg.test(number)) {
-		showtips("学号格式不对哦，请检查一下学号^_^");
-		document.getElementById("number").focus();
-		return false;
-	} else {
-		showtips('');
+	function showtips(msg) {
+		var tip = document.getElementById('tip');
+		tip.innerHTML = msg;
+		tip.style.display = '';
 	}
-	ajax('POST', '/school/number', 'number=' + number, checknumberCallback);
-}
-var authCallback = function(data) {
-	switch (data.status) {
-		case 1: //登录成功
+	function getVerifyCode(sch_id) {
+		var img = document.querySelector('#img');
+		var verifyCodeCallback = function(data) {
+			if (data.status == 1) {
+				document.querySelector('#codeArea').style.display = 'block';
+				document.querySelector('#code').setAttribute('required', 'required');
+				img.setAttribute('src', data.info['img']);
+				img.onclick = function(){getVerifyCode(sch_id);};
+			}
+		}
+		img.onclick=null;
+		ajax('GET', '/school/' + sch_id + '/code', '', verifyCodeCallback);
+	}
+	function showSchoolInfo(sch_id) {
+		ajax('GET', '/school/' + sch_id, '', function(data) {
+			if (data.status == 1) {
+				var school = data.info;
+				showtips(school['name'] + ':首次登录用<a target="_blank" href="' + school['verifyurl'] + '">' + school['verify'] + '</a>密码验证');
+			}
+		});
+	}
+	var checknumberCallback = function(data) {
+		if (data.status) {
+			document.getElementById('codeArea').style.display = 'none';
+			document.getElementById('code').removeAttribute('required');
 			showtips('');
-			location.reload();
-			break;
-		case 2: //注册
-			document.querySelectorAll('h1').textContent = '设置云印密码';
-			document.getElementById('authform').style.display = 'none';
-			document.getElementById('regform').style.display = '';
+			var info = data.info;
+			for (var s in info) {
+				if (info[s] != 0) {
+					getVerifyCode(s);
+					showSchoolInfo(s);
+				}
+			};
+		} else {
+			showtips("学号好像不是所支持的学校，请检查一下学号^_^");
+			return false;
+		}
+	}
+	function checknumber() {
+		var number = document.getElementById('number').value.trim();
+		var reg = /^(\d{6,7})|(\d{10})$/;
+		if (!reg.test(number)) {
+			showtips("学号格式不对哦，请检查一下学号^_^");
+			document.getElementById("number").focus();
+			return false;
+		} else {
 			showtips('');
-			break;
-		case 0:
-		case -1:
-			showtips(data.info);
-			enable();
-			break;
-		default:
-			enable();
-			showtips('请求异常');
+		}
+		ajax('POST', '/school/number', 'number=' + number, checknumberCallback);
 	}
-};
-
-function enable() {
-	document.getElementById('authform').removeAttribute('disabled');
-	document.getElementById('number').removeAttribute('disabled');
-	document.getElementById('password').removeAttribute('disabled');
-	document.getElementById('code').removeAttribute('disabled');
-	var submit = document.getElementById('submit');
-	submit.textContent = '验证';
-	submit.removeAttribute('disabled');
-}
-
-function checkform() {
-	document.getElementById('authform').setAttribute('disabled', 'disabled');
-	var submit = document.getElementById('submit');
-	submit.textContent = '验证中';
-	submit.setAttribute('disabled', 'disabled');
-	checknumber();
-	var number= document.getElementById('number').value.trim();
-	var password = document.getElementById('password').value.trim();
-	var code = document.getElementById('code').value.trim();
-	var data = 'number=' + number + "&password=" + password;
-	if (code) {
-		data += "&code=" + code;
+	var authCallback = function(data) {
+		switch (data.status) {
+			case 1: //登录成功
+				showtips('');
+				location.reload();
+				break;
+			case 2: //注册
+				document.querySelectorAll('h1').textContent = '设置云印密码';
+				document.getElementById('authform').style.display = 'none';
+				document.getElementById('regform').style.display = '';
+				showtips('');
+				break;
+			case 0:
+			case -1:
+				showtips(data.info);
+				enable();
+				break;
+			default:
+				enable();
+				showtips('请求异常');
+		}
+	};
+	function enable() {
+		document.getElementById('authform').removeAttribute('disabled');
+		document.getElementById('number').removeAttribute('disabled');
+		document.getElementById('password').removeAttribute('disabled');
+		document.getElementById('code').removeAttribute('disabled');
+		var submit = document.getElementById('submit');
+		submit.textContent = '验证';
+		submit.removeAttribute('disabled');
 	}
-	ajax('POST', '/auth/', data, authCallback);
-	return false;
-}
-
-function checkreg() {
-	var password = document.getElementById('reg_password').value;
-	var repassword = document.getElementById('repassword').value;
-	if (password.trim() == repassword.trim()) {
-		document.getElementById('reg_password').value = password.trim();
-		showtips('');
-		return true;
-	} else {
-		showtips('两次密码不一样');
+	function checkform() {
+		document.getElementById('authform').setAttribute('disabled', 'disabled');
+		var submit = document.getElementById('submit');
+		submit.textContent = '验证中';
+		submit.setAttribute('disabled', 'disabled');
+		checknumber();
+		var number= document.getElementById('number').value.trim();
+		var password = document.getElementById('password').value.trim();
+		var code = document.getElementById('code').value.trim();
+		var data = 'number=' + number + "&password=" + password;
+		if (code) {
+			data += "&code=" + code;
+		}
+		ajax('POST', '/auth/', data, authCallback);
 		return false;
 	}
-}
-</script>
-</body>
+	function checkreg() {
+		var password = document.getElementById('reg_password').value;
+		var repassword = document.getElementById('repassword').value;
+		if (password.trim() == repassword.trim()) {
+			document.getElementById('reg_password').value = password.trim();
+			showtips('');
+			return true;
+		} else {
+			showtips('两次密码不一样');
+			return false;
+		}
+	}
+	</script>
 </html>
