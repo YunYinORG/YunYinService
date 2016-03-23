@@ -92,7 +92,7 @@ class ApiController extends Yaf_Controller_Abstract
 		Input::I('url', $url, FILTER_VALIDATE_URL, '/');
 		Cookie::flush();
 		Session::flush();
-		$this->success('注销成功', $url);
+		$this->jump($url,'注销成功');
 	}
 
 	/**

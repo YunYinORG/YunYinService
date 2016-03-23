@@ -31,7 +31,7 @@ class Model implements JsonSerializable, ArrayAccess
 		$this->pk    = $pk;
 		if (self::$_db == null)
 		{
-			$config    = Config::get('database');
+			$config    = Config::getSecret('database');
 			$dsn       = $config['driver'] . ':host=' . $config['host'] . ';port=' . $config['port'] . ';dbname=' . $config['database'];
 			self::$_db = new Service\Db($dsn, $config['username'], $config['password']);
 		}
