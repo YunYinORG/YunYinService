@@ -348,6 +348,9 @@
 	</script>
 	<!-- data js-->
 	<script>
+
+	var currentSchId = -1;
+
 	function ajax(method, url, data, callback) {
 		var xhr = new XMLHttpRequest();
 		xhr.open(method, url, true);
@@ -369,21 +372,23 @@
 		var tip = document.getElementById('tip');
 		tip.innerHTML = msg;
 	}
-	function getVerifyCode(sch_id) {
+	function getVerifyCode() {
+		if(currentSchId == -1) return;
 		var img = document.querySelector('#img');
 		var verifyCodeCallback = function(data) {
 			if (data.status == 1) {
 				document.querySelector('#codeArea').style.display = 'block';
 				document.querySelector('#code').setAttribute('required', 'required');
 				img.setAttribute('src', data.info['img']);
-				img.onclick = function(){getVerifyCode(sch_id);};
+				img.onclick = function(){getVerifyCode();};
 			}
 		}
 		img.onclick=null;
-		ajax('GET', '/school/' + sch_id + '/code', '', verifyCodeCallback);
+		ajax('GET', '/school/' + currentSchId + '/code', '', verifyCodeCallback);
 	}
-	function showSchoolInfo(sch_id) {
-		ajax('GET', '/school/' + sch_id, '', function(data) {
+	function showSchoolInfo() {
+		if(currentSchId == -1) return;
+		ajax('GET', '/school/' + currentSchId, '', function(data) {
 			if (data.status == 1) {
 				var school = data.info;
 				showtips(school['name'] + ':首次登录用<a target="_blank" href="' + school['verifyurl'] + '">' + school['verify'] + '</a>密码验证');
@@ -398,11 +403,13 @@
 			var info = data.info;
 			for (var s in info) {
 				if (info[s] != 0) {
+					currentSchId = s;
 					getVerifyCode(s);
 					showSchoolInfo(s);
 				}
 			};
 		} else {
+			currentSchId = -1;
 			showtips("学号好像不是所支持的学校，请检查一下学号^_^");
 			return false;
 		}
@@ -411,6 +418,7 @@
 		var number = document.getElementById('number').value.trim();
 		var reg = /^(\d{6,7})|(\d{10})$/;
 		if (!reg.test(number)) {
+			currentSchId = -1;
 			showtips("学号格式不对哦，请检查一下学号^_^");
 			document.getElementById("number").focus();
 			return false;
@@ -434,9 +442,11 @@
 			case 0:
 			case -1:
 				showtips(data.info);
+				getVerifyCode(currentSchId);
 				enable();
 				break;
 			default:
+				getVerifyCode(currentSchId);
 				enable();
 				showtips('请求异常');
 		}
