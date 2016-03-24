@@ -404,8 +404,8 @@
 			for (var s in info) {
 				if (info[s] != 0) {
 					currentSchId = s;
-					getVerifyCode(s);
-					showSchoolInfo(s);
+					getVerifyCode();
+					showSchoolInfo();
 				}
 			};
 		} else {
@@ -442,11 +442,11 @@
 			case 0:
 			case -1:
 				showtips(data.info);
-				getVerifyCode(currentSchId);
+				getVerifyCode();
 				enable();
 				break;
 			default:
-				getVerifyCode(currentSchId);
+				getVerifyCode();
 				enable();
 				showtips('请求异常');
 		}
