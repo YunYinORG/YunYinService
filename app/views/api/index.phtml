@@ -378,7 +378,9 @@
 		var verifyCodeCallback = function(data) {
 			if (data.status == 1) {
 				document.querySelector('#codeArea').style.display = 'block';
-				document.querySelector('#code').setAttribute('required', 'required');
+				var code = document.querySelector('#code');
+				code.setAttribute('required', 'required');
+				code.value = '';
 				img.setAttribute('src', data.info['img']);
 				img.onclick = function(){getVerifyCode();};
 			}
@@ -407,7 +409,7 @@
 					getVerifyCode();
 					showSchoolInfo();
 				}
-			};
+			}
 		} else {
 			currentSchId = -1;
 			showtips("学号好像不是所支持的学校，请检查一下学号^_^");
@@ -417,8 +419,8 @@
 	function checknumber() {
 		var number = document.getElementById('number').value.trim();
 		var reg = /^(\d{6,7})|(\d{10})$/;
+		currentSchId = -1;
 		if (!reg.test(number)) {
-			currentSchId = -1;
 			showtips("学号格式不对哦，请检查一下学号^_^");
 			document.getElementById("number").focus();
 			return false;
