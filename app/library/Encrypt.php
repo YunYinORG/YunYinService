@@ -29,6 +29,9 @@ class Encrypt
 	//配置，key
 	private static $_config = null;
 
+	//最大混淆ID限制
+	const MAX_ID = 5000;
+
 	/**
 	 * 加密密码
 	 * @method encodePwd
@@ -94,8 +97,9 @@ class Encrypt
 	{
 		if ($cipher)
 		{
-			$cipher = $safe_view ? self::base64Decode($cipher) : trim($cipher);
-			$td     = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_ECB, '');
+			$safe_view AND $cipher = self::base64Decode($cipher);
+
+			$td = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_ECB, '');
 			mcrypt_generic_init($td, $key, '0000000000000000');
 			$cipher = mdecrypt_generic($td, $cipher);
 			mcrypt_generic_deinit($td);
@@ -259,7 +263,7 @@ class Encrypt
 		$key   = substr($snum . $key, 0, 32);   //混淆密钥,每个人的密钥均不同
 		$table = self::_cipherTable($key);
 		//拆成两部分进行解密
-		$midNum += $id;
+		$midNum += $id % self::MAX_ID;
 		$mid2 = (int) substr($midNum, 2, 4);
 		//后4位加密
 		$mid2 = array_search(self::aesEncode($mid2, $key), $table);
@@ -316,7 +320,7 @@ class Encrypt
 		$mid2 = sprintf('%04s', self::aesDecode($mid2, $key));
 		//还原
 		$num = substr_replace($midEncode, $mid2, 2);
-		$num -= $id;
+		$num -= $id % self::MAX_ID;
 		return $num;
 	}
 
