@@ -63,8 +63,17 @@ abstract class Connect
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 		}
 
-		$response            = curl_exec($ch);
+		$response = curl_exec($ch);
+		if (!$response)
+		{
+			return NULL;
+		}
 		list($header, $body) = explode("\r\n\r\n", $response, 2);
+		//100 continue重复解析
+		while ($header && $body && substr_compare($header, 'HTTP/1.1 100 Continue', 0, 21) === 0)
+		{
+			list($header, $body) = explode("\r\n\r\n", $body, 2);
+		}
 		if (preg_match('/Set-Cookie:(.*);/iU', $header, $matchs))
 		{
 			self::$_cookie = $matchs[1];
