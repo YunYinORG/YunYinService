@@ -5,6 +5,7 @@ namespace Verify;
  * 湖南理工学院验证类http://hnist.cn/
  * 61.187.92.235 【http://info.hnist.cn/】服务器访问慢;
  * HNIST::getName($name,$pwd);验证姓名
+ * 修改自https://github.com/chauyuen/hnistinfo/blob/master/apis/index.php
  */
 class HNIST extends Connect
 {
