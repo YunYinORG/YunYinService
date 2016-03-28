@@ -247,7 +247,7 @@ class PasswordController extends Rest
 			}
 
 			/*学校系统验证*/
-			if (School::verify($info))
+			if ($result=School::verify($info))
 			{
 				/*验证成功*/
 				$user['id']     = $id;

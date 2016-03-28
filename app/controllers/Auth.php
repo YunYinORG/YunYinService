@@ -1,6 +1,7 @@
 <?php
 /**
  *登录和验证
+ *TODO 多学校验证
  */
 class AuthController extends Rest
 {
@@ -18,7 +19,7 @@ class AuthController extends Rest
 			$safekey = $sch_id . 'auth_' . $number;
 			if (!Safe::checkTry($safekey, 5))
 			{
-				$this->response(0, '尝试次过度,账号临时封禁');
+				$this->response(0, '尝试次过度,账号临时封禁,12小时后重试，或者联系forbidden@yunyin.org');
 			}
 			elseif (Input::post('code', $code, 'ctype_alnum'))
 			{
@@ -30,7 +31,7 @@ class AuthController extends Rest
 				}
 				else
 				{
-					$this->response(-1, '学校账号验证失败,请检查密码是否正确,您也可尝试登录该系统!');
+					$this->response(-1, '学校系统认证失败,请确认您也可登录该系统!');
 				}
 			}
 			elseif ($result = $this->login($number, md5($password), $sch_id))
@@ -41,7 +42,7 @@ class AuthController extends Rest
 			elseif ($sch_id && false === $result)
 			{
 				/*指定学校后登录失败*/
-				$this->response(-1, '登录失败！请检查学号和密码是否正确，或者找回密码！');
+				$this->response(-1, '密码错误,检查账号或找回密码！');
 			}
 			elseif ($this->verify($number, $password, $sch_id)) //尝试验证
 			{
@@ -51,12 +52,12 @@ class AuthController extends Rest
 			else
 			{
 				/*注册验证失败*/
-				$this->response(-1, '验证出错,请检查学号或者密码是否正确!');
+				$this->response(-1, '验证出错,请检查学号或密码是否正确,可尝试登录验证的教务系统，或者点忘记密码找回!');
 			}
 		}
 		else
 		{
-			$this->response(-1, '学号或者密码无效!');
+			$this->response(-1, '输入学号或者密码无效!');
 		}
 	}
 
@@ -137,36 +138,42 @@ class AuthController extends Rest
 	public function verify($number, $password, $sch_id = null, $code = null)
 	{
 		$info = array(
-			'number' => $number,
+			'number'   => $number,
 			'password' => $password,
-			'sch_id' => $sch_id,
+			// 'sch_id' => $sch_id,
 		);
 		$code AND $info['code'] = $code; //验证码
 
-		/*黑名单*/
-		$black = isset($this->reg_schools) ? $this->reg_schools : [];
-
-		if (!$result = School::verify($info, $black))
+		if ($sch_id)
 		{
-			return false;
+			$info['sch_id'] = $sch_id;
+			return School::verify($info);
 		}
-		elseif ($result = array_filter($result))
+		else
 		{
-			/*验证成功*/
-			$reg = array(
-				'number' => $info['number'],
-				'password' => md5($info['password']),
-				'name' => current($result),
-				'sch_id' => key($result),
-			);
-			$sid = Session::start();
-			Session::set('reg', $reg);
+			/*黑名单*/
+			$black  = isset($this->reg_schools) ? $this->reg_schools : [];
+			$result = School::verify($info, $black);
+			if ($result && $result = array_filter($result))
+			{
+				/*验证成功*/
+				//取第一个
+				$reg = array(
+					'number'   => $info['number'],
+					'password' => md5($info['password']),
+					'name'     => current($result),
+					'sch_id'   => key($result),
+				);
+				$sid = Session::start();
+				Session::set('reg', $reg);
 
-			unset($reg['password']);
-			$reg['school'] = SchoolModel::getName($reg['sch_id']);
-			$this->response(2, ['sid' => $sid, 'user' => $reg, 'msg' => '验证成功', 'url' => '/user/']);
-			return true;
+				unset($reg['password']);
+				$reg['school'] = SchoolModel::getName($reg['sch_id']);
+				$this->response(2, ['sid' => $sid, 'user' => $reg, 'msg' => '验证成功', 'url' => '/user/']);
+				return true;
+			}
 		}
+
 	}
 }
 ?>

@@ -28,6 +28,8 @@ class School
 	 * @method verify
 	 * @param  array  $student   [description]
 	 * @return [mixed]          [description]
+	 * $student包含school id 返回该学校的验证情况
+	 * 不包含，返回除$except之外，所有可能的结果
 	 * @author NewFuture
 	 */
 	public static function verify($student, $except = [])
@@ -35,13 +37,15 @@ class School
 		$param = [$student['number'], $student['password'], isset($student['code']) ? $student['code'] : null];
 		if (isset($student['sch_id']) && $sch_id = $student['sch_id'])
 		{
+			//指定学校，直接验证该学校
 			if ($school = self::getAbbr($sch_id))
 			{
-				return [$sch_id => call_user_func_array(array('Verify\\' . strtoupper($school), 'getName'), $param)];
+				return call_user_func_array(array('Verify\\' . strtoupper($school), 'getName'), $param);
 			}
 		}
 		else
 		{
+			//未指定学校，验证所有可能的情况
 			if (!$list = self::guess($student['number'], $except))
 			{
 				return false;
