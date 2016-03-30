@@ -9,7 +9,7 @@ namespace Verify;
  */
 class HNIST extends Connect
 {
-	const ID = 4; //学校id
+	const ID = 6; //学校id
 
 	const LOGIN_URL = 'http://61.187.92.235/loginAction.do';                  //登录url
 	const ERROR_MSG = '错误信息';                                         //错误提示

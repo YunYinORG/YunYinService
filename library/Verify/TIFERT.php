@@ -15,9 +15,9 @@ class TIFERT extends Connect
 	{
 		$data   = "USERNAME=$number&PASSWORD=$pwd";
 		$result = parent::getHtml(self::LOGIN_URL, $data);
-		if (strpos($result, self::SUCC_KEY) !== false)
+		if ($result&&strpos($result, self::SUCC_KEY) !== false)
 		{
-			if ($result = parent::getHtml(self::INFO_URL, $data))
+			if ($result = parent::getHtml(self::INFO_URL))
 			{
 				return parent::parseName($result, '当前用户：', '</td>');
 			}
