@@ -76,7 +76,7 @@ class ApiController extends Yaf_Controller_Abstract
 				Cookie::set('token', [$id => $token]);
 				unset($regInfo['password']);
 				Session::set('user', $regInfo);
-				$msg = '信息注册成功!';
+				$msg = '';
 			}
 		}
 		$this->jump('/', $msg);

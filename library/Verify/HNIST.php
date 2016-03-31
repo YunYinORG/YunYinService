@@ -41,6 +41,8 @@ class HNIST extends Connect
 			curl_close($ch);
 			if (!($result && ($url = parent::parseName($result, 'href="', '"'))))
 			{
+				$err = self::ID . ':[' . curl_errno($ch) . ']' . curl_error($ch);
+				\Log::write($msg, 'ERROR');
 				return NULL;
 			}
 			$bill = substr($url, -36);
@@ -54,6 +56,8 @@ class HNIST extends Connect
 			curl_close($ch);
 			if (!preg_match('/Set-Cookie:(.*);/iU', $ret, $str))
 			{
+				$err = self::ID . ':cannot get cookie[' . curl_errno($ch) . ']' . curl_error($ch);
+				\Log::write($msg, 'ERROR');
 				return NULL;
 			}
 			$cookie = $str[1]; //获得COOKIE（SESSIONID）
@@ -68,8 +72,11 @@ class HNIST extends Connect
 			curl_close($ch);
 			if (!$ret)
 			{
+				$err = self::ID . '[' . curl_errno($ch) . ']' . curl_error($ch);
+				\Log::write($msg, 'ERROR');
 				return NULL;
 			}
+			
 			//姓名截取
 			$html = mb_convert_encoding($ret, 'UTF-8', 'GBK');
 			if ($html = parent::parseName($html, '姓名</strong></p></td>', '</p></td>'))
