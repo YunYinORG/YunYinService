@@ -33,7 +33,7 @@ class ApiController extends Yaf_Controller_Abstract
 			{
 				//显示成功页面
 				Yaf_Dispatcher::getInstance()->autoRender(false);
-				$this->_view->display('choice.phtml');
+				$this->_view->display('api/choice.phtml');
 			}
 
 		}
@@ -47,26 +47,30 @@ class ApiController extends Yaf_Controller_Abstract
 
 	/**
 	 * 确认注册【设定密码】
+	 * 无password时，使用验证密码
 	 * @method registerAction
 	 * @return [type]         [description]
 	 * @author NewFuture
 	 */
 	public function registerAction()
 	{
-		$msg = '信息注册失败!';
-		if ($regInfo = Session::get('reg'))
+		if (!$regInfo = Session::get('reg'))
+		{
+			$this->jump('/', '注册信息已失效');
+		}
+		else
 		{
 			Session::del('reg');
-			if (Input::post('password', $password, 'trim') === false)
+			if (Input::post('password', $password, 'trim'))
 			{
-				/*密码未md5*/
-				$this->error('密码错误', '/');
+				$password = md5($password);
 			}
-			elseif (!$password)
+			else
 			{
 				/*未设置密码*/
 				$password = $regInfo['password'];
 			}
+
 			$regInfo['password'] = Encrypt::encryptPwd($password, $regInfo['number']);
 			if ($id = UserModel::insert($regInfo))
 			{
@@ -76,10 +80,15 @@ class ApiController extends Yaf_Controller_Abstract
 				Cookie::set('token', [$id => $token]);
 				unset($regInfo['password']);
 				Session::set('user', $regInfo);
-				$msg = '';
+				$this->_response->setHeader('HTTP/1.1 303 See Other', '');
+				$this->redirect('/');
+			}
+			else
+			{
+				$this->jump('/', '注册失败');
 			}
 		}
-		$this->jump('/', $msg);
+
 	}
 
 	/**
@@ -92,7 +101,7 @@ class ApiController extends Yaf_Controller_Abstract
 		Input::I('url', $url, FILTER_VALIDATE_URL, '/');
 		Cookie::flush();
 		Session::flush();
-		$this->jump($url,'注销成功');
+		$this->redirect($url);
 	}
 
 	/**

@@ -307,11 +307,13 @@
 				</div>
 			<hr>
 			<div class='text-center'>
-			<small id='tip' class='text-center'><?=isset($msg) ? $msg : '南开大学学生可以直接使用信息门户(urp)账号及密码登录'?></small>
+			<small id='tip' class='text-center'><?=isset($msg) ? $msg : '请输入您的学号'?></small>
 			</div>
 			</form>
 			<form id="regform" method="post" action="/api/register" onsubmit="return checkreg();">
-				<p class='text-center' style='font-size: 15px; margin-top: -20px'>第一次使用云印？我们推荐您设置独立的密码,这样更加安全！如果您跳过设置,将会使用验证密码作为云印密码!</p>
+				<h4>验证成功!</h4>
+				<p class='text-center' style='font-size: 15px; margin-top: -20px'>
+				第一次登录云印？我们推荐您设置独立的密码,这样更加安全！如果您跳过设置,将会使用验证密码作为云印密码!</p>
 				<div class='form-group'>
 				<input class='form-control' name="password" type="password" placeholder="新的密码" id="reg_password" required="" />
 				</div>
