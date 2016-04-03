@@ -1,7 +1,7 @@
 <?php
 /**
  *登录和验证
- *TODO 多学校验证
+ *TODO 多学校自动验证
  */
 class AuthController extends Rest
 {
@@ -11,7 +11,96 @@ class AuthController extends Rest
 	 * @return [type]     [description]
 	 * @author NewFuture
 	 */
-	public function indexAction()
+	public function POST_indexAction()
+	{
+		if (Input::post('number', $number, 'card') && Input::post('password', $password, 'trim'))
+		{
+			Input::post('sch_id', $sch_id, 'int');
+			$safekey = $sch_id . 'auth_' . $number;
+			if (!Safe::checkTry($safekey, 5))
+			{
+				$this->response(0, '尝试次过度,账号临时封禁,12小时后重试，或者联系forbidden@yunyin.org');
+			}
+			elseif (Input::post('code', $code, 'ctype_alnum'))
+			{
+				/*输入验证码直接走验证通道*/
+				if ($this->verify($number, $password, $sch_id, $code))
+				{
+					/*验证通过*/
+					Safe::del($safekey);
+				}
+				else
+				{
+					/*验证失败*/
+					$this->response(-1, '学校系统认证失败,请确认您也可登录该系统!');
+				}
+			}
+			else
+			{
+				$conditon = ['number' => $number];
+
+				$sch_id AND $conditon['sch_id'] = $sch_id; //指定学校
+
+				$user = UserModel::where($conditon)->field('id,password,sch_id,name')->find();
+				if (empty($user))
+				{
+					/*未注册*/
+					if ($this->verify($number, $password, $sch_id))
+					{
+						/*学校验证成功*/
+						Safe::del($safekey);
+					}
+					else
+					{
+						$this->response(-1, '学校系统认证失败,您可尝试登录该系统!');
+					}
+				}
+				elseif (Encrypt::encryptPwd(md5($password), $number) == $user['password'])
+				{
+					/*单学校登录成功*/
+					Safe::del($safekey);
+					$user['number'] = $number;
+					$token          = Auth::token($user);
+					$sessionid      = Session::start();
+					unset($user['password']);
+					Session::set('user', $user);
+					Cookie::set('token', $token);
+					$result = ['sid' => $sessionid, 'user' => $user, 'msg' => '登录成功！', 'token' => $token];
+					$this->response(1, $result);
+				}
+				else
+				{
+					/*登录失败*/
+					$this->response(0, '账号或者密码错误,如果忘记密码，可点击找回!');
+				}
+			}
+		}
+		else
+		{
+			$this->response(-1, '输入学号或者密码无效!');
+		}
+	}
+
+	/**
+	 * 注销
+	 * @method logout
+	 * @return 重定向或者json字符
+	 */
+	public function logoutAction()
+	{
+		Cookie::flush();
+		Session::flush();
+		$this->response(1, '注销成功!');
+	}
+
+	/**
+	 * 自动验证
+	 * @method POST_autoAction
+	 * @return [type]     [description]
+	 * @author NewFuture
+	 * @todo 完善，自动判断学校
+	 */
+	public function POST_autoAction()
 	{
 		if (Input::post('number', $number, 'card') && Input::post('password', $password, 'trim'))
 		{
@@ -59,18 +148,6 @@ class AuthController extends Rest
 		{
 			$this->response(-1, '输入学号或者密码无效!');
 		}
-	}
-
-	/**
-	 * 注销
-	 * @method logout
-	 * @return 重定向或者json字符
-	 */
-	public function logoutAction()
-	{
-		Cookie::flush();
-		Session::flush();
-		$this->response(1, '注销成功!');
 	}
 
 	/**
@@ -147,7 +224,21 @@ class AuthController extends Rest
 		if ($sch_id)
 		{
 			$info['sch_id'] = $sch_id;
-			return School::verify($info);
+			if ($name = School::verify($info))
+			{
+				$reg = array(
+					'number'   => $info['number'],
+					'password' => md5($info['password']),
+					'name'     => $name,
+					'sch_id'   => $sch_id,
+				);
+				$sid = Session::start();
+				Session::set('reg', $reg);
+				unset($reg['password']);
+				$reg['school'] = SchoolModel::getName($reg['sch_id']);
+				$this->response(2, ['sid' => $sid, 'user' => $reg, 'msg' => '验证成功', 'url' => '/user/']);
+				return true;
+			}
 		}
 		else
 		{
