@@ -231,7 +231,7 @@ class ShareController extends Rest
 		if (Input::get('key', $key))
 		{
 			$key   = '%' . strtr($key, ' ', '%') . '%';
-			$Share = where('name', 'LIKE', $key)->orWhere('detail', 'LIKE', $key);
+			$Share -> where('name', 'LIKE', $key)->orWhere('detail', 'LIKE', $key);
 		}
 
 		if (Input::get('key', $tag, 'int'))
